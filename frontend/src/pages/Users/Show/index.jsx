@@ -378,8 +378,12 @@ export default function UserProfile() {
 				<SectionTitle icon="💪">Workload & Balance Metrics</SectionTitle>
 
 				<div className="flex flex-col md:flex-row gap-4 md:col-span-12 overflow-auto">
-					<SectionCard description="📊 Avg Estimated Days" showBadge={false} value="Coming Soon" variant="" />
-					<SectionCard description="📊 Avg Actual Days" showBadge={false} value="Coming Soon" variant="" />
+					<SectionCard
+						description="Avg Estimated Days"
+						showBadge={false}
+						value={`${userReports?.section_cards?.average_estimated_days}`}
+						variant=""
+					/>
 					<SectionCard description="📊 Workload Balance Index" showBadge={false} value="Coming Soon" variant="" />
 					<SectionCard description="📊 Utilization Rate" showBadge={false} value="Coming Soon" variant="" />
 				</div>
