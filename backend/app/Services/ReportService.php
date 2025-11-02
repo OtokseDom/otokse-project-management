@@ -165,6 +165,7 @@ class ReportService
             'tasks_ahead_of_schedule' => $taskAheadOfScheduleQuery->count(),
             'average_tasks_completed_per_day' => round((clone $baseQuery)->where('status_id', $completed)->selectRaw('COUNT(*) / NULLIF(COUNT(DISTINCT DATE(actual_date)), 0) as avg_per_day')->value('avg_per_day'), 2),
             'average_estimated_days' => round((clone $baseQuery)->where('status_id', $completed)->avg('days_estimate'), 2),
+            'average_actual_days' => round((clone $baseQuery)->where('status_id', $completed)->avg('days_taken'), 2),
             'delay_frequency_percentage' => round((clone $baseQuery)->where('status_id', $completed)
                 ->selectRaw('(SUM(CASE WHEN delay_days > 0 THEN 1 ELSE 0 END) * 100.0) / NULLIF(COUNT(*), 0) AS delay_percent')->value('delay_percent'), 2),
             'filters' => $filter
