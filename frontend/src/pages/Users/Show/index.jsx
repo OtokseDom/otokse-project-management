@@ -388,10 +388,6 @@ export default function UserProfile() {
 					<AreaChartGradient report={userReports?.task_activity_timeline} />
 				</div>
 
-				<div className="md:col-span-6">
-					<PlaceholderChart title="User Task Load" />
-				</div>
-
 				{/* ========================================== */}
 				{/* TASKS TABLE */}
 				{/* ========================================== */}
