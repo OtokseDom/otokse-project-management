@@ -22,7 +22,7 @@ export function AreaChartGradient({ report }) {
 	return (
 		<Card className="flex flex-col relative h-full rounded-2xl justify-between">
 			<CardHeader className="items-center text-center">
-				<CardTitle className="text-lg">Task Activity Timeline</CardTitle>
+				<CardTitle className="text-lg">User Task Load</CardTitle>
 				<CardDescription>Total tasks assigned (6 months)</CardDescription>
 			</CardHeader>
 			<CardContent>
