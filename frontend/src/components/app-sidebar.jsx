@@ -14,6 +14,7 @@ import {
 	FolderKanban,
 	ListCheck,
 	KanbanSquareDashedIcon,
+	ListOrderedIcon,
 } from "lucide-react";
 import logo from "../assets/logo.png";
 
@@ -78,6 +79,13 @@ const items = [
 		title: "Tasks",
 		url: "/tasks",
 		icon: ClipboardList,
+		collapsible: false,
+		subItems: [],
+	},
+	{
+		title: "Task List View",
+		url: "/list-view",
+		icon: ListOrderedIcon,
 		collapsible: false,
 		subItems: [],
 	},
