@@ -365,11 +365,11 @@ export default function UserProfile() {
 				</div>
 
 				<div className="md:col-span-6">
-					<ChartLineLabel report={userReports?.performance_rating_trend} />
+					<ChartLineLabel report={userReports?.performance_rating_trend} title="Performance Trends" metricLabel="Performance Rating" />
 				</div>
 
 				<div className="md:col-span-6">
-					<ChartLineLabel report={userReports?.completion_velocity} />
+					<ChartLineLabel report={userReports?.completion_velocity} title="Completion Velocity" metricLabel="Completion Rate (%)" />
 				</div>
 
 				{/* ========================================== */}
