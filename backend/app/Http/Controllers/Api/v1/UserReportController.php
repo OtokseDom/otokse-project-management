@@ -36,6 +36,7 @@ class UserReportController extends Controller
             'task_activity_timeline' => $this->report_service->taskActivityTimeline($id, $filter),
             'rating_per_category' => $this->report_service->ratingPerCategory($id, $filter),
             'performance_rating_trend' => $this->report_service->performanceRatingTrend($id, "", $filter),
+            'completion_velocity' => $this->report_service->completionVelocityTrend($id, "", $filter),
             'estimate_vs_actual' => $this->report_service->userEstimateVsActual($id, $filter),
 
             // Summary cards / progress
