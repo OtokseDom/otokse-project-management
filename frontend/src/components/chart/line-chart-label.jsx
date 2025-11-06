@@ -12,19 +12,27 @@ export const description = "A line chart with a label";
 const chartConfig = {
 	rating: {
 		label: "Rating",
-		// color: "hsl(var(--chart-1))",
 		color: "hsl(270 70% 50%)", // Purple
 	},
 };
 
-export function ChartLineLabel({ report, variant }) {
+// accept optional title and metricLabel props
+export function ChartLineLabel({ report, variant, title = null, metricLabel = null }) {
 	const { loading, setLoading } = useLoadContext();
+
+	// determine total count (supports reports with task_count or data_count)
+	const totalCount = report ? report.task_count ?? report.data_count ?? 0 : 0;
+
+	// default title/metric when not provided
+	const resolvedTitle = title ?? (metricLabel ? `${metricLabel} Trend` : "Performance Trends");
+	const resolvedMetricLabel = metricLabel ?? "Performance Rating";
+
 	return (
 		<Card className={`flex flex-col relative h-full justify-between rounded-2xl`}>
 			<CardHeader className="text-center">
-				<CardTitle className="text-lg">Performance Trends</CardTitle>
+				<CardTitle className="text-lg">{resolvedTitle}</CardTitle>
 				<CardDescription>
-					Performance Rating for{" "}
+					{resolvedMetricLabel} for{" "}
 					{report?.filters?.from && report?.filters?.to
 						? `${new Date(report.filters.from).toLocaleDateString("en-CA", { month: "short", day: "numeric", year: "numeric" })} - ${new Date(
 								report.filters.to
@@ -41,7 +49,7 @@ export function ChartLineLabel({ report, variant }) {
 							<Skeleton className=" w-full h-10 rounded-full" />
 							<Skeleton className=" w-full h-10 rounded-full" />
 						</div>
-					) : report?.task_count == 0 ? (
+					) : totalCount == 0 ? (
 						<div className="flex items-center justify-center fw-full h-full text-lg text-gray-500">No Tasks Yet</div>
 					) : (
 						<LineChart
@@ -80,7 +88,7 @@ export function ChartLineLabel({ report, variant }) {
 						<Skeleton className=" w-full h-4 rounded-full" />
 						<Skeleton className=" w-full h-4 rounded-full" />
 					</div>
-				) : report?.task_count == 0 ? (
+				) : totalCount == 0 ? (
 					""
 				) : (
 					<>
