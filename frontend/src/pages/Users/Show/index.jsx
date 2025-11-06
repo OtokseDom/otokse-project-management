@@ -369,7 +369,7 @@ export default function UserProfile() {
 				</div>
 
 				<div className="md:col-span-6">
-					<PlaceholderChart title="Delayed vs Performance Correlation" />
+					<ChartLineLabel report={userReports?.completion_velocity} />
 				</div>
 
 				{/* ========================================== */}
