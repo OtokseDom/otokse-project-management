@@ -7,7 +7,19 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTr
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, FileCheck, FileQuestion, FolderKanban, Trash2, UserCheck2 } from "lucide-react";
+import {
+	ChevronLeft,
+	ChevronRight,
+	FileCheck,
+	FileQuestion,
+	FolderKanban,
+	Trash2,
+	UserCheck2,
+	BellRing,
+	CalendarCheck,
+	CalendarClock,
+	CalendarCheck2,
+} from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useLoadContext } from "@/contexts/LoadContextProvider";
@@ -264,6 +276,18 @@ export function DataTableTasks({
 					</Button>
 					<Button size="sm" className="text-xs" onClick={() => setBulkAction("category")}>
 						<FileQuestion /> Update Category
+					</Button>
+					<Button size="sm" className="text-xs" onClick={() => setBulkAction("priority")}>
+						<BellRing /> Update Priority
+					</Button>
+					<Button size="sm" className="text-xs" onClick={() => setBulkAction("start_date")}>
+						<CalendarCheck /> Update Start Date
+					</Button>
+					<Button size="sm" className="text-xs" onClick={() => setBulkAction("end_date")}>
+						<CalendarClock /> Update End Date
+					</Button>
+					<Button size="sm" className="text-xs" onClick={() => setBulkAction("actual_date")}>
+						<CalendarCheck2 /> Update Actual Date
 					</Button>
 					<Button size="sm" className="text-xs" variant="destructive" onClick={() => setBulkAction("delete")}>
 						<Trash2 className="text-destructive-foreground" /> Delete
