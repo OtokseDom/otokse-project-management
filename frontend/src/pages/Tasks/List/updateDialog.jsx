@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Form, FormField, FormItem, FormLabel, FormControl } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { MultiSelect } from "@/components/ui/multi-select";
+import DateInput from "@/components/form/DateInput";
 import { useTasksStore } from "@/store/tasks/tasksStore";
 import axiosClient from "@/axios.client";
 import { API } from "@/constants/api";
@@ -19,11 +20,16 @@ import { useCategoriesStore } from "@/store/categories/categoriesStore";
 import { useLoadContext } from "@/contexts/LoadContextProvider";
 import { useToast } from "@/contexts/ToastContextProvider";
 import { useTaskHelpers } from "@/utils/taskHelpers";
+import { format } from "date-fns";
 
 const formSchema = z.object({
 	status_id: z.number().optional(),
 	project_id: z.number().optional(),
 	category_id: z.number().optional(),
+	priority: z.string().optional(),
+	start_date: z.date().optional().nullable(),
+	end_date: z.date().optional().nullable(),
+	actual_date: z.date().optional().nullable(),
 });
 export default function UpdateDialog({ open, onClose, action, selectedTasks = [] }) {
 	const { loading, setLoading } = useLoadContext();
@@ -58,6 +64,18 @@ export default function UpdateDialog({ open, onClose, action, selectedTasks = []
 			case "category":
 				value = data.category_id;
 				break;
+			case "priority":
+				value = data.priority;
+				break;
+			case "start_date":
+				value = data.start_date ? format(data.start_date, "yyyy-MM-dd") : null;
+				break;
+			case "end_date":
+				value = data.end_date ? format(data.end_date, "yyyy-MM-dd") : null;
+				break;
+			case "actual_date":
+				value = data.actual_date ? format(data.actual_date, "yyyy-MM-dd") : null;
+				break;
 			default:
 				return;
 		}
@@ -83,7 +101,14 @@ export default function UpdateDialog({ open, onClose, action, selectedTasks = []
 		<Dialog open={open} onOpenChange={onClose}>
 			<DialogContent>
 				<DialogHeader>
-					<DialogTitle>Bulk Update {action && action.charAt(0).toUpperCase() + action.slice(1)}</DialogTitle>
+					<DialogTitle>
+						Bulk Update{" "}
+						{action &&
+							action
+								.split("_")
+								.map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+								.join(" ")}
+					</DialogTitle>
 					<DialogDescription>Update selected tasks</DialogDescription>
 				</DialogHeader>
 
@@ -192,6 +217,52 @@ export default function UpdateDialog({ open, onClose, action, selectedTasks = []
 											</Select>
 										</FormItem>
 									)}
+								/>
+							)}
+
+							{action === "priority" && (
+								<FormField
+									control={form.control}
+									name="priority"
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>Priority</FormLabel>
+											<Select onValueChange={field.onChange} value={field.value}>
+												<FormControl>
+													<SelectTrigger>
+														<SelectValue placeholder="Select priority" />
+													</SelectTrigger>
+												</FormControl>
+												<SelectContent>
+													{["Low", "Medium", "High", "Urgent", "Critical"].map((priority) => (
+														<SelectItem key={priority} value={priority}>
+															{priority}
+														</SelectItem>
+													))}
+												</SelectContent>
+											</Select>
+										</FormItem>
+									)}
+								/>
+							)}
+
+							{(action === "start_date" || action === "end_date" || action === "actual_date") && (
+								<FormField
+									control={form.control}
+									name={action}
+									render={({ field }) => {
+										return (
+											<DateInput
+												field={field}
+												label={action
+													.split("_")
+													.map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+													.join(" ")}
+												placeholder={`Select ${action.split("_").join(" ")}`}
+												className="w-full"
+											/>
+										);
+									}}
 								/>
 							)}
 
