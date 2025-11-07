@@ -68,7 +68,7 @@ export default function TaskForm({ parentId, projectId, isOpen, setIsOpen, updat
 	const { loading, setLoading } = useLoadContext();
 	const { user: user_auth } = useAuthContext();
 	const showToast = useToast();
-	const [showMore, setShowMore] = useState(false);
+	const [showMore, setShowMore] = useState(true);
 	const parentTasks = () => {
 		return tasks.filter((task) => task.parent_id == null && task.id !== updateData?.id) || [];
 	};
