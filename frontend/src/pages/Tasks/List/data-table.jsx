@@ -52,6 +52,12 @@ export function DataTableTasks({
 	const [filterValue, setFilterValue] = useState("");
 	const [bulkAction, setBulkAction] = useState(null);
 	const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+	// TODO: table row bg color of parent task to be solid
+	// TODO: Task datatable filter
+	// TODO: Kanban remove parent tasks
+	// TODO: Task bulk action empty dates
+	// TODO: Completion veolocity wrong data
+	// TODO: Calendar show all asks in a cell
 
 	// Helper to clear selection and reset dialogs
 	const clearSelection = () => {
