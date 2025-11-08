@@ -371,16 +371,29 @@ export function DataTableTasks({
 							</TableRow>
 						) : table.getRowModel().rows.length ? (
 							// Show table data if available
-							table.getRowModel().rows.map((row) => (
-								<TableRow
-									key={row.id}
-									//  onClick={() => handleUpdate(row.original)} className="cursor-pointer"
-								>
-									{row.getVisibleCells().map((cell) => (
-										<TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
-									))}
-								</TableRow>
-							))
+							table.getRowModel().rows.map((row) => {
+								// Determine if row is a parent task (depth 0 with subtasks) or a leaf (no subtasks)
+								const hasSubtasks =
+									(Array.isArray(row.original?.children) && row.original.children.length > 0) || !!row.original?.has_children || false;
+								const isParent = row.original?.depth === 0;
+								const isLeaf = !hasSubtasks;
+
+								// Choose a slightly stronger background for emphasis
+								// Parent tasks get slightly stronger emphasis than leaves
+								const rowBgClass = isParent ? "bg-muted/10" : isLeaf ? "bg-muted/80" : "";
+
+								return (
+									<TableRow
+										key={row.id}
+										className={rowBgClass}
+										//  onClick={() => handleUpdate(row.original)} className="cursor-pointer"
+									>
+										{row.getVisibleCells().map((cell) => (
+											<TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
+										))}
+									</TableRow>
+								);
+							})
 						) : (
 							<TableRow>
 								<TableCell colSpan={columns.length} className="h-24 text-center">
