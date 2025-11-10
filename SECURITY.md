@@ -2,7 +2,7 @@
 
 ## Reporting a Vulnerability
 
-We take security seriously. If you discover a security vulnerability in Otokse Project Management, please email us at security@example.com instead of using the issue tracker.
+We take security seriously. If you discover a security vulnerability in Otokse Project Management, please email us at imjohndominic08@gmail.com instead of using the issue tracker.
 
 Please include:
 - Description of the vulnerability
