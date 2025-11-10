@@ -65,22 +65,6 @@ Built with role-based access control, dashboards, and multiple task views for fl
 
 ---
 
-## 💡 How to Contribute
-
-Contributions, ideas, and feature suggestions are very welcome!
-
-1. Fork the repo
-2. Create a feature branch
-3. Submit a pull request with a clear description
-
-Or simply open an **Issue** for:
-
--   Bug reports
--   Feature requests
--   UI/UX suggestions
-
----
-
 ## 🧱 Tech Stack
 
 -   **Frontend:** React JS
