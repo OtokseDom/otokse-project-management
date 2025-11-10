@@ -128,7 +128,7 @@ class ReportService
             ->where('status_id', '!=', $completed)
             ->where('end_date', '<=', now()->addDays(3))
             ->where('end_date', '>=', now());
-        // Tasks at ahhead of schedule query (has unique conditions)
+        // Tasks at ahread of schedule query (has unique conditions)
         $taskAheadOfScheduleQuery = (clone $baseQuery)
             ->where('status_id', $completed)
             ->whereColumn('actual_date', '<', 'end_date');
@@ -487,8 +487,8 @@ class ReportService
         ];
 
         $data = [
-            'percentage_difference' => $percentageDifference,
             'chart_data' => $chart_data,
+            'percentage_difference' => $percentageDifference,
             'task_count' => $task_count,
             'filters' => $filter
         ];
@@ -498,6 +498,79 @@ class ReportService
         }
 
         return apiResponse($data, "Performance rating trend report fetched successfully");
+    }
+
+    // Completion Velocity - monthly completion rate for last 6 months
+    public function completionVelocityTrend($id = null, $variant = "", $filter)
+    {
+        // Determine starting month (use filter 'to' if provided)
+        $months = [];
+        $startDate = isset($filter['to']) ? Carbon::parse($filter['to'])->startOfMonth() : now()->startOfMonth();
+        for ($i = 5; $i >= 0; $i--) {
+            $date = $startDate->copy()->subMonths($i);
+            $months[] = [
+                'year' => $date->year,
+                'month' => $date->format('F'),
+                'month_num' => $date->month,
+            ];
+        }
+
+        $chart_data = [];
+        $task_count = 0;
+
+        // status ids for completed/cancelled
+        $completedStatus = $this->task_status->where('name', 'Completed')->where('organization_id', $this->organization_id)->value('id');
+        $cancelledStatus = $this->task_status->where('name', 'Cancelled')->where('organization_id', $this->organization_id)->value('id');
+
+        foreach ($months as $m) {
+            $baseQuery = $this->task
+                ->whereYear('actual_date', $m['year'])
+                ->whereMonth('actual_date', $m['month_num'])
+                ->where('organization_id', $this->organization_id)
+                ->where(function ($query) {
+                    $query->whereNotNull('parent_id')->orWhere(function ($subQuery) {
+                        $subQuery->whereNull('parent_id')->whereDoesntHave('children');
+                    });
+                });
+
+            // apply the same filters logic used elsewhere
+            $baseQuery = $this->applyFilters($baseQuery, ($variant !== 'dashboard' ? $id : null), $filter);
+
+            $total = (clone $baseQuery)->where('status_id', '!=', $cancelledStatus)->where('status_id', '!=', null)->count();
+            $completed = (clone $baseQuery)->where('status_id', $completedStatus)->count();
+
+            $rate = $total > 0 ? round(($completed / $total) * 100, 2) : 0;
+
+            $chart_data[] = [
+                'year' => $m['year'],
+                'month' => $m['month'],
+                'rating' => $rate,
+            ];
+
+            $task_count += $total;
+        }
+        // Calculate percentage difference (current vs previous month)
+        $month1 = $chart_data[5]['rating'];
+        $month2 = $chart_data[4]['rating'];
+        $percentageDifference = [
+            'value' => ($month2 != 0)
+                ? round(abs((($month1 - $month2) / $month2) * 100), 2)
+                : ($month1 > 0 ? 100 : 0),
+            'event' => $month1 > $month2 ? 'Increased' : ($month1 < $month2 ? 'Decreased' : 'Same'),
+        ];
+
+        $data = [
+            'chart_data' => $chart_data,
+            'percentage_difference' => $percentageDifference,
+            'data_count' => $task_count,
+            'filters' => $filter,
+        ];
+
+        if (empty($data['chart_data'])) {
+            return apiResponse(null, 'Failed to fetch completion velocity report', false, 404);
+        }
+
+        return apiResponse($data, "Completion velocity report fetched successfully");
     }
 
     // Underrun vs Overruns based on date. Bar chart multiple
@@ -626,6 +699,7 @@ class ReportService
         return apiResponse($data, "Overrun/Underrun ratio fetched successfully");
     }
 
+    // Delays per user - Bar chart
     public function delaysPerUser($id = null, $filter)
     {
         $taskCount = $this->task->where('organization_id', $this->organization_id)->count();

@@ -13,6 +13,10 @@ import {
 	Text,
 	Trash2Icon,
 	UserCheck2,
+	BellRing,
+	CalendarCheck,
+	CalendarClock,
+	CalendarCheck2,
 } from "lucide-react";
 import { MoreHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -529,6 +533,54 @@ export const columnsTask = ({ dialogOpen, setDialogOpen, setIsOpen, setUpdateDat
 												}}
 											>
 												<FileQuestionIcon /> Update Category
+											</DropdownMenuItem>
+											<DropdownMenuItem
+												className="cursor-pointer"
+												onClick={(e) => {
+													e.stopPropagation();
+													let selected = table.getSelectedRowModel().rows.map((r) => r.original);
+													if (selected.length === 0) selected = [row.original];
+													setSelectedTasks(selected);
+													setBulkAction("priority");
+												}}
+											>
+												<BellRing /> Update Priority
+											</DropdownMenuItem>
+											<DropdownMenuItem
+												className="cursor-pointer"
+												onClick={(e) => {
+													e.stopPropagation();
+													let selected = table.getSelectedRowModel().rows.map((r) => r.original);
+													if (selected.length === 0) selected = [row.original];
+													setSelectedTasks(selected);
+													setBulkAction("start_date");
+												}}
+											>
+												<CalendarCheck /> Update Start Date
+											</DropdownMenuItem>
+											<DropdownMenuItem
+												className="cursor-pointer"
+												onClick={(e) => {
+													e.stopPropagation();
+													let selected = table.getSelectedRowModel().rows.map((r) => r.original);
+													if (selected.length === 0) selected = [row.original];
+													setSelectedTasks(selected);
+													setBulkAction("end_date");
+												}}
+											>
+												<CalendarClock /> Update End Date
+											</DropdownMenuItem>
+											<DropdownMenuItem
+												className="cursor-pointer"
+												onClick={(e) => {
+													e.stopPropagation();
+													let selected = table.getSelectedRowModel().rows.map((r) => r.original);
+													if (selected.length === 0) selected = [row.original];
+													setSelectedTasks(selected);
+													setBulkAction("actual_date");
+												}}
+											>
+												<CalendarCheck2 /> Update Actual Date
 											</DropdownMenuItem>
 										</>
 									)}

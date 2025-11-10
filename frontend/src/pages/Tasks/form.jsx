@@ -68,7 +68,7 @@ export default function TaskForm({ parentId, projectId, isOpen, setIsOpen, updat
 	const { loading, setLoading } = useLoadContext();
 	const { user: user_auth } = useAuthContext();
 	const showToast = useToast();
-	const [showMore, setShowMore] = useState(false);
+	const [showMore, setShowMore] = useState(true);
 	const parentTasks = () => {
 		return tasks.filter((task) => task.parent_id == null && task.id !== updateData?.id) || [];
 	};
@@ -511,6 +511,54 @@ export default function TaskForm({ parentId, projectId, isOpen, setIsOpen, updat
 			>
 				<FormField
 					control={form.control}
+					name="title"
+					render={({ field }) => {
+						return (
+							<FormItem>
+								<FormLabel>
+									Title <span className="text-red-500">*</span>
+								</FormLabel>
+								<FormControl>
+									<Input disabled={!isEditable} placeholder="Title" {...field} />
+								</FormControl>
+								<FormMessage />
+							</FormItem>
+						);
+					}}
+				/>
+				<FormField
+					control={form.control}
+					name="description"
+					render={({ field }) => (
+						<FormItem>
+							<FormLabel>Description</FormLabel>
+							<FormControl>
+								{/* <RichTextEditor value={field.value || ""} onChange={field.onChange} /> */}
+								<RichTextEditor
+									value={field.value || ""}
+									onChange={field.onChange}
+									// onImageDrop={handleImageDropFromEditor}
+								/>
+							</FormControl>
+							<FormMessage />
+						</FormItem>
+					)}
+				/>
+				<Input
+					type="file"
+					multiple
+					onChange={(e) => setAttachments(Array.from(e.target.files))}
+					className="cursor-pointer bg-secondary text-foreground"
+				/>
+				{/* Display existing attachments from database */}
+				<TaskAttachments
+					existingAttachments={existingAttachments}
+					setExistingAttachments={setExistingAttachments}
+					attachments={attachments}
+					setAttachments={setAttachments}
+				/>
+				<FormField
+					control={form.control}
 					name="status_id"
 					render={({ field }) => {
 						return (
@@ -577,23 +625,6 @@ export default function TaskForm({ parentId, projectId, isOpen, setIsOpen, updat
 										)}
 									</SelectContent>
 								</Select>
-								<FormMessage />
-							</FormItem>
-						);
-					}}
-				/>
-				<FormField
-					control={form.control}
-					name="title"
-					render={({ field }) => {
-						return (
-							<FormItem>
-								<FormLabel>
-									Title <span className="text-red-500">*</span>
-								</FormLabel>
-								<FormControl>
-									<Input disabled={!isEditable} placeholder="Title" {...field} />
-								</FormControl>
 								<FormMessage />
 							</FormItem>
 						);
@@ -738,37 +769,6 @@ export default function TaskForm({ parentId, projectId, isOpen, setIsOpen, updat
 							</FormItem>
 						);
 					}}
-				/>
-				<FormField
-					control={form.control}
-					name="description"
-					render={({ field }) => (
-						<FormItem>
-							<FormLabel>Description</FormLabel>
-							<FormControl>
-								{/* <RichTextEditor value={field.value || ""} onChange={field.onChange} /> */}
-								<RichTextEditor
-									value={field.value || ""}
-									onChange={field.onChange}
-									// onImageDrop={handleImageDropFromEditor}
-								/>
-							</FormControl>
-							<FormMessage />
-						</FormItem>
-					)}
-				/>
-				<Input
-					type="file"
-					multiple
-					onChange={(e) => setAttachments(Array.from(e.target.files))}
-					className="cursor-pointer bg-secondary text-foreground"
-				/>
-				{/* Display existing attachments from database */}
-				<TaskAttachments
-					existingAttachments={existingAttachments}
-					setExistingAttachments={setExistingAttachments}
-					attachments={attachments}
-					setAttachments={setAttachments}
 				/>
 				{showMore || updateData.calendar_add ? (
 					<>

@@ -651,6 +651,40 @@ class Task extends Model
                         $task->category_id = $value;
                         $task->save();
                         break;
+                    case 'priority':
+                        if ($task->priority != $value) {
+                            $changes['priority'] = ['from' => $task->priority, 'to' => $value];
+                            $task->priority = $value;
+                            $task->save();
+                        }
+                        break;
+                    case 'start_date':
+                        $orig = isset($original['start_date']) ? date('Y-m-d', strtotime($original['start_date'])) : null;
+                        $val = $value ? date('Y-m-d', strtotime($value)) : null;
+                        if ($orig !== $val) {
+                            $changes['start_date'] = ['from' => $orig, 'to' => $val];
+                            $task->start_date = $value;
+                            $task->save();
+                        }
+                        break;
+                    case 'end_date':
+                        $orig = isset($original['end_date']) ? date('Y-m-d', strtotime($original['end_date'])) : null;
+                        $val = $value ? date('Y-m-d', strtotime($value)) : null;
+                        if ($orig !== $val) {
+                            $changes['end_date'] = ['from' => $orig, 'to' => $val];
+                            $task->end_date = $value;
+                            $task->save();
+                        }
+                        break;
+                    case 'actual_date':
+                        $orig = isset($original['actual_date']) ? date('Y-m-d', strtotime($original['actual_date'])) : null;
+                        $val = $value ? date('Y-m-d', strtotime($value)) : null;
+                        if ($orig !== $val) {
+                            $changes['actual_date'] = ['from' => $orig, 'to' => $val];
+                            $task->actual_date = $value;
+                            $task->save();
+                        }
+                        break;
                 }
 
                 // Record history if there are changes

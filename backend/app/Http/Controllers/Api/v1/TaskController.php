@@ -115,7 +115,7 @@ class TaskController extends Controller
         $validated = $request->validate([
             'ids' => 'required|array',
             'ids.*' => 'integer|exists:tasks,id',
-            'action' => 'required|string|in:status,assignees,project,category',
+            'action' => 'required|string|in:status,assignees,project,category,priority,start_date,end_date,actual_date',
             'value' => 'required',
         ]);
         $organization_id = $this->userData->organization_id;

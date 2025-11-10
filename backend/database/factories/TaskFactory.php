@@ -56,7 +56,7 @@ class TaskFactory extends Factory
             'time_taken' => $this->faker->randomFloat(1, 1, 36),
             'delay' => $this->faker->randomFloat(1, 0, 10),
             'delay_reason' => $this->faker->sentence,
-            'performance_rating' => $this->faker->numberBetween(0, 10),
+            'performance_rating' => $this->faker->numberBetween(0, 5),
             'priority' => $this->faker->randomElement(['Low', 'Medium', 'High', 'Urgent', 'Critical']),
             'remarks' => $this->faker->paragraph,
             'position' => self::$positionCounters[$key],
