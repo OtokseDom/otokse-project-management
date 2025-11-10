@@ -7,7 +7,19 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTr
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, FileCheck, FileQuestion, FolderKanban, Trash2, UserCheck2 } from "lucide-react";
+import {
+	ChevronLeft,
+	ChevronRight,
+	FileCheck,
+	FileQuestion,
+	FolderKanban,
+	Trash2,
+	UserCheck2,
+	BellRing,
+	CalendarCheck,
+	CalendarClock,
+	CalendarCheck2,
+} from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useLoadContext } from "@/contexts/LoadContextProvider";
@@ -40,6 +52,12 @@ export function DataTableTasks({
 	const [filterValue, setFilterValue] = useState("");
 	const [bulkAction, setBulkAction] = useState(null);
 	const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+	// TODO: table row bg color of parent task to be solid
+	// TODO: Task datatable filter
+	// TODO: Kanban remove parent tasks
+	// TODO: Task bulk action empty dates
+	// TODO: Completion veolocity wrong data
+	// TODO: Calendar show all asks in a cell
 
 	// Helper to clear selection and reset dialogs
 	const clearSelection = () => {
@@ -265,6 +283,18 @@ export function DataTableTasks({
 					<Button size="sm" className="text-xs" onClick={() => setBulkAction("category")}>
 						<FileQuestion /> Update Category
 					</Button>
+					<Button size="sm" className="text-xs" onClick={() => setBulkAction("priority")}>
+						<BellRing /> Update Priority
+					</Button>
+					<Button size="sm" className="text-xs" onClick={() => setBulkAction("start_date")}>
+						<CalendarCheck /> Update Start Date
+					</Button>
+					<Button size="sm" className="text-xs" onClick={() => setBulkAction("end_date")}>
+						<CalendarClock /> Update End Date
+					</Button>
+					<Button size="sm" className="text-xs" onClick={() => setBulkAction("actual_date")}>
+						<CalendarCheck2 /> Update Actual Date
+					</Button>
 					<Button size="sm" className="text-xs" variant="destructive" onClick={() => setBulkAction("delete")}>
 						<Trash2 className="text-destructive-foreground" /> Delete
 					</Button>
@@ -341,16 +371,29 @@ export function DataTableTasks({
 							</TableRow>
 						) : table.getRowModel().rows.length ? (
 							// Show table data if available
-							table.getRowModel().rows.map((row) => (
-								<TableRow
-									key={row.id}
-									//  onClick={() => handleUpdate(row.original)} className="cursor-pointer"
-								>
-									{row.getVisibleCells().map((cell) => (
-										<TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
-									))}
-								</TableRow>
-							))
+							table.getRowModel().rows.map((row) => {
+								// Determine if row is a parent task (depth 0 with subtasks) or a leaf (no subtasks)
+								const hasSubtasks =
+									(Array.isArray(row.original?.children) && row.original.children.length > 0) || !!row.original?.has_children || false;
+								const isParent = row.original?.depth === 0;
+								const isLeaf = !hasSubtasks;
+
+								// Choose a slightly stronger background for emphasis
+								// Parent tasks get slightly stronger emphasis than leaves
+								const rowBgClass = isParent ? "bg-muted/10" : isLeaf ? "bg-muted/80" : "";
+
+								return (
+									<TableRow
+										key={row.id}
+										className={rowBgClass}
+										//  onClick={() => handleUpdate(row.original)} className="cursor-pointer"
+									>
+										{row.getVisibleCells().map((cell) => (
+											<TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
+										))}
+									</TableRow>
+								);
+							})
 						) : (
 							<TableRow>
 								<TableCell colSpan={columns.length} className="h-24 text-center">

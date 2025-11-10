@@ -30,6 +30,7 @@ class DashboardReportController extends Controller
             'overrun_underrun_ratio' => $this->report_service->overrunUnderrunRatio(null, 'dashboard', $filter),
             'performance_leaderboard' => $this->report_service->performanceLeaderboard($filter),
             'performance_rating_trend' => $this->report_service->performanceRatingTrend(null, "dashboard", $filter),
+            'completion_velocity' => $this->report_service->completionVelocityTrend(null, "dashboard", $filter),
             'section_cards' => $this->report_service->sectionCards(null, $filter),
             'overall_progress' => $this->report_service->overallProgress(null, $filter),
         ];

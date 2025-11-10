@@ -294,11 +294,11 @@ export default function UserProfile() {
 			</div>
 
 			<div className="md:col-span-6">
-				<ChartLineLabel report={reports?.performance_rating_trend} variant="dashboard" />
+				<ChartLineLabel report={reports?.performance_rating_trend} variant="dashboard" title="Performance Trends" metricLabel="Performance Rating" />
 			</div>
 
 			<div className="md:col-span-6">
-				<PlaceholderChart title="Delayed vs Performance Correlation" />
+				<ChartLineLabel report={reports?.completion_velocity} variant="dashboard" title="Completion Velocity" metricLabel="Completion Rate (%)" />
 			</div>
 
 			{/* ========================================== */}
