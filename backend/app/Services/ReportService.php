@@ -524,8 +524,8 @@ class ReportService
 
         foreach ($months as $m) {
             $baseQuery = $this->task
-                ->whereYear('actual_date', $m['year'])
-                ->whereMonth('actual_date', $m['month_num'])
+                ->whereYear('end_date', $m['year'])
+                ->whereMonth('end_date', $m['month_num'])
                 ->where('organization_id', $this->organization_id)
                 ->where(function ($query) {
                     $query->whereNotNull('parent_id')->orWhere(function ($subQuery) {
