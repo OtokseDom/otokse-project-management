@@ -59,14 +59,6 @@ const router = createBrowserRouter(
 					),
 				},
 				{
-					path: "/list-view",
-					element: (
-						<ErrorFallback>
-							<TasksListView />
-						</ErrorFallback>
-					),
-				},
-				{
 					path: "/projects",
 					element: (
 						<ErrorFallback>
