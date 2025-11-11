@@ -83,13 +83,6 @@ const items = [
 		subItems: [],
 	},
 	{
-		title: "Task List View",
-		url: "/list-view",
-		icon: ListOrderedIcon,
-		collapsible: false,
-		subItems: [],
-	},
-	{
 		title: "Projects",
 		url: "/projects",
 		icon: FolderKanban,
