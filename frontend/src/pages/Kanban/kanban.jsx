@@ -34,7 +34,7 @@ export default function KanbanBoard() {
 					color: status.color,
 					position: col.position,
 					items: tasks
-						.filter((task) => task.status_id === status.id && task.project_id === selectedProject.id)
+						.filter((task) => task.status_id === status.id && task.project_id === selectedProject.id && task.children === null) // only top-level tasks
 						.sort((a, b) => a.position - b.position) // <-- order by position
 						.map((task) => ({
 							...task, // include all original task fields
