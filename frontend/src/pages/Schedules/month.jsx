@@ -95,7 +95,7 @@ export default function Month({ days, currentMonth, getTaskForDate }) {
 										</div>
 									) : (
 										<div className="mt-1 space-y-1 overflow-y-auto max-h-20">
-											{(dayTasks || []).slice(0, 3).map((task) => (
+											{(dayTasks || []).map((task) => (
 												<div
 													title={task.title}
 													key={task.id}
@@ -123,7 +123,7 @@ export default function Month({ days, currentMonth, getTaskForDate }) {
 													</div>
 												</div>
 											))}
-											{dayTasks?.length > 3 && <div className="text-xs text-blue-600">+{dayTasks?.length - 3} more</div>}
+											{/* {dayTasks?.length > 3 && <div className="text-xs text-blue-600">+{dayTasks?.length - 3} more</div>} */}
 										</div>
 									)}
 								</div>
