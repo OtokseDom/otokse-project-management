@@ -116,14 +116,14 @@ class TaskController extends Controller
             'ids' => 'required|array',
             'ids.*' => 'integer|exists:tasks,id',
             'action' => 'required|string|in:status,assignees,project,category,priority,start_date,end_date,actual_date',
-            'value' => 'required',
+            'value' => 'nullable',
         ]);
         $organization_id = $this->userData->organization_id;
         $userId = $this->userData->id;
 
         $ids = $validated['ids'];
         $action = $validated['action'];
-        $value = $validated['value'];
+        $value = $validated['value'] ?? null;
         // For assignees, value should be array
         if ($action === 'assignees' && !is_array($value)) {
             $value = [$value];
