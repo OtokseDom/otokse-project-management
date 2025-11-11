@@ -8,7 +8,6 @@ import GuestLayout from "./components/GuestLayout";
 import AdminLayout from "./components/AdminLayout";
 import UserProfile from "./pages/Users/Show/index";
 import Tasks from "./pages/Tasks/List/index";
-import TasksListView from "./pages/Tasks/ListView/index";
 import Users from "./pages/Users/List/index";
 import Schedules from "./pages/Schedules";
 import Categories from "./pages/Categories/List";
