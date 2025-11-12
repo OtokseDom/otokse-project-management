@@ -27,8 +27,8 @@ import { useTasksStore } from "@/store/tasks/tasksStore";
 import { useMemo, useState } from "react";
 import { useAuthContext } from "@/contexts/AuthContextProvider";
 import { Checkbox } from "@/components/ui/checkbox";
-import UpdateDialog from "./updateDialog";
-import DeleteDialog from "./deleteDialog";
+import UpdateDialog from "../updateDialog";
+import DeleteDialog from "../deleteDialog";
 import { useTaskDiscussionsStore } from "@/store/taskDiscussions/taskDiscussionsStore";
 
 export const columnsTask = ({ dialogOpen, setDialogOpen, setIsOpen, setUpdateData }) => {

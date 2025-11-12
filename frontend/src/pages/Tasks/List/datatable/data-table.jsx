@@ -23,13 +23,13 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useLoadContext } from "@/contexts/LoadContextProvider";
-import TaskForm from "../form";
+import TaskForm from "../../form";
 import History from "@/components/task/History";
 import Relations from "@/components/task/Relations";
 import Tabs from "@/components/task/Tabs";
 import { useTasksStore } from "@/store/tasks/tasksStore";
-import UpdateDialog from "./updateDialog";
-import DeleteDialog from "./deleteDialog";
+import UpdateDialog from "../updateDialog";
+import DeleteDialog from "../deleteDialog";
 import { TaskDiscussions } from "@/components/task/Discussion";
 export function DataTableTasks({
 	columns,
@@ -52,12 +52,7 @@ export function DataTableTasks({
 	const [filterValue, setFilterValue] = useState("");
 	const [bulkAction, setBulkAction] = useState(null);
 	const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-	// TODO: table row bg color of parent task to be solid
 	// TODO: Task datatable filter
-	// TODO: Kanban remove parent tasks
-	// TODO: Task bulk action empty dates
-	// TODO: Completion veolocity wrong data
-	// TODO: Calendar show all asks in a cell
 
 	// Helper to clear selection and reset dialogs
 	const clearSelection = () => {
