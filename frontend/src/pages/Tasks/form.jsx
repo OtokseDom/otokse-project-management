@@ -111,7 +111,7 @@ export default function TaskForm({ parentId, projectId, isOpen, setIsOpen, updat
 			parent_id: undefined,
 			project_id: undefined,
 			category: undefined,
-			priority: undefined,
+			priority: "",
 			expected_output: "",
 			start_date: null,
 			end_date: null,
