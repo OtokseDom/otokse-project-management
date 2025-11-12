@@ -5,9 +5,10 @@ import { ChevronDown, ChevronUp, Edit, Plus, MoreHorizontal, Copy, Trash2 } from
 import { format } from "date-fns";
 import axiosClient from "@/axios.client";
 import { API } from "@/constants/api";
-import { useTaskHelpers, statusColors } from "@/utils/taskHelpers";
+import { useTaskHelpers, statusColors, priorityColors } from "@/utils/taskHelpers";
 import { useLoadContext } from "@/contexts/LoadContextProvider";
 import { useToast } from "@/contexts/ToastContextProvider";
+import { Button } from "@/components/ui/button";
 
 export default function TaskGridItem({ task, setIsOpen = () => {}, setUpdateData = () => {}, setParentId = () => {}, setProjectId = () => {} }) {
 	const [open, setOpen] = useState(false);
@@ -38,6 +39,7 @@ export default function TaskGridItem({ task, setIsOpen = () => {}, setUpdateData
 
 	const statusKey = task.status?.color ? String(task.status.color).toLowerCase() : null;
 	const statusClass = statusColors?.[statusKey] ?? "bg-muted/20 text-muted-foreground";
+	const priorityClass = priorityColors?.[priority] ?? "bg-muted/20 text-muted-foreground";
 
 	const openEdit = (t) => {
 		// reuse datatable form/dialog
@@ -95,7 +97,7 @@ export default function TaskGridItem({ task, setIsOpen = () => {}, setUpdateData
 					) : (
 						<span className="text-xs px-2 py-0.5 rounded-md bg-muted/20 text-muted-foreground">No status</span>
 					)}
-					{priority && <span className="text-xs text-muted-foreground">{priority}</span>}
+					{priority && <span className={`text-xs px-2 py-0.5 rounded-md font-medium ${priorityClass}`}>{priority}</span>}
 				</div>
 			</div>
 
@@ -151,57 +153,41 @@ export default function TaskGridItem({ task, setIsOpen = () => {}, setUpdateData
 
 				{/* right column: actions + subtasks toggle */}
 				<div className="flex flex-col items-end gap-2">
-					<div className="flex items-center gap-2">
-						<button
-							onClick={() => openEdit(task)}
-							title="Edit"
-							className="inline-flex items-center gap-2 px-2 py-1 text-sm rounded bg-accent/10 hover:bg-accent/20"
-						>
-							<Edit size={14} />
-							<span className="hidden sm:inline">Edit</span>
-						</button>
-
-						<button
-							onClick={() => handleClone(task)}
-							title="Clone"
-							className="inline-flex items-center gap-2 px-2 py-1 text-sm rounded bg-muted/6 hover:bg-muted/8"
-						>
-							<Copy size={14} />
-							<span className="hidden sm:inline">Clone</span>
-						</button>
-
-						<button
-							onClick={() => handleAddSubtask(task)}
-							title="Add subtask"
-							className="inline-flex items-center gap-2 px-2 py-1 text-sm rounded bg-secondary/10 hover:bg-secondary/20"
-						>
-							<Plus size={14} />
-							<span className="hidden sm:inline">Subtask</span>
-						</button>
-
-						<button
-							onClick={() => handleDelete(task)}
-							title="Delete"
-							className="inline-flex items-center gap-1 px-2 py-1 text-sm rounded border-destructive hover:bg-destructive/10 text-destructive"
-						>
-							<Trash2 size={14} />
-							<span className="hidden sm:inline">Delete</span>
-						</button>
-					</div>
-
 					{/* subtasks toggle */}
 					{hasChildren ? (
-						<button
+						<Button
 							onClick={() => setOpen((s) => !s)}
 							className="inline-flex items-center gap-2 text-sm text-muted-foreground mt-2"
 							aria-expanded={open}
 						>
 							{open ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
 							<span className="text-xs">{task.children.length} subtasks</span>
-						</button>
+						</Button>
 					) : (
 						<span className="text-xs text-muted-foreground mt-2">No subtasks</span>
 					)}
+
+					<div className="flex items-center gap-2">
+						<Button variant="ghost" size="sm" onClick={() => openEdit(task)} title="Edit">
+							<Edit size={14} />
+							<span className="hidden sm:inline">Edit</span>
+						</Button>
+
+						<Button variant="ghost" size="sm" onClick={() => handleClone(task)} title="Clone">
+							<Copy size={14} />
+							<span className="hidden sm:inline">Clone</span>
+						</Button>
+
+						<Button variant="ghost" size="sm" onClick={() => handleAddSubtask(task)} title="Add subtask">
+							<Plus size={14} />
+							<span className="hidden sm:inline">Subtask</span>
+						</Button>
+
+						<Button variant="ghost" size="sm" onClick={() => handleDelete(task)} title="Delete">
+							<Trash2 size={14} className="text-destructive" />
+							<span className="hidden sm:inline">Delete</span>
+						</Button>
+					</div>
 				</div>
 			</div>
 
