@@ -1,12 +1,15 @@
 import React, { useEffect, useState } from "react";
-import { columnsTask } from "./columns";
-import { DataTableTasks } from "./data-table";
+import { columnsTask } from "./datatable/columns";
+import { DataTableTasks } from "./datatable/data-table";
 import { flattenTasks, useTaskHelpers } from "@/utils/taskHelpers";
 import { useTasksStore } from "@/store/tasks/tasksStore";
 import { useUsersStore } from "@/store/users/usersStore";
 import { useProjectsStore } from "@/store/projects/projectsStore";
 import { useCategoriesStore } from "@/store/categories/categoriesStore";
 import { useTaskStatusesStore } from "@/store/taskStatuses/taskStatusesStore";
+import GridList from "./grid/gridList";
+import { Button } from "@/components/ui/button";
+import { List, Rows3 } from "lucide-react";
 export default function Tasks() {
 	const { tasks, tasksLoaded, setRelations, setActiveTab } = useTasksStore();
 	const { users } = useUsersStore();
@@ -24,6 +27,9 @@ export default function Tasks() {
 
 	// Flatten tasks for datatable usage (also groups children below parent)
 	const [tableData, setTableData] = useState([]);
+
+	// New view state: 'list' or 'grid'
+	const [view, setView] = useState(() => "list");
 
 	useEffect(() => {
 		if (!isOpen) {
@@ -56,10 +62,22 @@ export default function Tasks() {
 				}`}
 				aria-hidden="true"
 			/>
-			<div>
-				<h1 className=" font-extrabold text-3xl">Tasks</h1>
-				<p>View list of all tasks</p>
+			<div className="flex items-center justify-between">
+				<div>
+					<h1 className=" font-extrabold text-3xl">Tasks</h1>
+					<p>View list of all tasks</p>
+				</div>
+				{/* Tabs */}
+				<div className="ml-4 inline-flex rounded-md bg-muted/5 p-1">
+					<Button variant={view === "list" ? "" : "ghost"} onClick={() => setView("list")}>
+						<List size={16} />
+					</Button>
+					<Button variant={view === "grid" ? "" : "ghost"} onClick={() => setView("grid")}>
+						<Rows3 size={16} />
+					</Button>
+				</div>
 			</div>
+
 			{/* Updated table to fix dialog per column issue */}
 			{(() => {
 				const {
@@ -72,22 +90,33 @@ export default function Tasks() {
 					setIsOpen,
 					setUpdateData,
 				});
+
 				return (
 					<>
-						<DataTableTasks
-							columns={taskColumns}
-							data={tableData}
-							updateData={updateData}
-							setUpdateData={setUpdateData}
-							isOpen={isOpen}
-							setIsOpen={setIsOpen}
-							parentId={parentId}
-							setParentId={setParentId}
-							projectId={projectId}
-							setProjectId={setProjectId}
-						/>
-						{dialog}
-						{bulkDialog}
+						{view === "list" ? (
+							<>
+								<DataTableTasks
+									columns={taskColumns}
+									data={tableData}
+									updateData={updateData}
+									setUpdateData={setUpdateData}
+									isOpen={isOpen}
+									setIsOpen={setIsOpen}
+									parentId={parentId}
+									setParentId={setParentId}
+									projectId={projectId}
+									setProjectId={setProjectId}
+								/>
+								{dialog}
+								{bulkDialog}
+							</>
+						) : (
+							<>
+								<GridList setIsOpen={setIsOpen} setUpdateData={setUpdateData} setParentId={setParentId} setProjectId={setProjectId} />
+								{dialog}
+								{bulkDialog}
+							</>
+						)}
 					</>
 				);
 			})()}
