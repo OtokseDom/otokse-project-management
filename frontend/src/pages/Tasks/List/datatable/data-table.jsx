@@ -23,13 +23,13 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useLoadContext } from "@/contexts/LoadContextProvider";
-import TaskForm from "../form";
+import TaskForm from "../../form";
 import History from "@/components/task/History";
 import Relations from "@/components/task/Relations";
 import Tabs from "@/components/task/Tabs";
 import { useTasksStore } from "@/store/tasks/tasksStore";
-import UpdateDialog from "./updateDialog";
-import DeleteDialog from "./deleteDialog";
+import UpdateDialog from "../updateDialog";
+import DeleteDialog from "../deleteDialog";
 import { TaskDiscussions } from "@/components/task/Discussion";
 export function DataTableTasks({
 	columns,
