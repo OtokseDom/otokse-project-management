@@ -524,14 +524,15 @@ class ReportService
 
         foreach ($months as $m) {
             $baseQuery = $this->task
-                ->whereYear('end_date', $m['year'])
-                ->whereMonth('end_date', $m['month_num'])
                 ->where('organization_id', $this->organization_id)
                 ->where(function ($query) {
                     $query->whereNotNull('parent_id')->orWhere(function ($subQuery) {
                         $subQuery->whereNull('parent_id')->whereDoesntHave('children');
                     });
-                });
+                })
+                // Use COALESCE(actual_date, end_date, start_date) so tasks are included based on actual_date when present,
+                // otherwise end_date, and finally start_date — and ensure year/month match the resolved date.
+                ->whereRaw('YEAR(COALESCE(actual_date, end_date, start_date)) = ? AND MONTH(COALESCE(actual_date, end_date, start_date)) = ?', [$m['year'], $m['month_num']]);
 
             // apply the same filters logic used elsewhere
             $baseQuery = $this->applyFilters($baseQuery, ($variant !== 'dashboard' ? $id : null), $filter);
