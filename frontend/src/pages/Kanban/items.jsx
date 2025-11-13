@@ -91,10 +91,15 @@ const Items = ({ item }) => {
 					)}
 				>
 					<div
-						className={`fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm z-40 transition-opacity duration-300 pointer-events-none ${
-							isDialogOpen ? "opacity-100" : "opacity-0"
+						className={`fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm z-40 transition-opacity duration-300 cursor-default ${
+							isDialogOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
 						}`}
 						aria-hidden="true"
+						onClick={(e) => {
+							e.stopPropagation();
+							e.preventDefault();
+							setDialogOpen(false);
+						}}
 					/>
 					<div className="flex flex-row w-full items-center justify-between draggable touch-none">
 						{/* Grip handle */}
