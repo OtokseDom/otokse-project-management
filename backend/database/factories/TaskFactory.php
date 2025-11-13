@@ -35,6 +35,9 @@ class TaskFactory extends Factory
         } else {
             self::$positionCounters[$key]++;
         }
+        $startDate = fake()->dateTimeBetween('now', '+1 month');
+        $estimate = $this->faker->randomFloat(0, 1, 7);
+        $actual = $this->faker->randomFloat(0, 1, 7);
         return [
             'organization_id' => 1,
             'status_id' => $statusId,
@@ -43,11 +46,11 @@ class TaskFactory extends Factory
             'title' => $this->faker->sentence,
             'description' => $this->faker->paragraph,
             'expected_output' => $this->faker->sentence,
-            'start_date' => $startDate = fake()->dateTimeBetween('now', '+1 month'),
+            'start_date' => $startDate,
             'end_date' => $startDate,
             'actual_date' => $startDate,
-            'days_estimate' => $estimate = $this->faker->randomFloat(0, 1, 7),
-            'days_taken' => $actual = $this->faker->randomFloat(0, 1, 7),
+            'days_estimate' => $estimate,
+            'days_taken' => $actual,
             'delay_days' => $estimate < $actual ? $actual - $estimate : 0,
             'start_time' => $this->faker->randomElement(['07:30:00', '08:00:00', '08:20:00', '09:45:00', '10:00:00']),
             'end_time' => $this->faker->randomElement(['13:30:00', '14:00:00', '15:45:00', '15:20:00', '16:00:00']),
