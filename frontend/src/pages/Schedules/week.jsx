@@ -43,10 +43,15 @@ export default function Week({ getWeekDays, getTimeSlots, weekstart_date: weekSt
 	return (
 		<div className="overflow-x-auto">
 			<div
-				className={`fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm z-40 transition-opacity duration-300 pointer-events-none ${
-					openDialogIndex !== null ? "opacity-100" : "opacity-0"
+				className={`fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm z-40 transition-opacity duration-300 ${
+					openDialogIndex !== null ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
 				}`}
 				aria-hidden="true"
+				onClick={(e) => {
+					e.stopPropagation();
+					e.preventDefault();
+					setOpenDialogIndex(null);
+				}}
 			/>
 			<div className="min-w-max grid grid-cols-8 gap-1">
 				{/* Time column */}

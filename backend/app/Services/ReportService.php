@@ -58,7 +58,7 @@ class ReportService
 
         // Date range filter
         if (!empty($filter['from']) && !empty($filter['to'])) {
-            $query->whereBetween('start_date', [$filter['from'], $filter['to']]);
+            $query->whereRaw('COALESCE(actual_date, end_date, start_date) BETWEEN ? AND ?', [$filter['from'], $filter['to']]);
         }
 
         // Projects filter
@@ -454,14 +454,15 @@ class ReportService
         $task_count = 0;
         foreach ($months as $m) {
             $query = $this->task
-                ->whereYear('start_date', $m['year'])
-                ->whereMonth('start_date', $m['month_num'])
                 ->where('organization_id', $this->organization_id)
                 ->where(function ($query) {
                     $query->whereNotNull('parent_id')->orWhere(function ($subQuery) {
                         $subQuery->whereNull('parent_id')->whereDoesntHave('children');
                     });
-                });
+                })
+                // Use COALESCE(actual_date, end_date, start_date) so tasks are included based on actual_date when present,
+                // otherwise end_date, and finally start_date — and ensure year/month match the resolved date.
+                ->whereRaw('YEAR(COALESCE(actual_date, end_date, start_date)) = ? AND MONTH(COALESCE(actual_date, end_date, start_date)) = ?', [$m['year'], $m['month_num']]);
             $query = $this->applyFilters($query, ($variant !== 'dashboard' ? $id : null), ($variant === 'dashboard' ? $filter : null));
             $rating = $query->select(
                 DB::raw('AVG(performance_rating) as average_rating'),
@@ -524,14 +525,15 @@ class ReportService
 
         foreach ($months as $m) {
             $baseQuery = $this->task
-                ->whereYear('end_date', $m['year'])
-                ->whereMonth('end_date', $m['month_num'])
                 ->where('organization_id', $this->organization_id)
                 ->where(function ($query) {
                     $query->whereNotNull('parent_id')->orWhere(function ($subQuery) {
                         $subQuery->whereNull('parent_id')->whereDoesntHave('children');
                     });
-                });
+                })
+                // Use COALESCE(actual_date, end_date, start_date) so tasks are included based on actual_date when present,
+                // otherwise end_date, and finally start_date — and ensure year/month match the resolved date.
+                ->whereRaw('YEAR(COALESCE(actual_date, end_date, start_date)) = ? AND MONTH(COALESCE(actual_date, end_date, start_date)) = ?', [$m['year'], $m['month_num']]);
 
             // apply the same filters logic used elsewhere
             $baseQuery = $this->applyFilters($baseQuery, ($variant !== 'dashboard' ? $id : null), $filter);
