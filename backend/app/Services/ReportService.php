@@ -58,7 +58,7 @@ class ReportService
 
         // Date range filter
         if (!empty($filter['from']) && !empty($filter['to'])) {
-            $query->whereBetween('start_date', [$filter['from'], $filter['to']]);
+            $query->whereRaw('COALESCE(actual_date, end_date, start_date) BETWEEN ? AND ?', [$filter['from'], $filter['to']]);
         }
 
         // Projects filter
