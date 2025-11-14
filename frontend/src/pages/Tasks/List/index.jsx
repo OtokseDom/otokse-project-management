@@ -7,11 +7,19 @@ import { useUsersStore } from "@/store/users/usersStore";
 import { useProjectsStore } from "@/store/projects/projectsStore";
 import { useCategoriesStore } from "@/store/categories/categoriesStore";
 import { useTaskStatusesStore } from "@/store/taskStatuses/taskStatusesStore";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import GridList from "./grid/gridList";
 import { Button } from "@/components/ui/button";
 import { List, Rows3 } from "lucide-react";
+import TaskForm from "../form";
+import History from "@/components/task/History";
+import Relations from "@/components/task/Relations";
+import Tabs from "@/components/task/Tabs";
+import { useLoadContext } from "@/contexts/LoadContextProvider";
+
 export default function Tasks() {
-	const { tasks, tasksLoaded, setRelations, setActiveTab } = useTasksStore();
+	const { loading, setLoading } = useLoadContext();
+	const { tasks, tasksLoaded, setRelations, activeTab, setActiveTab } = useTasksStore();
 	const { users } = useUsersStore();
 	const { taskStatuses } = useTaskStatusesStore();
 	const { projects, projectsLoaded } = useProjectsStore();
@@ -58,6 +66,15 @@ export default function Tasks() {
 		<div className="w-screen md:w-full bg-card text-card-foreground border border-border rounded-2xl container p-4 md:p-10 shadow-md">
 			<div
 				className={`fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm z-40 transition-opacity duration-300 pointer-events-none ${
+					isOpen || dialogOpen
+						? // || deleteDialogOpen
+						  "opacity-100"
+						: "opacity-0"
+				}`}
+				aria-hidden="true"
+			/>
+			<div
+				className={`fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm z-40 transition-opacity duration-300 pointer-events-none ${
 					dialogOpen ? "opacity-100" : "opacity-0"
 				}`}
 				aria-hidden="true"
@@ -77,6 +94,37 @@ export default function Tasks() {
 					</Button>
 				</div>
 			</div>
+			<div>
+				<Sheet open={isOpen} onOpenChange={setIsOpen} modal={false}>
+					<SheetTrigger asChild>
+						<Button variant="">Add Task</Button>
+					</SheetTrigger>
+					<SheetContent side="right" className="overflow-y-auto w-full sm:w-[640px] p-2 md:p-6">
+						<SheetHeader>
+							<SheetTitle>
+								<Tabs loading={loading} updateData={updateData} activeTab={activeTab} setActiveTab={setActiveTab} parentId={parentId} />
+							</SheetTitle>
+							<SheetDescription className="sr-only">Navigate through the app using the options below.</SheetDescription>
+						</SheetHeader>
+						{activeTab == "history" ? (
+							<History selectedTaskHistory={selectedTaskHistory} />
+						) : activeTab == "relations" ? (
+							<Relations setUpdateData={setUpdateData} setParentId={setParentId} setProjectId={setProjectId} />
+						) : activeTab == "discussions" ? (
+							<TaskDiscussions taskId={updateData?.id} />
+						) : (
+							<TaskForm
+								parentId={parentId}
+								projectId={projectId}
+								isOpen={isOpen}
+								setIsOpen={setIsOpen}
+								updateData={updateData}
+								setUpdateData={setUpdateData}
+							/>
+						)}
+					</SheetContent>
+				</Sheet>
+			</div>
 
 			{/* Updated table to fix dialog per column issue */}
 			{(() => {
@@ -95,18 +143,7 @@ export default function Tasks() {
 					<>
 						{view === "list" ? (
 							<>
-								<DataTableTasks
-									columns={taskColumns}
-									data={tableData}
-									updateData={updateData}
-									setUpdateData={setUpdateData}
-									isOpen={isOpen}
-									setIsOpen={setIsOpen}
-									parentId={parentId}
-									setParentId={setParentId}
-									projectId={projectId}
-									setProjectId={setProjectId}
-								/>
+								<DataTableTasks columns={taskColumns} data={tableData} isOpen={isOpen} />
 								{dialog}
 								{bulkDialog}
 							</>
