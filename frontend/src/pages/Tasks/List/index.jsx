@@ -113,9 +113,10 @@ export default function Tasks() {
 						value={selectedProject ? String(selectedProject.id) : ""}
 					>
 						<SelectTrigger>
-							<SelectValue placeholder="Select a project" />
+							<SelectValue placeholder="All Projects" />
 						</SelectTrigger>
 						<SelectContent>
+							<SelectItem value={null}>All Projects</SelectItem>
 							{Array.isArray(projects) && projects.length > 0 ? (
 								projects.map((project) => (
 									// <SelectItem key={project.id} value={project.id}>
