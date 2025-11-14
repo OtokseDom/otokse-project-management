@@ -1,5 +1,5 @@
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { useLoadContext } from "@/contexts/LoadContextProvider";
@@ -7,7 +7,6 @@ import axiosClient from "@/axios.client";
 import { useToast } from "@/contexts/ToastContextProvider";
 import { columnsTask } from "@/pages/Tasks/List/datatable/columns";
 import { DataTableTasks } from "@/pages/Tasks/List/datatable/data-table";
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { PieChartDonut } from "@/components/chart/pie-chart-donut";
 import GalaxyProfileBanner from "@/components/design/galaxy";
@@ -33,6 +32,12 @@ import { useUserStore } from "@/store/user/userStore";
 import UserForm from "../form";
 import { useTaskStatusesStore } from "@/store/taskStatuses/taskStatusesStore";
 import { useDashboardStore } from "@/store/dashboard/dashboardStore";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import TaskForm from "../../Tasks/form.jsx";
+import History from "@/components/task/History";
+import Relations from "@/components/task/Relations";
+import Tabs from "@/components/task/Tabs";
+import { TaskDiscussions } from "@/components/task/Discussion";
 
 export default function UserProfile() {
 	const { id } = useParams();
@@ -42,7 +47,7 @@ export default function UserProfile() {
 	const { users } = useUsersStore();
 	const { projects, projectsLoaded } = useProjectsStore();
 	const { categories } = useCategoriesStore();
-	const { tasks, tasksLoaded, setRelations, setActiveTab } = useTasksStore();
+	const { tasks, tasksLoaded, setRelations, selectedTaskHistory, activeTab, setActiveTab } = useTasksStore();
 	const { taskStatuses } = useTaskStatusesStore();
 	const { fetchTasks, fetchProjects, fetchUsers, fetchCategories, fetchTaskStatuses, fetchUserReports } = useTaskHelpers();
 	const { loading, setLoading } = useLoadContext();
@@ -52,9 +57,9 @@ export default function UserProfile() {
 	const [isOpenUser, setIsOpenUser] = useState(false);
 	const [isOpenFilter, setIsOpenFilter] = useState(false);
 	const [updateData, setUpdateData] = useState({});
-	const [updateDataUser, setUpdateDataUser] = useState({});
-	const [hasRelation, setHasRelation] = useState(false);
 	const [dialogOpen, setDialogOpen] = useState(false);
+	// const [dialogOpenTask, setDialogOpenTask] = useState(false);
+	const [projectId, setProjectId] = useState(null); //for adding subtasks from relations tab
 	const [parentId, setParentId] = useState(null);
 	const [tableData, setTableData] = useState([]);
 
@@ -69,10 +74,9 @@ export default function UserProfile() {
 			setRelations({});
 			setActiveTab("update");
 			setParentId(null);
-			setHasRelation(false);
+			setProjectId(null);
 		}
-		if (!isOpenUser) setUpdateDataUser({});
-	}, [isOpen, isOpenUser]);
+	}, [isOpen]);
 
 	useEffect(() => {
 		document.title = "Task Management | User Profile";
@@ -162,7 +166,7 @@ export default function UserProfile() {
 		<div className="flex flex-col w-screen md:w-full container p-5 md:p-0 sm:text-sm -mt-10">
 			<div
 				className={`fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm z-40 transition-opacity duration-300 pointer-events-none ${
-					isOpenUser || isOpenFilter || dialogOpen ? "opacity-100" : "opacity-0"
+					isOpen || isOpenUser || isOpenFilter || dialogOpen ? "opacity-100" : "opacity-0"
 				}`}
 				aria-hidden="true"
 			/>
@@ -186,7 +190,7 @@ export default function UserProfile() {
 						<SheetTitle>Update User</SheetTitle>
 						<SheetDescription className="sr-only">Navigate through the app using the options below.</SheetDescription>
 					</SheetHeader>
-					<UserForm setIsOpen={setIsOpenUser} updateData={user} setUpdateData={setUpdateDataUser} userProfileId={id} />
+					<UserForm setIsOpen={setIsOpenUser} updateData={user} userProfileId={id} />
 				</SheetContent>
 			</Sheet>
 
@@ -417,31 +421,67 @@ export default function UserProfile() {
 						</p>
 					</div>
 
+					<div className="w-full justify-between flex items-center my-4">
+						<div>filter here</div>
+						<Sheet open={isOpen} onOpenChange={setIsOpen} modal={false}>
+							<SheetTrigger asChild>
+								<Button variant="">
+									<Plus /> Add Task
+								</Button>
+							</SheetTrigger>
+							<SheetContent side="right" className="overflow-y-auto w-full sm:w-[640px] p-2 md:p-6">
+								<SheetHeader>
+									<SheetTitle>
+										<Tabs loading={loading} updateData={updateData} activeTab={activeTab} setActiveTab={setActiveTab} parentId={parentId} />
+									</SheetTitle>
+									<SheetDescription className="sr-only">Navigate through the app using the options below.</SheetDescription>
+								</SheetHeader>
+								{activeTab == "history" ? (
+									<History selectedTaskHistory={selectedTaskHistory} />
+								) : activeTab == "relations" ? (
+									<Relations setUpdateData={setUpdateData} setParentId={setParentId} setProjectId={setProjectId} />
+								) : activeTab == "discussions" ? (
+									<TaskDiscussions taskId={updateData?.id} />
+								) : (
+									<TaskForm
+										parentId={parentId}
+										projectId={projectId}
+										isOpen={isOpen}
+										setIsOpen={setIsOpen}
+										updateData={updateData}
+										setUpdateData={setUpdateData}
+									/>
+								)}
+							</SheetContent>
+						</Sheet>
+					</div>
 					{(() => {
-						const { columnsTask: taskColumns, dialog } = columnsTask({
+						const {
+							columnsTask: taskColumns,
+							dialog,
+							bulkDialog,
+						} = columnsTask({
 							dialogOpen,
 							setDialogOpen,
-							hasRelation,
-							setHasRelation,
 							setIsOpen,
 							setUpdateData,
-							fetchTasks,
 						});
 						return (
 							<>
 								<DataTableTasks
 									columns={taskColumns}
 									data={tableData}
-									updateData={updateData}
-									setUpdateData={setUpdateData}
-									isOpen={isOpen}
-									setIsOpen={setIsOpen}
-									parentId={parentId}
-									setParentId={setParentId}
-									fetchData={fetchTasks}
+									// updateData={updateData}
+									// setUpdateData={setUpdateData}
+									// isOpen={isOpenTask}
+									// setIsOpen={setIsOpenTask}
+									// parentId={parentId}
+									// setParentId={setParentId}
+									// fetchData={fetchTasks}
 									showLess={true}
 								/>
 								{dialog}
+								{bulkDialog}
 							</>
 						);
 					})()}
