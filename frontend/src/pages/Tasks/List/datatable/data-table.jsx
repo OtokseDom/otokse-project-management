@@ -35,14 +35,14 @@ export function DataTableTasks({
 	columns,
 	data,
 	isOpen,
-	setIsOpen,
-	updateData,
-	setUpdateData,
+	// setIsOpen,
+	// updateData,
+	// setUpdateData,
 	showLess = true,
-	parentId,
-	setParentId,
-	projectId,
-	setProjectId,
+	// parentId,
+	// setParentId,
+	// projectId,
+	// setProjectId,
 }) {
 	const { selectedTaskHistory, activeTab, setActiveTab } = useTasksStore();
 	const { loading, setLoading } = useLoadContext();
@@ -164,13 +164,6 @@ export function DataTableTasks({
 	}, [table.getSelectedRowModel().rows.length]);
 	return (
 		<div className="w-full scrollbar-custom">
-			<div
-				className={`fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm z-40 transition-opacity duration-300 pointer-events-none ${
-					isOpen || deleteDialogOpen ? "opacity-100" : "opacity-0"
-				}`}
-				aria-hidden="true"
-			/>
-
 			<div className="flex flex-col md:flex-row justify-between py-4">
 				<div className="flex flex-row gap-4">
 					{/* Input field to enter filter value */}
@@ -201,35 +194,6 @@ export function DataTableTasks({
 				</div>
 				<div className="flex flex-row justify-between gap-2">
 					<div className="flex gap-2">
-						<Sheet open={isOpen} onOpenChange={setIsOpen} modal={false}>
-							<SheetTrigger asChild>
-								<Button variant="">Add Task</Button>
-							</SheetTrigger>
-							<SheetContent side="right" className="overflow-y-auto w-full sm:w-[640px] p-2 md:p-6">
-								<SheetHeader>
-									<SheetTitle>
-										<Tabs loading={loading} updateData={updateData} activeTab={activeTab} setActiveTab={setActiveTab} parentId={parentId} />
-									</SheetTitle>
-									<SheetDescription className="sr-only">Navigate through the app using the options below.</SheetDescription>
-								</SheetHeader>
-								{activeTab == "history" ? (
-									<History selectedTaskHistory={selectedTaskHistory} />
-								) : activeTab == "relations" ? (
-									<Relations setUpdateData={setUpdateData} setParentId={setParentId} setProjectId={setProjectId} />
-								) : activeTab == "discussions" ? (
-									<TaskDiscussions taskId={updateData?.id} />
-								) : (
-									<TaskForm
-										parentId={parentId}
-										projectId={projectId}
-										isOpen={isOpen}
-										setIsOpen={setIsOpen}
-										updateData={updateData}
-										setUpdateData={setUpdateData}
-									/>
-								)}
-							</SheetContent>
-						</Sheet>
 						<DropdownMenu>
 							<DropdownMenuTrigger asChild>
 								<Button variant="outline">Columns</Button>
