@@ -11,6 +11,7 @@ import GridList from "./grid/gridList";
 import { Button } from "@/components/ui/button";
 import { List, Rows3 } from "lucide-react";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import TaskForm from "../form";
 import History from "@/components/task/History";
 import Relations from "@/components/task/Relations";
@@ -21,9 +22,10 @@ import { useLoadContext } from "@/contexts/LoadContextProvider";
 export default function Tasks() {
 	const { loading, setLoading } = useLoadContext();
 	const { tasks, tasksLoaded, setRelations, selectedTaskHistory, activeTab, setActiveTab } = useTasksStore();
+	const [filteredTasks, setFilteredTasks] = useState([]);
 	const { users } = useUsersStore();
+	const { projects, projectsLoaded, selectedProject, setSelectedProject } = useProjectsStore();
 	const { taskStatuses } = useTaskStatusesStore();
-	const { projects, projectsLoaded } = useProjectsStore();
 	const { categories } = useCategoriesStore();
 	// Fetch Hooks
 	const { fetchTasks, fetchProjects, fetchUsers, fetchCategories, fetchTaskStatuses } = useTaskHelpers();
@@ -58,10 +60,16 @@ export default function Tasks() {
 		if ((!tasks || tasks.length === 0) && !tasksLoaded) fetchTasks();
 		if ((!projects || projects.length === 0) && !projectsLoaded) fetchProjects();
 	}, []);
-
 	useEffect(() => {
-		if (tasks !== null) setTableData(flattenTasks(tasks));
-	}, [tasks]);
+		if (selectedProject) {
+			const filtered = tasks.filter((task) => task.project_id === selectedProject.id);
+			if (filtered !== null) setTableData(flattenTasks(filtered));
+			// setFilteredTasks(filtered);
+		} else {
+			if (tasks !== null) setTableData(flattenTasks(tasks));
+			setFilteredTasks(tasks);
+		}
+	}, [tasks, selectedProject]);
 
 	return (
 		<div className="w-screen md:w-full bg-card text-card-foreground border border-border rounded-2xl container p-4 md:p-10 shadow-md">
@@ -95,7 +103,32 @@ export default function Tasks() {
 					</Button>
 				</div>
 			</div>
-			<div>
+			<div className="w-full justify-between flex items-center my-4">
+				<div className="flex flex-row justify-between w-[250px] ml-2 md:ml-0">
+					<Select
+						onValueChange={(value) => {
+							const selected = projects.find((project) => String(project.id) === value);
+							setSelectedProject(selected);
+						}}
+						value={selectedProject ? String(selectedProject.id) : ""}
+					>
+						<SelectTrigger>
+							<SelectValue placeholder="Select a project" />
+						</SelectTrigger>
+						<SelectContent>
+							{Array.isArray(projects) && projects.length > 0 ? (
+								projects.map((project) => (
+									// <SelectItem key={project.id} value={project.id}>
+									<SelectItem key={project.id} value={String(project.id)}>
+										{project.title}
+									</SelectItem>
+								))
+							) : (
+								<SelectItem disabled>No projects available</SelectItem>
+							)}
+						</SelectContent>
+					</Select>
+				</div>
 				<Sheet open={isOpen} onOpenChange={setIsOpen} modal={false}>
 					<SheetTrigger asChild>
 						<Button variant="">Add Task</Button>
