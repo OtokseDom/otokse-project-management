@@ -64,7 +64,7 @@ export default function Tasks() {
 		if (selectedProject) {
 			const filtered = tasks.filter((task) => task.project_id === selectedProject.id);
 			if (filtered !== null) setTableData(flattenTasks(filtered));
-			// setFilteredTasks(filtered);
+			setFilteredTasks(filtered);
 		} else {
 			if (tasks !== null) setTableData(flattenTasks(tasks));
 			setFilteredTasks(tasks);
@@ -183,7 +183,13 @@ export default function Tasks() {
 							</>
 						) : (
 							<>
-								<GridList setIsOpen={setIsOpen} setUpdateData={setUpdateData} setParentId={setParentId} setProjectId={setProjectId} />
+								<GridList
+									tasks={filteredTasks}
+									setIsOpen={setIsOpen}
+									setUpdateData={setUpdateData}
+									setParentId={setParentId}
+									setProjectId={setProjectId}
+								/>
 								{dialog}
 								{bulkDialog}
 							</>
