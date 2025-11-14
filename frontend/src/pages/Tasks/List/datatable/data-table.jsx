@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { flexRender, getSortedRowModel, getFilteredRowModel, getCoreRowModel, getPaginationRowModel, useReactTable } from "@tanstack/react-table";
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -23,29 +22,11 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useLoadContext } from "@/contexts/LoadContextProvider";
-import TaskForm from "../../form";
-import History from "@/components/task/History";
-import Relations from "@/components/task/Relations";
-import Tabs from "@/components/task/Tabs";
 import { useTasksStore } from "@/store/tasks/tasksStore";
 import UpdateDialog from "../updateDialog";
 import DeleteDialog from "../deleteDialog";
-import { TaskDiscussions } from "@/components/task/Discussion";
-export function DataTableTasks({
-	columns,
-	data,
-	isOpen,
-	// setIsOpen,
-	// updateData,
-	// setUpdateData,
-	showLess = true,
-	// parentId,
-	// setParentId,
-	// projectId,
-	// setProjectId,
-}) {
-	const { selectedTaskHistory, activeTab, setActiveTab } = useTasksStore();
-	const { loading, setLoading } = useLoadContext();
+export function DataTableTasks({ columns, data, showLess = true }) {
+	const { loading } = useLoadContext();
 	const [sorting, setSorting] = useState([]);
 	const [columnFilters, setColumnFilters] = useState([]);
 	const [selectedColumn, setSelectedColumn] = useState(null);
