@@ -421,7 +421,7 @@ export default function UserProfile() {
 						</p>
 					</div>
 
-					<div className="w-full justify-between flex items-center my-4">
+					<div className="w-full justify-between flex items-center my-4 gap-2">
 						<div>filter here</div>
 						<Sheet open={isOpen} onOpenChange={setIsOpen} modal={false}>
 							<SheetTrigger asChild>
