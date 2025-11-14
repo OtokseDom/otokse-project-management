@@ -146,32 +146,13 @@ export function DataTableTasks({ columns, data, showLess = true }) {
 	return (
 		<div className="w-full scrollbar-custom">
 			<div className="flex flex-col md:flex-row justify-between py-4">
-				<div className="flex flex-row gap-4">
-					{/* Input field to enter filter value */}
+				<div className="flex flex-row gap-4 max-w-sm w-full">
 					<Input
-						type="text"
-						placeholder={selectedColumn ? `Filter by ${selectedColumn}` : "Select a column first"}
-						value={filterValue}
-						onChange={(e) => handleFilterChange(e.target.value)}
-						disabled={!selectedColumn} // Disable until a column is selected
-						className="max-w-sm"
+						placeholder={"filter title ..."}
+						value={table.getColumn("title")?.getFilterValue() || ""}
+						onChange={(event) => table.getColumn("title")?.setFilterValue(event.target.value)}
+						className="w-full"
 					/>
-					{/* Dropdown Menu for selecting column */}
-					<Select onValueChange={handleColumnChange}>
-						<SelectTrigger className="w-60 capitalize">
-							<SelectValue placeholder="Select Column" />
-						</SelectTrigger>
-						<SelectContent>
-							{table
-								.getAllColumns()
-								.filter((col) => col.getCanFilter())
-								.map((col) => (
-									<SelectItem key={col.id} value={col.id} className="capitalize">
-										{col.id}
-									</SelectItem>
-								))}
-						</SelectContent>
-					</Select>
 				</div>
 				<div className="flex flex-row justify-between gap-2">
 					<div className="flex gap-2">
