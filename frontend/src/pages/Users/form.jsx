@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 // Calendar
 import { format, parseISO } from "date-fns";
 import { Loader2 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useToast } from "@/contexts/ToastContextProvider";
 import axiosClient from "@/axios.client";
 import { useAuthContext } from "@/contexts/AuthContextProvider";
@@ -39,7 +39,7 @@ const formSchema = z.object({
 	}),
 });
 
-export default function UserForm({ setIsOpen, updateData, setUpdateData, userProfileId }) {
+export default function UserForm({ setIsOpen, updateData, userProfileId }) {
 	const { user: user_auth, setUser } = useAuthContext();
 	const { loading, setLoading } = useLoadContext();
 	const showToast = useToast();
@@ -106,7 +106,6 @@ export default function UserForm({ setIsOpen, updateData, setUpdateData, userPro
 			showToast("Failed!", e.response?.data?.message, 3000, "fail");
 			console.error("Error fetching data:", e);
 		} finally {
-			setUpdateData({});
 			fetchTasks();
 			setLoading(false);
 			setIsOpen(false);
