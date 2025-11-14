@@ -7,19 +7,20 @@ import { useUsersStore } from "@/store/users/usersStore";
 import { useProjectsStore } from "@/store/projects/projectsStore";
 import { useCategoriesStore } from "@/store/categories/categoriesStore";
 import { useTaskStatusesStore } from "@/store/taskStatuses/taskStatusesStore";
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import GridList from "./grid/gridList";
 import { Button } from "@/components/ui/button";
 import { List, Rows3 } from "lucide-react";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import TaskForm from "../form";
 import History from "@/components/task/History";
 import Relations from "@/components/task/Relations";
 import Tabs from "@/components/task/Tabs";
+import { TaskDiscussions } from "@/components/task/Discussion";
 import { useLoadContext } from "@/contexts/LoadContextProvider";
 
 export default function Tasks() {
 	const { loading, setLoading } = useLoadContext();
-	const { tasks, tasksLoaded, setRelations, activeTab, setActiveTab } = useTasksStore();
+	const { tasks, tasksLoaded, setRelations, selectedTaskHistory, activeTab, setActiveTab } = useTasksStore();
 	const { users } = useUsersStore();
 	const { taskStatuses } = useTaskStatusesStore();
 	const { projects, projectsLoaded } = useProjectsStore();
@@ -143,7 +144,7 @@ export default function Tasks() {
 					<>
 						{view === "list" ? (
 							<>
-								<DataTableTasks columns={taskColumns} data={tableData} isOpen={isOpen} />
+								<DataTableTasks columns={taskColumns} data={tableData} />
 								{dialog}
 								{bulkDialog}
 							</>
