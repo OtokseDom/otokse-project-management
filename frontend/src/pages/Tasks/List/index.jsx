@@ -9,7 +9,7 @@ import { useCategoriesStore } from "@/store/categories/categoriesStore";
 import { useTaskStatusesStore } from "@/store/taskStatuses/taskStatusesStore";
 import GridList from "./grid/gridList";
 import { Button } from "@/components/ui/button";
-import { List, Rows3 } from "lucide-react";
+import { List, Plus, Rows3 } from "lucide-react";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import TaskForm from "../form";
@@ -103,7 +103,7 @@ export default function Tasks() {
 					</Button>
 				</div>
 			</div>
-			<div className="w-full justify-between flex items-center my-4">
+			<div className="w-full justify-between flex items-center my-4 gap-2">
 				<div className="flex flex-row justify-between w-[250px] ml-2 md:ml-0">
 					<Select
 						onValueChange={(value) => {
@@ -131,7 +131,10 @@ export default function Tasks() {
 				</div>
 				<Sheet open={isOpen} onOpenChange={setIsOpen} modal={false}>
 					<SheetTrigger asChild>
-						<Button variant="">Add Task</Button>
+						<Button variant="">
+							<Plus />
+							Add Task
+						</Button>
 					</SheetTrigger>
 					<SheetContent side="right" className="overflow-y-auto w-full sm:w-[640px] p-2 md:p-6">
 						<SheetHeader>
