@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { ChevronDown, ChevronUp, Edit, Plus, MoreHorizontal, Copy, Trash2 } from "lucide-react";
+import { ChevronDown, ChevronUp, Edit, Plus, MoreHorizontal, Copy, Trash2, User, CalendarDaysIcon, Target, CircleDot, Circle } from "lucide-react";
 import { format } from "date-fns";
 import axiosClient from "@/axios.client";
 import { API } from "@/constants/api";
@@ -27,10 +27,11 @@ export default function TaskGridItem({ task, setIsOpen = () => {}, setUpdateData
 		}
 	};
 
-	const dueString = task.end_date ? formatDateSafe(task.end_date) : "No due";
+	const endString = task.end_date ? formatDateSafe(task.end_date) : null;
 	const startString = task.start_date ? formatDateSafe(task.start_date) : null;
-	const estimate = task.estimate_hours ?? task.time_estimate ?? task.time_estimate_hours ?? null;
-	const priority = task.priority ?? task.priority_label ?? null;
+	const actualString = task.actual_date ? formatDateSafe(task.actual_date) : null;
+	const priority = task.priority ?? null;
+	const category = task.category?.name ?? null;
 	const projectName = task.project?.title ?? task.project?.name ?? null;
 
 	// assignees array handling
@@ -84,32 +85,35 @@ export default function TaskGridItem({ task, setIsOpen = () => {}, setUpdateData
 	return (
 		<div className="bg-sidebar text-card-foreground border border-border rounded-lg p-4 flex flex-col shadow-sm w-full">
 			{/* Header */}
-			<div className="flex items-start justify-between gap-3">
-				<div className="min-w-0 flex-1">
+			<div className="flex flex-col items-start justify-between gap-2">
+				<div className="flex flex-row items-end gap-2">
+					{/* status pill uses statusColors mapping */}
+					{task.status?.name ? <span className={`text-xs px-2 py-1 rounded-md font-medium ${statusClass}`}>{task.status.name}</span> : ""}
+					{priority && <span className={`text-xs px-2 py-1 rounded-md font-medium ${priorityClass}`}>{priority}</span>}
+					{category && (
+						<span className="flex justify-center items-center px-2 py-1 rounded-md bg-background/50 border-2 border-foreground/50 text-foreground text-xs gap-2">
+							{category}
+						</span>
+					)}
+				</div>
+				<div className="min-w-0 flex flex-col gap-2">
 					<h3 className="text-lg font-bold">{task.title || "Untitled task"}</h3>
 
+					{/* project */}
+					{projectName && <span className="font-bold text-muted-foreground text-sm">{projectName}</span>}
+
 					<div
-						className="text-muted-foreground prose prose-sm max-w-none
+						className="text-xs text-muted-foreground prose prose-sm max-w-none
 												 			[&_ul]:list-disc [&_ul]:pl-6
 															[&_ol]:list-decimal [&_ol]:pl-6
 															[&_li]:my-1"
 						dangerouslySetInnerHTML={{ __html: task.description }}
 					/>
 				</div>
-
-				<div className="flex flex-col items-end gap-2">
-					{/* status pill uses statusColors mapping */}
-					{task.status?.name ? (
-						<span className={`text-xs px-2 py-0.5 rounded-md font-medium ${statusClass}`}>{task.status.name}</span>
-					) : (
-						<span className="text-xs px-2 py-0.5 rounded-md bg-muted/20 text-muted-foreground">No status</span>
-					)}
-					{priority && <span className={`text-xs px-2 py-0.5 rounded-md font-medium ${priorityClass}`}>{priority}</span>}
-				</div>
 			</div>
-
+			<hr className="mt-2" />
 			{/* Details row */}
-			<div className="mt-3 grid grid-cols-2 gap-4 items-start">
+			<div className="flex flex-col mt-3 gap-2 items-start">
 				{/* left column: metadata */}
 				<div className="space-y-2">
 					<div className="flex flex-wrap items-center gap-2 text-sm">
@@ -117,56 +121,45 @@ export default function TaskGridItem({ task, setIsOpen = () => {}, setUpdateData
 						{assigneeNames.length > 0 ? (
 							<>
 								{assigneeNames.slice(0, 3).map((n, i) => (
-									<span key={i} className="px-2 py-1 rounded-full bg-background/50 border border-foreground/50 text-foreground text-xs">
-										{n}
+									<span
+										key={i}
+										className="flex justify-center items-center px-2 py-1 rounded-full bg-background/50 border-2 border-foreground/50 text-foreground text-xs gap-2"
+									>
+										<User size={16} /> {n}
 									</span>
 								))}
 								{assigneeNames.length > 3 && <span className="px-2 py-1 rounded bg-muted/6 text-xs">+{assigneeNames.length - 3}</span>}
 							</>
 						) : (
-							<span className="px-2 py-1 rounded bg-muted/6 text-xs">Unassigned</span>
+							""
 						)}
-
-						{/* project */}
-						{projectName && <span className="px-2 py-1 rounded bg-muted/6 text-xs">{projectName}</span>}
-
-						{/* estimate */}
-						{estimate !== null && <span className="px-2 py-1 rounded bg-muted/6 text-xs">{estimate}h</span>}
 					</div>
 
 					{/* dates */}
-					<div className="text-xs text-muted-foreground">
+					<div className="flex flex-wrap text-xs text-muted-foreground gap-4">
 						{startString && (
-							<div>
-								Start: <span className="text-card-foreground">{startString}</span>
+							<div className="flex gap-1">
+								<CalendarDaysIcon size={16} /> Start: <span className="text-card-foreground">{startString}</span>
 							</div>
 						)}
-						<div>
-							Due: <span className="text-card-foreground">{dueString}</span>
-						</div>
+						{endString && (
+							<div className="flex gap-1">
+								<CalendarDaysIcon size={16} /> End: <span className="text-card-foreground">{endString}</span>
+							</div>
+						)}
+						{actualString && (
+							<div className="flex gap-1">
+								<Target size={16} /> Actual: <span className="text-card-foreground">{actualString}</span>
+							</div>
+						)}
 					</div>
-
-					{/* tags */}
-					{Array.isArray(task.tags) && task.tags.length > 0 && (
-						<div className="flex flex-wrap gap-2 mt-2">
-							{task.tags.slice(0, 4).map((t) => (
-								<span key={t.id ?? t} className="text-xs px-2 py-0.5 rounded bg-muted/6">
-									{t.name ?? t}
-								</span>
-							))}
-						</div>
-					)}
 				</div>
 
 				{/* right column: actions + subtasks toggle */}
-				<div className="flex flex-col items-end gap-2">
+				<div className="flex flex-row justify-between items-center w-full">
 					{/* subtasks toggle */}
 					{hasChildren ? (
-						<Button
-							onClick={() => setOpen((s) => !s)}
-							className="inline-flex items-center gap-2 text-sm text-muted-foreground mt-2"
-							aria-expanded={open}
-						>
+						<Button onClick={() => setOpen((s) => !s)} className="inline-flex items-center gap-2 text-sm mt-2" aria-expanded={open}>
 							{open ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
 							<span className="text-xs">{task.children.length} subtasks</span>
 						</Button>
@@ -200,30 +193,45 @@ export default function TaskGridItem({ task, setIsOpen = () => {}, setUpdateData
 
 			{/* subtasks list */}
 			{hasChildren && open && (
-				<div className="mt-3 space-y-2">
+				<div className="w-full rounded mt-3 space-y-1 ">
+					<hr />
 					{task.children.map((sub) => (
-						<div key={sub.id} className="flex items-center justify-between gap-2 bg-muted/6 px-3 py-2 rounded">
-							<div className="min-w-0">
-								<div className="text-sm font-medium truncate">{sub.title}</div>
-								<div className="text-xs text-muted-foreground truncate">
+						<div key={sub.id} className="flex items-center justify-between gap-2 rounded bg-accent/70 px-3 py-2">
+							<div className="flex flex-col gap-2 min-w-0">
+								<div className={`flex gap-1 items-start text-sm font-medium`}>
+									<span className={`mt-0.5 p-1.5 rounded-full ${statusColors?.[sub.status?.color?.toLowerCase()]}`}></span>
+									{sub.title}
+								</div>
+								<div className="text-xs text-muted-foreground">
 									{sub.assignees &&
 										Array.isArray(sub.assignees) &&
 										sub.assignees
 											.map((a) => a.name)
 											.slice(0, 3)
 											.join(", ")}
-									{sub.project?.title ? ` • ${sub.project.title}` : ""}
 								</div>
 							</div>
-							<div className="flex items-center gap-2">
-								<button onClick={() => openEdit(sub)} className="px-2 py-1 text-xs rounded bg-accent/10 hover:bg-accent/20">
-									Edit
+							<div className="flex flex-col md:flex-row items-center gap-2">
+								<button
+									onClick={() => openEdit(sub)}
+									className="flex gap-2 items-center px-2 py-1 text-xs rounded bg-accent/10 hover:bg-accent/20"
+								>
+									<Edit size={12} />
+									<span className="hidden sm:inline">Edit</span>
 								</button>
-								<button onClick={() => handleClone(sub)} className="px-2 py-1 text-xs rounded bg-muted/6 hover:bg-muted/8">
-									Clone
+								<button
+									onClick={() => handleClone(sub)}
+									className="flex gap-2 items-center px-2 py-1 text-xs rounded bg-muted/6 hover:bg-muted/8"
+								>
+									<Copy size={12} />
+									<span className="hidden sm:inline">Clone</span>
 								</button>
-								<button onClick={() => handleDelete(sub)} className="px-2 py-1 text-xs rounded bg-destructive/10 hover:bg-destructive/20">
-									Delete
+								<button
+									onClick={() => handleDelete(sub)}
+									className="flex gap-2 items-center px-2 py-1 text-xs rounded bg-destructive/10 hover:bg-destructive/20"
+								>
+									<Trash2 size={12} className="text-destructive" />
+									<span className="hidden sm:inline">Delete</span>
 								</button>
 							</div>
 						</div>
