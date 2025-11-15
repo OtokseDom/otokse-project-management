@@ -87,7 +87,14 @@ export default function TaskGridItem({ task, setIsOpen = () => {}, setUpdateData
 			<div className="flex items-start justify-between gap-3">
 				<div className="min-w-0 flex-1">
 					<h3 className="text-lg font-bold">{task.title || "Untitled task"}</h3>
-					<p className="text-sm text-muted-foreground mt-1">{task.description || ""}</p>
+
+					<div
+						className="text-muted-foreground prose prose-sm max-w-none
+												 			[&_ul]:list-disc [&_ul]:pl-6
+															[&_ol]:list-decimal [&_ol]:pl-6
+															[&_li]:my-1"
+						dangerouslySetInnerHTML={{ __html: task.description }}
+					/>
 				</div>
 
 				<div className="flex flex-col items-end gap-2">
