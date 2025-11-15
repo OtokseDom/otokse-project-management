@@ -14,7 +14,7 @@ export default function GridList({ tasks, setIsOpen, setUpdateData, setParentId,
 	return (
 		<div className="w-full scrollbar-custom mt-10">
 			{/* single column full-span list so each card has maximum horizontal room */}
-			<div className="w-full bg-blue-500/20 border border-blue-500 text-xl font-bold text-center rounded p-2 my-2">⚠️ Under Construction</div>
+			{/* <div className="w-full bg-blue-500/20 border border-blue-500 text-xl font-bold text-center rounded p-2 my-2">⚠️ Under Construction</div> */}
 			<div className="flex flex-col gap-4 w-full">
 				{parentTasks.map((task) => (
 					<TaskGridItem
