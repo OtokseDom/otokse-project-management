@@ -159,7 +159,12 @@ export default function TaskGridItem({ task, setIsOpen = () => {}, setUpdateData
 				<div className="flex flex-row justify-between items-center w-full">
 					{/* subtasks toggle */}
 					{hasChildren ? (
-						<Button onClick={() => setOpen((s) => !s)} className="inline-flex items-center gap-2 text-sm mt-2" aria-expanded={open}>
+						<Button
+							variant="outline"
+							onClick={() => setOpen((s) => !s)}
+							className="inline-flex items-center gap-2 text-sm mt-2"
+							aria-expanded={open}
+						>
 							{open ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
 							<span className="text-xs">{task.children.length} subtasks</span>
 						</Button>
@@ -169,23 +174,23 @@ export default function TaskGridItem({ task, setIsOpen = () => {}, setUpdateData
 
 					<div className="flex items-center gap-2">
 						<Button variant="ghost" size="sm" onClick={() => openEdit(task)} title="Edit">
-							<Edit size={14} />
-							<span className="hidden sm:inline">Edit</span>
+							<Edit size={12} />
+							<span className="hidden sm:inline text-xs">Edit</span>
 						</Button>
 
 						<Button variant="ghost" size="sm" onClick={() => handleClone(task)} title="Clone">
-							<Copy size={14} />
-							<span className="hidden sm:inline">Clone</span>
+							<Copy size={12} />
+							<span className="hidden sm:inline text-xs">Clone</span>
 						</Button>
 
 						<Button variant="ghost" size="sm" onClick={() => handleAddSubtask(task)} title="Add subtask">
-							<Plus size={14} />
-							<span className="hidden sm:inline">Subtask</span>
+							<Plus size={12} />
+							<span className="hidden sm:inline text-xs">Subtask</span>
 						</Button>
 
 						<Button variant="ghost" size="sm" onClick={() => handleDelete(task)} title="Delete">
-							<Trash2 size={14} className="text-destructive" />
-							<span className="hidden sm:inline">Delete</span>
+							<Trash2 size={12} className="text-destructive" />
+							<span className="hidden sm:inline text-xs">Delete</span>
 						</Button>
 					</div>
 				</div>
