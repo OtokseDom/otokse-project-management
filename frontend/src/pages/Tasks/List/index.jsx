@@ -104,7 +104,7 @@ export default function Tasks() {
 				</div>
 			</div>
 			<div className="w-full justify-between flex items-center my-4 gap-2">
-				<div className="flex flex-row justify-between w-[250px] ml-2 md:ml-0">
+				<div className="flex flex-row justify-between w-[350px] ml-2 md:ml-0">
 					<Select
 						onValueChange={(value) => {
 							const selected = projects.find((project) => String(project.id) === value);
