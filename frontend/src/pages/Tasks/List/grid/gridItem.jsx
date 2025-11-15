@@ -193,10 +193,10 @@ export default function TaskGridItem({ task, setIsOpen = () => {}, setUpdateData
 
 			{/* subtasks list */}
 			{hasChildren && open && (
-				<div className="w-full rounded mt-3 space-y-1 ">
+				<div className="w-full rounded mt-3 ">
 					<hr />
 					{task.children.map((sub) => (
-						<div key={sub.id} className="flex items-center justify-between gap-2 rounded bg-accent/70 px-3 py-2">
+						<div key={sub.id} className="flex items-center justify-between border-b border-accent gap-2 bg-accent/50 px-3 py-2">
 							<div className="flex flex-col gap-2 min-w-0">
 								<div className={`flex gap-1 items-start text-sm font-medium`}>
 									<span className={`mt-0.5 p-1.5 rounded-full ${statusColors?.[sub.status?.color?.toLowerCase()]}`}></span>
