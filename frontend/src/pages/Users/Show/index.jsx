@@ -38,6 +38,7 @@ import History from "@/components/task/History";
 import Relations from "@/components/task/Relations";
 import Tabs from "@/components/task/Tabs";
 import { TaskDiscussions } from "@/components/task/Discussion";
+// TODO: Project Filter and search by title
 
 export default function UserProfile() {
 	const { id } = useParams();
