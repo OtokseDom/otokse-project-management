@@ -91,8 +91,30 @@ export default function TaskGridItem({ task, setIsOpen = () => {}, setUpdateData
 			<div className="flex flex-col items-start justify-between gap-2">
 				<div className="flex flex-row items-end gap-2">
 					{/* status pill uses statusColors mapping */}
-					{task.status?.name ? <span className={`text-xs px-2 py-1 rounded-md font-medium ${statusClass}`}>{task.status.name}</span> : ""}
-					{priority && <span className={`text-xs px-2 py-1 rounded-md font-medium ${priorityClass}`}>{priority}</span>}
+					{task.status?.name ? (
+						<span
+							onClick={() => {
+								setBulkAction("status");
+								setSelectedTasks([task]);
+							}}
+							className={`text-xs px-2 py-1 rounded-md font-medium hover:cursor-pointer ${statusClass}`}
+						>
+							{task.status.name}
+						</span>
+					) : (
+						""
+					)}
+					{priority && (
+						<span
+							onClick={() => {
+								setBulkAction("priority");
+								setSelectedTasks([task]);
+							}}
+							className={`text-xs px-2 py-1 rounded-md font-medium hover:cursor-pointer ${priorityClass}`}
+						>
+							{priority}
+						</span>
+					)}
 					{category && (
 						<span className="flex justify-center items-center px-2 py-1 rounded-md bg-background/50 border-2 border-foreground/50 text-foreground text-xs gap-2">
 							{category}
