@@ -119,7 +119,7 @@ export function DataTableTasks({ columns, data, showLess = true }) {
 				clearSelection={clearSelection} // Pass the callback
 			/>
 		);
-	} else if (bulkAction && bulkAction !== "delete") {
+	} else {
 		dialog = (
 			<UpdateDialog
 				open={!!bulkAction}
