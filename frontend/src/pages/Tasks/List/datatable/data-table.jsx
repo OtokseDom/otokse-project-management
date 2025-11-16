@@ -278,19 +278,7 @@ export function DataTableTasks({ columns, data, showLess = true }) {
 						))}
 					</TableHeader>
 					<TableBody>
-						{loading ? (
-							<TableRow>
-								<TableCell colSpan={columns.length} className="h-24">
-									<div className="flex items-center justify-center">
-										<div className="flex flex-col space-y-3 w-full">
-											{Array.from({ length: 6 }).map((_, i) => (
-												<Skeleton key={i} index={i * 0.9} className="h-24 w-full" />
-											))}
-										</div>
-									</div>
-								</TableCell>
-							</TableRow>
-						) : table.getRowModel().rows.length ? (
+						{table.getRowModel().rows.length ? (
 							// Show table data if available
 							table.getRowModel().rows.map((row) => {
 								// Determine if row is a parent task (depth 0 with subtasks) or a leaf (no subtasks)
