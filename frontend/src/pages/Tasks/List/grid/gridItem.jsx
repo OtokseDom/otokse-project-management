@@ -204,7 +204,10 @@ export default function TaskGridItem({ task, setIsOpen = () => {}, setUpdateData
 						<div key={sub.id} className="flex items-center justify-between border-b border-accent gap-2 bg-accent/50 px-3 py-2">
 							<div className="flex flex-col gap-2 min-w-0">
 								<div className={`flex gap-1 items-start text-sm font-medium`}>
-									<span className={`mt-0.5 p-1.5 rounded-full ${statusColors?.[sub.status?.color?.toLowerCase()]}`}></span>
+									<span
+										title={sub.status?.name || "No status"}
+										className={`mt-0.5 p-1.5 rounded-full hover:cursor-pointer ${statusColors?.[sub.status?.color?.toLowerCase()]}`}
+									></span>
 									{sub.title}
 								</div>
 								<div className="text-xs text-muted-foreground">
