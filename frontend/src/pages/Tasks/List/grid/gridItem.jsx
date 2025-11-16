@@ -9,12 +9,15 @@ import { useTaskHelpers, statusColors, priorityColors } from "@/utils/taskHelper
 import { useLoadContext } from "@/contexts/LoadContextProvider";
 import { useToast } from "@/contexts/ToastContextProvider";
 import { Button } from "@/components/ui/button";
+import UpdateDialog from "../updateDialog";
 
 export default function TaskGridItem({ task, setIsOpen = () => {}, setUpdateData = () => {}, setParentId = () => {}, setProjectId = () => {} }) {
 	const [open, setOpen] = useState(false);
 	const { fetchTasks, fetchReports } = useTaskHelpers();
 	const { loading, setLoading } = useLoadContext();
 	const showToast = useToast();
+	const [bulkAction, setBulkAction] = useState(null);
+	const [selectedTasks, setSelectedTasks] = useState(null);
 
 	const hasChildren = Array.isArray(task.children) && task.children.length > 0;
 
@@ -207,6 +210,10 @@ export default function TaskGridItem({ task, setIsOpen = () => {}, setUpdateData
 									<span
 										title={sub.status?.name || "No status"}
 										className={`mt-0.5 p-1.5 rounded-full hover:cursor-pointer ${statusColors?.[sub.status?.color?.toLowerCase()]}`}
+										onClick={() => {
+											setBulkAction("status");
+											setSelectedTasks([sub]);
+										}}
 									></span>
 									{sub.title}
 								</div>
@@ -246,6 +253,7 @@ export default function TaskGridItem({ task, setIsOpen = () => {}, setUpdateData
 					))}
 				</div>
 			)}
+			<UpdateDialog open={!!bulkAction} onClose={() => setBulkAction(null)} action={bulkAction} selectedTasks={selectedTasks} />
 		</div>
 	);
 }
