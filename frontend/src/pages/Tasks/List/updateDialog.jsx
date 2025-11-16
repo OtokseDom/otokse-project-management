@@ -46,6 +46,10 @@ export default function UpdateDialog({ open, onClose, action, selectedTasks = []
 			status_id: undefined,
 			project_id: undefined,
 			category: undefined,
+			priority: "",
+			start_date: undefined,
+			end_date: undefined,
+			actual_date: undefined,
 		},
 	});
 	const handleBulkUpdate = async (action, data, tasks) => {
