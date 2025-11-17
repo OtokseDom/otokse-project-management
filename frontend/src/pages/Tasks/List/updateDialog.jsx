@@ -34,7 +34,7 @@ const formSchema = z.object({
 export default function UpdateDialog({ open, onClose, action, selectedTasks = [] }) {
 	const { loading, setLoading } = useLoadContext();
 	const showToast = useToast();
-	const { options } = useTasksStore();
+	const { options, updateTask } = useTasksStore();
 	const { taskStatuses } = useTaskStatusesStore();
 	const { projects } = useProjectsStore();
 	const { categories } = useCategoriesStore();
@@ -55,34 +55,51 @@ export default function UpdateDialog({ open, onClose, action, selectedTasks = []
 	const handleBulkUpdate = async (action, data, tasks) => {
 		const ids = tasks.map((t) => t.id);
 		let value;
+		let updateField;
+		let updateStatusData;
+
 		switch (action) {
 			case "status":
 				value = data.status_id;
+				updateStatusData = taskStatuses.find((s) => s.id === data.status_id);
+				// Optimistic update - pass the entire updated task
+				tasks.forEach((task) => {
+					const updatedTask = { ...task, status_id: data.status_id, status: updateStatusData };
+					updateTask(task.id, updatedTask);
+				});
 				break;
 			case "assignees":
 				value = data.assignees;
+				updateField = "assignees";
 				break;
 			case "project":
 				value = data.project_id;
+				updateField = "project_id";
 				break;
 			case "category":
 				value = data.category_id;
+				updateField = "category_id";
 				break;
 			case "priority":
 				value = data.priority;
+				updateField = "priority";
 				break;
 			case "start_date":
 				value = data.start_date ? format(data.start_date, "yyyy-MM-dd") : null;
+				updateField = "start_date";
 				break;
 			case "end_date":
 				value = data.end_date ? format(data.end_date, "yyyy-MM-dd") : null;
+				updateField = "end_date";
 				break;
 			case "actual_date":
 				value = data.actual_date ? format(data.actual_date, "yyyy-MM-dd") : null;
+				updateField = "actual_date";
 				break;
 			default:
 				return;
 		}
+
 		try {
 			setLoading(true);
 			await axiosClient.patch(API().task_bulk_update(), {
@@ -94,6 +111,8 @@ export default function UpdateDialog({ open, onClose, action, selectedTasks = []
 			fetchReports();
 			showToast("Success!", "Tasks' " + action.toUpperCase() + " updated.", 3000);
 		} catch (e) {
+			// Rollback optimistic update on error
+			fetchTasks(); // Re-fetch to restore original state
 			// Optionally show error toast
 			console.error("Bulk update failed", e);
 			showToast("Bulk update failed", e.message, 3000, "fail");
