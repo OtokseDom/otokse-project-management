@@ -9,6 +9,7 @@ export const useTasksStore = () => {
 		setTasks: useAppStore((state) => state.setTasks),
 		addTask: useAppStore((state) => state.addTask),
 		updateTask: useAppStore((state) => state.updateTask),
+		updateMultipleTasks: useAppStore((state) => state.updateMultipleTasks),
 		removeTask: useAppStore((state) => state.removeTask),
 		// Task History
 		taskHistory: useAppStore((state) => state.taskHistory),

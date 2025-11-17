@@ -24,6 +24,13 @@ export const createTasksSlice = (set) => ({
 			tasks: state.tasks.map((t) => (t.id === id ? { ...t, ...updates } : t)),
 		})),
 
+	updateMultipleTasks: (updates) =>
+		set((state) => ({
+			tasks: state.tasks.map((t) => {
+				const update = updates.find((u) => u.id === t.id);
+				return update ? { ...t, ...update.data } : t;
+			}),
+		})),
 	removeTask: (id) =>
 		set((state) => ({
 			tasks: state.tasks.filter((t) => t.id !== id),
