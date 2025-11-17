@@ -10,8 +10,10 @@ import { useLoadContext } from "@/contexts/LoadContextProvider";
 import { useToast } from "@/contexts/ToastContextProvider";
 import { Button } from "@/components/ui/button";
 import UpdateDialog from "../updateDialog";
+import { useTasksStore } from "@/store/tasks/tasksStore";
 
 export default function TaskGridItem({ task, setIsOpen = () => {}, setUpdateData = () => {}, setParentId = () => {}, setProjectId = () => {} }) {
+	const { tasks, taskHistory, setSelectedTaskHistory, setRelations } = useTasksStore();
 	const [open, setOpen] = useState(false);
 	const { fetchTasks, fetchReports } = useTaskHelpers();
 	const { loading, setLoading } = useLoadContext();
@@ -45,10 +47,18 @@ export default function TaskGridItem({ task, setIsOpen = () => {}, setUpdateData
 	const statusClass = statusColors?.[statusKey] ?? "bg-muted/20 text-muted-foreground";
 	const priorityClass = priorityColors?.[priority] ?? "bg-muted/20 text-muted-foreground";
 
-	const openEdit = (t) => {
+	const openEdit = (task) => {
 		// reuse datatable form/dialog
-		setUpdateData(t);
+		setUpdateData(task);
 		setIsOpen(true);
+		const filteredHistory = taskHistory.filter((th) => th.task_id === task.id);
+		setSelectedTaskHistory(filteredHistory);
+		if (!task.parent_id) {
+			setRelations(task);
+		} else {
+			const parentTask = tasks.find((t) => t.id == task.parent_id);
+			setRelations(parentTask);
+		}
 	};
 
 	const handleClone = (t) => {
