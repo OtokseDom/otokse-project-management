@@ -18,7 +18,6 @@ import Relations from "@/components/task/Relations";
 import Tabs from "@/components/task/Tabs";
 import { TaskDiscussions } from "@/components/task/Discussion";
 import { useLoadContext } from "@/contexts/LoadContextProvider";
-import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Tasks() {
 	const { loading, setLoading } = useLoadContext();
@@ -180,14 +179,7 @@ export default function Tasks() {
 
 				return (
 					<>
-						{loading ? (
-							// <div className="flex flex-row space-x-3 w-max h-full">
-							<div className="flex flex-col space-y-2 w-full h-[calc(100vh-11rem)]">
-								{Array.from({ length: 4 }).map((_, i) => (
-									<Skeleton key={i} index={i * 0.9} className="h-full w-full mt-2" />
-								))}
-							</div>
-						) : view === "list" ? (
+						{view === "list" ? (
 							<>
 								<DataTableTasks columns={taskColumns} data={tableData} />
 								{dialog}
