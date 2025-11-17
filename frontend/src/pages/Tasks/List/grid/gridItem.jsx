@@ -126,16 +126,23 @@ export default function TaskGridItem({ task, setIsOpen = () => {}, setUpdateData
 						</span>
 					)}
 					{category && (
-						<span className="flex justify-center items-center px-2 py-1 rounded-md bg-background/50 border-2 border-foreground/50 text-foreground text-xs gap-2">
+						<span
+							onClick={() => {
+								setBulkAction("category");
+								setSelectedTasks([task]);
+							}}
+							className="flex justify-center items-center px-2 py-1 rounded-md bg-background/50 border-2 border-foreground/50 text-foreground text-xs gap-2 cursor-pointer"
+						>
 							{category}
 						</span>
 					)}
 				</div>
 				<div className="min-w-0 flex flex-col gap-2">
-					<h3 className="text-lg font-bold">{task.title || "Untitled task"}</h3>
-
-					{/* project */}
-					{projectName && <span className="font-bold text-muted-foreground text-sm">{projectName}</span>}
+					<div className="flex flex-col gap-0">
+						<h3 className="text-lg font-bold">{task.title || "Untitled task"}</h3>
+						{/* project */}
+						{projectName && <span className="font-bold text-muted-foreground text-sm">{projectName}</span>}
+					</div>
 
 					<div
 						className="text-xs text-muted-foreground prose prose-sm max-w-none
