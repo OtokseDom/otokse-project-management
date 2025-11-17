@@ -34,7 +34,7 @@ const formSchema = z.object({
 export default function UpdateDialog({ open, onClose, action, selectedTasks = [] }) {
 	const { loading, setLoading } = useLoadContext();
 	const showToast = useToast();
-	const { options, updateTask } = useTasksStore();
+	const { options, updateTask, updateMultipleTasks } = useTasksStore();
 	const { taskStatuses } = useTaskStatusesStore();
 	const { projects } = useProjectsStore();
 	const { categories } = useCategoriesStore();
@@ -56,17 +56,14 @@ export default function UpdateDialog({ open, onClose, action, selectedTasks = []
 		const ids = tasks.map((t) => t.id);
 		let value;
 		let updateField;
-		let updateStatusData;
+		let additionalUpdates = {};
 
 		switch (action) {
 			case "status":
 				value = data.status_id;
-				updateStatusData = taskStatuses.find((s) => s.id === data.status_id);
 				// Optimistic update - pass the entire updated task
-				tasks.forEach((task) => {
-					const updatedTask = { ...task, status_id: data.status_id, status: updateStatusData };
-					updateTask(task.id, updatedTask);
-				});
+				const updateStatusData = taskStatuses.find((s) => s.id === data.status_id);
+				additionalUpdates = { status: updateStatusData };
 				break;
 			case "assignees":
 				value = data.assignees;
@@ -99,6 +96,16 @@ export default function UpdateDialog({ open, onClose, action, selectedTasks = []
 			default:
 				return;
 		}
+		// Batch optimistic update - single store update for all tasks
+		const updates = tasks.map((task) => ({
+			id: task.id,
+			data: {
+				[updateField]: value,
+				...additionalUpdates,
+			},
+		}));
+
+		updateMultipleTasks(updates);
 
 		try {
 			setLoading(true);
