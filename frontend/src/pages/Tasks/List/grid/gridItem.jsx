@@ -184,17 +184,35 @@ export default function TaskGridItem({ task, setIsOpen = () => {}, setUpdateData
 					{/* dates */}
 					<div className="flex flex-wrap text-xs text-muted-foreground gap-4">
 						{startString && (
-							<div className="flex gap-1">
+							<div
+								onClick={() => {
+									setBulkAction("start_date");
+									setSelectedTasks([task]);
+								}}
+								className="flex gap-1 hover:cursor-pointer"
+							>
 								<CalendarDaysIcon size={16} /> Start: <span className="text-card-foreground">{startString}</span>
 							</div>
 						)}
 						{endString && (
-							<div className="flex gap-1">
+							<div
+								onClick={() => {
+									setBulkAction("end_date");
+									setSelectedTasks([task]);
+								}}
+								className="flex gap-1 hover:cursor-pointer"
+							>
 								<CalendarDaysIcon size={16} /> End: <span className="text-card-foreground">{endString}</span>
 							</div>
 						)}
 						{actualString && (
-							<div className="flex gap-1">
+							<div
+								onClick={() => {
+									setBulkAction("actual_date");
+									setSelectedTasks([task]);
+								}}
+								className="flex gap-1 hover:cursor-pointer"
+							>
 								<Target size={16} /> Actual: <span className="text-card-foreground">{actualString}</span>
 							</div>
 						)}
