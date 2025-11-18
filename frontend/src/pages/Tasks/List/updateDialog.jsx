@@ -38,6 +38,7 @@ export default function UpdateDialog({ open, onClose, action, selectedTasks = []
 	const { taskStatuses } = useTaskStatusesStore();
 	const { projects } = useProjectsStore();
 	const { categories } = useCategoriesStore();
+	const { users } = useUsersStore();
 	const [selectedAssignees, setSelectedAssignees] = useState(Array.from(new Set(selectedTasks?.flatMap((t) => t.assignees?.map((a) => a.id)) || [])));
 	const { fetchTasks, fetchReports } = useTaskHelpers();
 	const form = useForm({
@@ -61,6 +62,7 @@ export default function UpdateDialog({ open, onClose, action, selectedTasks = []
 		switch (action) {
 			case "status":
 				value = data.status_id;
+				updateField = "status_id";
 				// Optimistic update - pass the entire updated task
 				const updateStatusData = taskStatuses.find((s) => s.id === data.status_id);
 				additionalUpdates = { status: updateStatusData };
@@ -68,6 +70,12 @@ export default function UpdateDialog({ open, onClose, action, selectedTasks = []
 			case "assignees":
 				value = data.assignees;
 				updateField = "assignees";
+				// Optimistic update - pass the entire updated task
+				let updateAssigneesData = [];
+				value?.map((assigneeId) => {
+					updateAssigneesData.push(users.find((s) => s.id === assigneeId));
+				});
+				additionalUpdates = { assignees: updateAssigneesData };
 				break;
 			case "project":
 				value = data.project_id;
