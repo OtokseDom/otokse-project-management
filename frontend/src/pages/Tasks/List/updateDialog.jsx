@@ -64,7 +64,7 @@ export default function UpdateDialog({ open, onClose, action, selectedTasks = []
 				value = data.status_id;
 				updateField = "status_id";
 				// Optimistic update - pass the entire updated task
-				const updateStatusData = taskStatuses.find((s) => s.id === data.status_id);
+				const updateStatusData = taskStatuses.find((s) => s.id === value);
 				additionalUpdates = { status: updateStatusData };
 				break;
 			case "assignees":
@@ -84,6 +84,9 @@ export default function UpdateDialog({ open, onClose, action, selectedTasks = []
 			case "category":
 				value = data.category_id;
 				updateField = "category_id";
+				// Optimistic update - pass the entire updated task
+				const updateCategoryData = categories.find((c) => c.id === value);
+				additionalUpdates = { category: updateCategoryData };
 				break;
 			case "priority":
 				value = data.priority;
