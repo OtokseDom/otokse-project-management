@@ -165,7 +165,11 @@ export default function TaskGridItem({ task, setIsOpen = () => {}, setUpdateData
 								{assigneeNames.slice(0, 3).map((n, i) => (
 									<span
 										key={i}
-										className="flex justify-center items-center px-2 py-1 rounded-full bg-background/50 border-2 border-foreground/50 text-foreground text-xs gap-2"
+										onClick={() => {
+											setBulkAction("assignees");
+											setSelectedTasks([task]);
+										}}
+										className="flex justify-center items-center px-2 py-1 rounded-full bg-background/50 border-2 border-foreground/50 text-foreground text-xs gap-2 hover:cursor-pointer"
 									>
 										<User size={16} /> {n}
 									</span>
