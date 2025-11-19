@@ -119,12 +119,12 @@ class ReportService
                     $subQuery->whereNull('parent_id')->whereDoesntHave('children');
                 });
             });
+        // Apply common filters to base query
+        $baseQuery = $this->applyFilters($baseQuery, $id, $filter);
+
         // Base query builder with common filters (exclude subtasks)
         $baseQueryXSubtasks = $this->task->where('organization_id', $this->organization_id)
             ->whereNull('parent_id');
-
-        // Apply common filters to base query
-        $baseQuery = $this->applyFilters($baseQuery, $id, $filter);
         // Apply common filters to base query (exclude subtasks)
         $baseQueryXSubtasks = $this->applyFilters($baseQueryXSubtasks, $id, $filter);
 
@@ -164,9 +164,9 @@ class ReportService
             ),
             'time_efficiency' => round((clone $baseQuery)->where('status_id', $completed)->avg(DB::raw('time_estimate / time_taken * 100')), 2),
             'completion_rate' => $taskCompletionQuery,
-            'average_delay_days' => round((clone $baseQuery)->where('status_id', $completed)->avg('delay_days'), 0),
+            'average_delay_days' => round((clone $baseQueryXSubtasks)->where('status_id', $completed)->avg('delay_days'), 0),
             'total_delay_days' => round((clone $baseQueryXSubtasks)->where('status_id', $completed)->sum('delay_days'), 2),
-            'average_days_per_task' => round((clone $baseQuery)->where('status_id', $completed)->avg('days_taken'), 2),
+            'average_days_per_task' => round((clone $baseQueryXSubtasks)->where('status_id', $completed)->avg('days_taken'), 2),
             'tasks_ahead_of_schedule' => $taskAheadOfScheduleQuery->count(),
             'average_tasks_completed_per_day' => round((clone $baseQuery)->where('status_id', $completed)->selectRaw('COUNT(*) / NULLIF(COUNT(DISTINCT DATE(actual_date)), 0) as avg_per_day')->value('avg_per_day'), 2),
             'average_estimated_days' => round((clone $baseQuery)->where('status_id', $completed)->avg('days_estimate'), 2),
