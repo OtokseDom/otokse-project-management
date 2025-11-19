@@ -161,7 +161,7 @@ export default function UserProfile() {
 					variant="dashboard"
 				/>
 				<SectionCard
-					description="Total Delayed Days"
+					description="Total Project Delayed Days"
 					showBadge={false}
 					value={`${reports?.section_cards?.total_delay_days} days`}
 					variant="dashboard"
