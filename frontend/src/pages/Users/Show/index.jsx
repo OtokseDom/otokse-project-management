@@ -244,7 +244,7 @@ export default function UserProfile() {
 				<div className="flex flex-col md:flex-row gap-4 md:col-span-12 overflow-auto">
 					<SectionCard variant="" description="Completion Rate" showBadge={false} value={`${userReports?.section_cards?.completion_rate}%`} />
 					<SectionCard variant="" description="Avg Delayed Days" showBadge={false} value={userReports?.section_cards?.average_delay_days} />
-					<SectionCard variant="" description="Total Delayed Days" showBadge={false} value={userReports?.section_cards?.total_delay_days} />
+					<SectionCard variant="" description="Total Project Delayed Days" showBadge={false} value={userReports?.section_cards?.total_delay_days} />
 					<SectionCard variant="" description="Tasks Due Soon" showBadge={false} value={userReports?.section_cards?.task_at_risk} />
 					<SectionCard description="📊 Tasks Before Deadline %" showBadge={false} value="Coming Soon" variant="" />
 				</div>
