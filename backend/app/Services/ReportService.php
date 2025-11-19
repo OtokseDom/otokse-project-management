@@ -720,13 +720,7 @@ class ReportService
                     ->where('tasks.organization_id', $this->organization_id);
             })
             ->where('users.organization_id', $this->organization_id)
-            ->where(function ($query) {
-                $query->whereNotNull('tasks.parent_id') // include only subtasks
-                    ->orWhere(function ($subQuery) {
-                        $subQuery->whereNull('tasks.parent_id')
-                            ->whereRaw('NOT EXISTS (SELECT 1 FROM tasks t WHERE t.parent_id = tasks.id)');
-                    });
-            })
+            ->whereNull('tasks.parent_id')
             ->select(
                 'users.name as assignee',
                 DB::raw('SUM(CASE WHEN delay_days > 0 THEN delay_days ELSE 0 END) as delay'),
