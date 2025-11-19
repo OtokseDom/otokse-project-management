@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { ChevronDown, ChevronUp, Edit, Plus, MoreHorizontal, Copy, Trash2, User, CalendarDaysIcon, Target, CircleDot, Circle } from "lucide-react";
+import { ChevronDown, ChevronUp, Edit, Plus, MoreHorizontal, Copy, Trash2, User, CalendarDaysIcon, Target, CircleDot, Circle, GoalIcon } from "lucide-react";
 import { format } from "date-fns";
 import axiosClient from "@/axios.client";
 import { API } from "@/constants/api";
@@ -138,10 +138,13 @@ export default function TaskGridItem({ task, setIsOpen = () => {}, setUpdateData
 					)}
 				</div>
 				<div className="min-w-0 flex flex-col gap-2">
-					<div className="flex flex-col gap-0">
-						<h3 className="text-lg font-bold">{task.title || "Untitled task"}</h3>
-						{/* project */}
-						{projectName && <span className="font-bold text-muted-foreground text-sm">{projectName}</span>}
+					<div className="flex gap-2">
+						<GoalIcon size={32} className="inline-block mt-2 text-primary/50" />
+						<div className="flex flex-col gap-0">
+							<h3 className="text-lg font-bold">{task.title || "Untitled task"}</h3>
+							{/* project */}
+							{projectName && <span className="font-bold text-muted-foreground text-sm">{projectName}</span>}
+						</div>
 					</div>
 
 					<div
