@@ -278,13 +278,55 @@ export default function TaskGridItem({ task, setIsOpen = () => {}, setUpdateData
 									></span>
 									{sub.title}
 								</div>
-								<div className="text-xs text-muted-foreground">
-									{sub.assignees &&
-										Array.isArray(sub.assignees) &&
-										sub.assignees
-											.map((a) => a.name)
-											.slice(0, 3)
-											.join(", ")}
+								<div className="flex flex-wrap text-xs text-muted-foreground gap-4">
+									<div
+										onClick={() => {
+											setBulkAction("assignees");
+											setSelectedTasks([sub]);
+										}}
+										className="flex gap-2 text-xs text-muted-foreground hover:cursor-pointer font-bold"
+									>
+										<User size={16} />
+										{sub.assignees &&
+											Array.isArray(sub.assignees) &&
+											sub.assignees
+												.map((a) => a.name)
+												.slice(0, 3)
+												.join(", ")}
+									</div>
+									{formatDateSafe(sub.start_date) && (
+										<div
+											onClick={() => {
+												setBulkAction("start_date");
+												setSelectedTasks([sub]);
+											}}
+											className="hidden md:flex gap-1 hover:cursor-pointer"
+										>
+											<CalendarDaysIcon size={16} /> Start: <span className="font-bold">{formatDateSafe(sub.start_date)}</span>
+										</div>
+									)}
+									{formatDateSafe(sub.end_date) && (
+										<div
+											onClick={() => {
+												setBulkAction("end_date");
+												setSelectedTasks([sub]);
+											}}
+											className="hidden md:flex gap-1 hover:cursor-pointer"
+										>
+											<CalendarDaysIcon size={16} /> End: <span className="font-bold">{formatDateSafe(sub.end_date)}</span>
+										</div>
+									)}
+									{formatDateSafe(sub.actual_date) && (
+										<div
+											onClick={() => {
+												setBulkAction("actual_date");
+												setSelectedTasks([sub]);
+											}}
+											className="hidden md:flex gap-1 hover:cursor-pointer"
+										>
+											<Target size={16} /> Actual: <span className="font-bold">{formatDateSafe(sub.actual_date)}</span>
+										</div>
+									)}
 								</div>
 							</div>
 							<div className="flex flex-col md:flex-row items-center gap-2">
