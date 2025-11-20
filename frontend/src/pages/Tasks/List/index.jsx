@@ -31,6 +31,7 @@ export default function Tasks() {
 	const { fetchTasks, fetchProjects, fetchUsers, fetchCategories, fetchTaskStatuses } = useTaskHelpers();
 	const [isOpen, setIsOpen] = useState(false);
 	const [dialogOpen, setDialogOpen] = useState(false);
+	const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
 	const [updateData, setUpdateData] = useState({});
 	const [parentId, setParentId] = useState(null); //for adding subtasks from relations tab
@@ -75,7 +76,7 @@ export default function Tasks() {
 		<div className="w-screen md:w-full bg-card text-card-foreground border border-border rounded-2xl container p-4 md:p-10 shadow-md">
 			<div
 				className={`fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm z-40 transition-opacity duration-300 pointer-events-none ${
-					isOpen || dialogOpen
+					isOpen || dialogOpen || deleteDialogOpen
 						? // || deleteDialogOpen
 						  "opacity-100"
 						: "opacity-0"
@@ -193,6 +194,8 @@ export default function Tasks() {
 									setUpdateData={setUpdateData}
 									setParentId={setParentId}
 									setProjectId={setProjectId}
+									deleteDialogOpen={deleteDialogOpen}
+									setDeleteDialogOpen={setDeleteDialogOpen}
 								/>
 								{dialog}
 								{bulkDialog}
