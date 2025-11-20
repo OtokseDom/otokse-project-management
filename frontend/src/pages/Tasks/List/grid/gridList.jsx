@@ -2,7 +2,7 @@ import React from "react";
 import { useTasksStore } from "@/store/tasks/tasksStore";
 import TaskGridItem from "./gridItem";
 
-export default function GridList({ tasks, setIsOpen, setUpdateData, setParentId, setProjectId }) {
+export default function GridList({ tasks, setIsOpen, setUpdateData, setParentId, setProjectId, deleteDialogOpen, setDeleteDialogOpen }) {
 	// tasks are expected to include parent_id (null for parents) and children array for subtasks
 	// const { tasks } = useTasksStore();
 
@@ -25,6 +25,8 @@ export default function GridList({ tasks, setIsOpen, setUpdateData, setParentId,
 						setUpdateData={setUpdateData}
 						setParentId={setParentId}
 						setProjectId={setProjectId}
+						deleteDialogOpen={deleteDialogOpen}
+						setDeleteDialogOpen={setDeleteDialogOpen}
 					/>
 				))}
 			</div>
