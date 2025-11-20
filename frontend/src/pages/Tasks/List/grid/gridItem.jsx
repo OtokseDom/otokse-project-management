@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ChevronDown, ChevronUp, Edit, Plus, MoreHorizontal, Copy, Trash2, User, CalendarDaysIcon, Target, CircleDot, Circle, GoalIcon } from "lucide-react";
 import { format } from "date-fns";
 import axiosClient from "@/axios.client";
@@ -11,8 +11,17 @@ import { useToast } from "@/contexts/ToastContextProvider";
 import { Button } from "@/components/ui/button";
 import UpdateDialog from "../updateDialog";
 import { useTasksStore } from "@/store/tasks/tasksStore";
+import DeleteDialog from "../deleteDialog";
 
-export default function TaskGridItem({ task, setIsOpen = () => {}, setUpdateData = () => {}, setParentId = () => {}, setProjectId = () => {} }) {
+export default function TaskGridItem({
+	task,
+	setIsOpen = () => {},
+	setUpdateData = () => {},
+	setParentId = () => {},
+	setProjectId = () => {},
+	deleteDialogOpen = false,
+	setDeleteDialogOpen,
+}) {
 	const { tasks, taskHistory, setSelectedTaskHistory, setRelations } = useTasksStore();
 	const [open, setOpen] = useState(false);
 	const { fetchTasks, fetchReports } = useTaskHelpers();
@@ -20,6 +29,7 @@ export default function TaskGridItem({ task, setIsOpen = () => {}, setUpdateData
 	const showToast = useToast();
 	const [bulkAction, setBulkAction] = useState(null);
 	const [selectedTasks, setSelectedTasks] = useState(null);
+	// const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
 	const hasChildren = Array.isArray(task.children) && task.children.length > 0;
 
@@ -79,20 +89,37 @@ export default function TaskGridItem({ task, setIsOpen = () => {}, setUpdateData
 		setIsOpen(true);
 	};
 
-	const handleDelete = async (t) => {
-		if (!confirm("Delete task? This cannot be undone.")) return;
-		setLoading(true);
-		try {
-			await axiosClient.delete(API().task(t.id));
-			await fetchTasks();
-			await fetchReports();
-			showToast("Success!", "Task deleted.", 3000);
-		} catch (e) {
-			showToast("Failed!", e.response?.data?.message || e.message, 3000, "fail");
-			console.error(e);
-		} finally {
-			setLoading(false);
+	// const handleDelete = async (t) => {
+	// 	if (!confirm("Delete task? This cannot be undone.")) return;
+	// 	setLoading(true);
+	// 	try {
+	// 		await axiosClient.delete(API().task(t.id));
+	// 		await fetchTasks();
+	// 		await fetchReports();
+	// 		showToast("Success!", "Task deleted.", 3000);
+	// 	} catch (e) {
+	// 		showToast("Failed!", e.response?.data?.message || e.message, 3000, "fail");
+	// 		console.error(e);
+	// 	} finally {
+	// 		setLoading(false);
+	// 	}
+	// };
+	// When bulkAction is "delete", just open the dialog
+	useEffect(() => {
+		if (bulkAction === "delete") {
+			setDeleteDialogOpen(true);
 		}
+	}, [bulkAction]);
+
+	const handleDeleteDialogClose = (open) => {
+		setDeleteDialogOpen(open);
+		if (!open) setBulkAction(null);
+	};
+	// Helper to clear selection and reset dialogs
+	const clearSelection = () => {
+		setSelectedTasks(null);
+		setBulkAction(null);
+		setDeleteDialogOpen(false);
 	};
 
 	return (
@@ -255,7 +282,15 @@ export default function TaskGridItem({ task, setIsOpen = () => {}, setUpdateData
 							<span className="hidden sm:inline text-xs">Subtask</span>
 						</Button>
 
-						<Button variant="ghost" size="sm" onClick={() => handleDelete(task)} title="Delete">
+						<Button
+							variant="ghost"
+							size="sm"
+							onClick={() => {
+								setBulkAction("delete");
+								setSelectedTasks([task]);
+							}}
+							title="Delete"
+						>
 							<Trash2 size={12} className="text-destructive" />
 							<span className="hidden sm:inline text-xs">Delete</span>
 						</Button>
@@ -348,7 +383,10 @@ export default function TaskGridItem({ task, setIsOpen = () => {}, setUpdateData
 									<span className="hidden sm:inline">Clone</span>
 								</button>
 								<button
-									onClick={() => handleDelete(sub)}
+									onClick={() => {
+										setBulkAction("delete");
+										setSelectedTasks([sub]);
+									}}
 									className="flex gap-2 items-center px-2 py-1 text-xs rounded bg-destructive/10 hover:bg-destructive/20"
 								>
 									<Trash2 size={12} className="text-destructive" />
@@ -359,7 +397,16 @@ export default function TaskGridItem({ task, setIsOpen = () => {}, setUpdateData
 					))}
 				</div>
 			)}
-			<UpdateDialog open={!!bulkAction} onClose={() => setBulkAction(null)} action={bulkAction} selectedTasks={selectedTasks} />
+			{bulkAction === "delete" && deleteDialogOpen ? (
+				<DeleteDialog
+					dialogOpen={deleteDialogOpen}
+					setDialogOpen={handleDeleteDialogClose}
+					selectedTasks={selectedTasks}
+					clearSelection={clearSelection} // Pass the callback
+				/>
+			) : (
+				<UpdateDialog open={!!bulkAction} onClose={() => setBulkAction(null)} action={bulkAction} selectedTasks={selectedTasks} />
+			)}
 		</div>
 	);
 }
