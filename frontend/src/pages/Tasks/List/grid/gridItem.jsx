@@ -5,13 +5,15 @@ import { ChevronDown, ChevronUp, Edit, Plus, MoreHorizontal, Copy, Trash2, User,
 import { format } from "date-fns";
 import axiosClient from "@/axios.client";
 import { API } from "@/constants/api";
-import { useTaskHelpers, statusColors, priorityColors } from "@/utils/taskHelpers";
+import { useTaskHelpers, statusColors, priorityColors, getSubtaskProgress } from "@/utils/taskHelpers";
 import { useLoadContext } from "@/contexts/LoadContextProvider";
 import { useToast } from "@/contexts/ToastContextProvider";
 import { Button } from "@/components/ui/button";
 import UpdateDialog from "../updateDialog";
 import { useTasksStore } from "@/store/tasks/tasksStore";
 import DeleteDialog from "../deleteDialog";
+import { useTaskStatusesStore } from "@/store/taskStatuses/taskStatusesStore";
+import { Progress } from "@/components/ui/progress";
 
 export default function TaskGridItem({
 	task,
@@ -23,6 +25,7 @@ export default function TaskGridItem({
 	setDeleteDialogOpen,
 }) {
 	const { tasks, taskHistory, setSelectedTaskHistory, setRelations } = useTasksStore();
+	const { taskStatuses } = useTaskStatusesStore();
 	const [open, setOpen] = useState(false);
 	const { fetchTasks, fetchReports } = useTaskHelpers();
 	const { loading, setLoading } = useLoadContext();
@@ -121,6 +124,9 @@ export default function TaskGridItem({
 		setBulkAction(null);
 		setDeleteDialogOpen(false);
 	};
+
+	// compute subtask progress for this task
+	const { text: subtaskProgressText, value: subtaskProgressValue, subTasksCount } = getSubtaskProgress(task, taskStatuses);
 
 	return (
 		<div className="bg-sidebar text-card-foreground border border-border rounded-lg p-4 flex flex-col shadow-sm w-full">
@@ -253,15 +259,17 @@ export default function TaskGridItem({
 				<div className="flex flex-row justify-between items-center w-full">
 					{/* subtasks toggle */}
 					{hasChildren ? (
-						<Button
-							variant="outline"
-							onClick={() => setOpen((s) => !s)}
-							className="inline-flex items-center gap-2 text-sm mt-2"
-							aria-expanded={open}
-						>
-							{open ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-							<span className="text-xs">{task.children.length} subtasks</span>
-						</Button>
+						<div className="flex flex-col items-end gap-2">
+							<Button
+								variant="outline"
+								onClick={() => setOpen((s) => !s)}
+								className="inline-flex items-center gap-2 text-sm mt-2"
+								aria-expanded={open}
+							>
+								{open ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+								<span className="text-xs">{task.children.length} subtasks</span>
+							</Button>
+						</div>
 					) : (
 						<span className="text-xs text-muted-foreground mt-2">No subtasks</span>
 					)}
@@ -296,6 +304,14 @@ export default function TaskGridItem({
 						</Button>
 					</div>
 				</div>
+
+				{/* show same progress as Relations */}
+				{hasChildren && (
+					<div className="w-full text-xs text-muted-foreground flex flex-col items-end">
+						<span>{subtaskProgressText}</span>
+						<Progress value={subtaskProgressValue} className="h-2 w-full mt-1" />
+					</div>
+				)}
 			</div>
 
 			{/* subtasks list */}
