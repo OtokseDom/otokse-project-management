@@ -197,3 +197,18 @@ export const priorityColors = {
 	Urgent: "bg-orange-100 border border-orange-800 border-2 text-foreground bg-opacity-20",
 	Critical: "bg-red-100 border border-red-800 border-2 text-foreground bg-opacity-20",
 };
+
+// New helper: compute subtask progress for a given task and taskStatuses array
+export function getSubtaskProgress(task = {}, taskStatuses = []) {
+	const children = Array.isArray(task?.children) ? task.children : [];
+	const subTasksCount = children.length;
+	const completedCount = children.filter((child) => {
+		const status = taskStatuses.find((s) => s.id === child.status_id);
+		const name = status?.name ?? "Unknown";
+		return name === "Completed";
+	}).length;
+	const percentage = subTasksCount > 0 ? (completedCount / subTasksCount) * 100 : 0;
+	const text = `${completedCount}/${subTasksCount} subtasks completed (${percentage.toFixed(2)}%)`;
+	const value = Math.round(percentage);
+	return { completedCount, subTasksCount, percentage, text, value };
+}
