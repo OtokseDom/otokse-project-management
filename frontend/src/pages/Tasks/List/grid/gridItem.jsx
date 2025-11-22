@@ -131,8 +131,26 @@ export default function TaskGridItem({
 	return (
 		<div className="bg-sidebar text-card-foreground border border-border rounded-lg p-4 flex flex-col shadow-sm w-full">
 			{/* Header */}
-			<div className="flex flex-col items-start justify-between gap-2">
-				<div className="flex flex-row items-end gap-2">
+			<div className="flex flex-col md:flex-row items-start justify-between gap-2">
+				<div className="min-w-0 flex flex-col order-2 md:order-1 gap-2">
+					<div className="flex gap-2">
+						<GoalIcon size={32} className="inline-block mt-2 text-primary/50" />
+						<div className="flex flex-col gap-0">
+							<h3 className="text-lg font-bold">{task.title || "Untitled task"}</h3>
+							{/* project */}
+							{projectName && <span className="font-bold text-muted-foreground text-sm">{projectName}</span>}
+						</div>
+					</div>
+
+					<div
+						className="text-xs text-muted-foreground prose prose-sm max-w-none
+												 			[&_ul]:list-disc [&_ul]:pl-6
+															[&_ol]:list-decimal [&_ol]:pl-6
+															[&_li]:my-1"
+						dangerouslySetInnerHTML={{ __html: task.description }}
+					/>
+				</div>
+				<div className="flex flex-row order-1 md:order-2 justify-end gap-2">
 					{/* status pill uses statusColors mapping */}
 					{task.status?.name ? (
 						<span
@@ -140,7 +158,7 @@ export default function TaskGridItem({
 								setBulkAction("status");
 								setSelectedTasks([task]);
 							}}
-							className={`text-xs px-2 py-1 rounded-md font-medium hover:cursor-pointer ${statusClass}`}
+							className={`text-xs min-w-fit px-2 py-1 rounded-md font-medium hover:cursor-pointer ${statusClass}`}
 						>
 							{task.status.name}
 						</span>
@@ -164,29 +182,11 @@ export default function TaskGridItem({
 								setBulkAction("category");
 								setSelectedTasks([task]);
 							}}
-							className="flex justify-center items-center px-2 py-1 rounded-md bg-background/50 border-2 border-foreground/50 text-foreground text-xs gap-2 cursor-pointer"
+							className="px-2 py-1 rounded-md bg-background/50 border-2 border-foreground/50 text-foreground text-xs gap-2 cursor-pointer"
 						>
 							{category}
 						</span>
 					)}
-				</div>
-				<div className="min-w-0 flex flex-col gap-2">
-					<div className="flex gap-2">
-						<GoalIcon size={32} className="inline-block mt-2 text-primary/50" />
-						<div className="flex flex-col gap-0">
-							<h3 className="text-lg font-bold">{task.title || "Untitled task"}</h3>
-							{/* project */}
-							{projectName && <span className="font-bold text-muted-foreground text-sm">{projectName}</span>}
-						</div>
-					</div>
-
-					<div
-						className="text-xs text-muted-foreground prose prose-sm max-w-none
-												 			[&_ul]:list-disc [&_ul]:pl-6
-															[&_ol]:list-decimal [&_ol]:pl-6
-															[&_li]:my-1"
-						dangerouslySetInnerHTML={{ __html: task.description }}
-					/>
 				</div>
 			</div>
 			<hr className="mt-2" />
