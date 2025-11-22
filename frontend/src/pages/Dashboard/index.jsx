@@ -153,22 +153,31 @@ export default function UserProfile() {
 			<SectionTitle icon="⌛">Timeliness & Delay Metrics</SectionTitle>
 
 			<div className="flex flex-col md:flex-row gap-4 md:col-span-12 overflow-auto">
-				<SectionCard description="Avg Completion Rate" showBadge={false} value={`${reports?.section_cards?.completion_rate}%`} variant="dashboard" />
+				<SectionCard
+					description="Avg Completion Rate"
+					showBadge={false}
+					tooltip={`% of tasks with status = "Completed"`}
+					value={`${reports?.section_cards?.completion_rate}%`}
+					variant="dashboard"
+				/>
 				<SectionCard
 					description="Avg Delayed Days"
 					showBadge={false}
+					tooltip={`Avg number of "Days Delayed" for tasks with status != "Cancelled"`}
 					value={`${reports?.section_cards?.average_delay_days} days`}
 					variant="dashboard"
 				/>
 				<SectionCard
-					description="Total Project Delayed Days"
+					description="Total Delayed Days"
 					showBadge={false}
+					tooltip={`Total number of "Days Delayed" for tasks with status != "Cancelled"`}
 					value={`${reports?.section_cards?.total_delay_days} days`}
 					variant="dashboard"
 				/>
 				<SectionCard
 					description="Delay Frequency %"
 					showBadge={false}
+					tooltip={`Percentage of tasks with "Days Delayed" > 0 and with status != "Cancelled"`}
 					value={`${reports?.section_cards?.delay_frequency_percentage}%`}
 					variant="dashboard"
 				/>
