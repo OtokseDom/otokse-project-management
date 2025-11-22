@@ -164,8 +164,8 @@ class ReportService
             ),
             'time_efficiency' => round((clone $baseQuery)->where('status_id', $completed)->avg(DB::raw('time_estimate / time_taken * 100')), 2),
             'completion_rate' => $taskCompletionQuery,
-            'average_delay_days' => round((clone $baseQueryXSubtasks)->where('status_id', $completed)->avg('delay_days'), 0),
-            'total_delay_days' => round((clone $baseQueryXSubtasks)->where('status_id', $completed)->sum('delay_days'), 2),
+            'average_delay_days' => round((clone $baseQueryXSubtasks)->where('status_id', '!=', $cancelled)->avg('delay_days'), 0),
+            'total_delay_days' => round((clone $baseQueryXSubtasks)->where('status_id', '!=', $cancelled)->sum('delay_days'), 2),
             'average_days_per_task' => round((clone $baseQueryXSubtasks)->where('status_id', $completed)->avg('days_taken'), 2),
             'tasks_ahead_of_schedule' => $taskAheadOfScheduleQuery->count(),
             'average_tasks_completed_per_day' => round((clone $baseQuery)->where('status_id', $completed)->selectRaw('COUNT(*) / NULLIF(COUNT(DISTINCT DATE(actual_date)), 0) as avg_per_day')->value('avg_per_day'), 2),
@@ -709,15 +709,17 @@ class ReportService
     // Delays per user - Bar chart
     public function delaysPerUser($id = null, $filter)
     {
+        $cancelled = $this->task_status->where('name', 'Cancelled')->where('organization_id', $this->organization_id)->value('id');
         $taskCount = $this->task->where('organization_id', $this->organization_id)->count();
         // Get all users, even without tasks, via task_assignees table relation, and get all their assigned tasks
         $query = $this->user
             ->leftJoin('task_assignees', function ($join) {
                 $join->on('users.id', '=', 'task_assignees.assignee_id');
             })
-            ->leftJoin('tasks', function ($join) {
+            ->leftJoin('tasks', function ($join) use ($cancelled) {
                 $join->on('tasks.id', '=', 'task_assignees.task_id')
-                    ->where('tasks.organization_id', $this->organization_id);
+                    ->where('tasks.organization_id', $this->organization_id)
+                    ->where('tasks.status_id', '!=', $cancelled);
             })
             ->where('users.organization_id', $this->organization_id)
             // ->whereNull('tasks.parent_id')
