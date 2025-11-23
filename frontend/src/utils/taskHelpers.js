@@ -20,7 +20,7 @@ export const useTaskHelpers = () => {
 	const { projects, setProjects, setSelectedProject } = useProjectsStore();
 	const { users, setUsers } = useUsersStore();
 	const { setCategories } = useCategoriesStore();
-	const { setTaskStatuses } = useTaskStatusesStore();
+	const { taskStatuses, setTaskStatuses } = useTaskStatusesStore();
 	const { profileProjectFilter, setProfileProjectFilter, setUserReports } = useUserStore();
 	const { setKanbanColumns } = useKanbanColumnsStore();
 
@@ -199,7 +199,8 @@ export const priorityColors = {
 };
 
 // New helper: compute subtask progress for a given task and taskStatuses array
-export function getSubtaskProgress(task = {}, taskStatuses = []) {
+export function getSubtaskProgress(task = {}) {
+	const { taskStatuses } = useTaskStatusesStore();
 	const children = Array.isArray(task?.children) ? task.children : [];
 	const subTasksCount = children.length;
 	const completedCount = children.filter((child) => {
@@ -207,8 +208,29 @@ export function getSubtaskProgress(task = {}, taskStatuses = []) {
 		const name = status?.name ?? "Unknown";
 		return name === "Completed";
 	}).length;
-	const percentage = subTasksCount > 0 ? (completedCount / subTasksCount) * 100 : 0;
-	const text = `${completedCount}/${subTasksCount} subtasks completed (${percentage.toFixed(2)}%)`;
-	const value = Math.round(percentage);
-	return { completedCount, subTasksCount, percentage, text, value };
+	const value = subTasksCount > 0 ? (completedCount / subTasksCount) * 100 : 0;
+	const text = `${completedCount}/${subTasksCount} subtasks completed (${value.toFixed(2)}%)`;
+	return { value, text };
+}
+
+export function getProjectProgress() {
+	const { tasks } = useTasksStore();
+	const { taskStatuses } = useTaskStatusesStore();
+	const { selectedProject } = useProjectsStore();
+	let projectTasks = [];
+	// If project tasks is empty, all projects selected
+	if (selectedProject) {
+		projectTasks = tasks.filter((task) => task.project_id === selectedProject.id);
+	} else {
+		projectTasks = tasks;
+	}
+	const tasksCount = projectTasks.length;
+	const completedCount = projectTasks.filter((task) => {
+		const status = taskStatuses.find((s) => s.id === task.status_id);
+		const name = status?.name ?? "Unknown";
+		return name === "Completed";
+	}).length;
+	const value = tasksCount > 0 ? (completedCount / tasksCount) * 100 : 0;
+	const text = `${completedCount}/${tasksCount} (${value.toFixed(2)}%) tasks completed for ${selectedProject ? "selected project" : "all projects"}`;
+	return { value, text };
 }
