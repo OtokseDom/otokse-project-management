@@ -3,17 +3,12 @@
 import React, { useEffect, useState } from "react";
 import { ChevronDown, ChevronUp, Edit, Plus, MoreHorizontal, Copy, Trash2, User, CalendarDaysIcon, Target, CircleDot, Circle, GoalIcon } from "lucide-react";
 import { format } from "date-fns";
-import axiosClient from "@/axios.client";
-import { API } from "@/constants/api";
-import { useTaskHelpers, statusColors, priorityColors, getSubtaskProgress } from "@/utils/taskHelpers";
-import { useLoadContext } from "@/contexts/LoadContextProvider";
-import { useToast } from "@/contexts/ToastContextProvider";
 import { Button } from "@/components/ui/button";
 import UpdateDialog from "../updateDialog";
 import { useTasksStore } from "@/store/tasks/tasksStore";
 import DeleteDialog from "../deleteDialog";
-import { useTaskStatusesStore } from "@/store/taskStatuses/taskStatusesStore";
 import { Progress } from "@/components/ui/progress";
+import { getSubtaskProgress, priorityColors, statusColors } from "@/utils/taskHelpers";
 
 export default function TaskGridItem({
 	task,
@@ -25,11 +20,7 @@ export default function TaskGridItem({
 	setDeleteDialogOpen,
 }) {
 	const { tasks, taskHistory, setSelectedTaskHistory, setRelations } = useTasksStore();
-	const { taskStatuses } = useTaskStatusesStore();
 	const [open, setOpen] = useState(false);
-	const { fetchTasks, fetchReports } = useTaskHelpers();
-	const { loading, setLoading } = useLoadContext();
-	const showToast = useToast();
 	const [bulkAction, setBulkAction] = useState(null);
 	const [selectedTasks, setSelectedTasks] = useState(null);
 	// const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -126,7 +117,7 @@ export default function TaskGridItem({
 	};
 
 	// compute subtask progress for this task
-	const { text: subtaskProgressText, value: subtaskProgressValue, subTasksCount } = getSubtaskProgress(task, taskStatuses);
+	const { text: subtaskProgressText, value: subtaskProgressValue } = getSubtaskProgress(task);
 
 	return (
 		<div className="bg-sidebar text-card-foreground border border-border rounded-lg p-4 flex flex-col shadow-sm w-full">
