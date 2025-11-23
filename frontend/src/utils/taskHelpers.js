@@ -220,7 +220,7 @@ export function getProjectProgress() {
 	let projectTasks = [];
 	// If project tasks is empty, all projects selected
 	if (selectedProject) {
-		projectTasks = tasks.filter((task) => task.project_id === selectedProject.id);
+		projectTasks = tasks.filter((task) => task.project_id === selectedProject.id && task.parent_id === null);
 	} else {
 		projectTasks = tasks;
 	}
