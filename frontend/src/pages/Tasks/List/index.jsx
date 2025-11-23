@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { columnsTask } from "./datatable/columns";
 import { DataTableTasks } from "./datatable/data-table";
-import { flattenTasks, useTaskHelpers } from "@/utils/taskHelpers";
+import { flattenTasks, getProjectProgress, useTaskHelpers } from "@/utils/taskHelpers";
 import { useTasksStore } from "@/store/tasks/tasksStore";
 import { useUsersStore } from "@/store/users/usersStore";
 import { useProjectsStore } from "@/store/projects/projectsStore";
@@ -18,6 +18,7 @@ import Relations from "@/components/task/Relations";
 import Tabs from "@/components/task/Tabs";
 import { TaskDiscussions } from "@/components/task/Discussion";
 import { useLoadContext } from "@/contexts/LoadContextProvider";
+import { Progress } from "@/components/ui/progress";
 
 export default function Tasks() {
 	const { loading, setLoading } = useLoadContext();
@@ -72,6 +73,8 @@ export default function Tasks() {
 		}
 	}, [tasks, selectedProject]);
 
+	const { text: taskProgressText, value: taskProgressValue } = getProjectProgress(selectedProject);
+
 	return (
 		<div className="w-screen md:w-full bg-card text-card-foreground border border-border rounded-2xl container p-4 md:p-10 shadow-md">
 			<div
@@ -104,8 +107,8 @@ export default function Tasks() {
 					</Button>
 				</div>
 			</div>
-			<div className="w-full justify-between flex items-center my-4 gap-2">
-				<div className="flex flex-row justify-between w-[350px] ml-2 md:ml-0">
+			<div className="w-full justify-between flex items-start my-4 gap-2">
+				<div className="flex flex-col gap-2 justify-between w-[350px] ml-2 md:ml-0">
 					<Select
 						onValueChange={(value) => {
 							const selected = projects.find((project) => String(project.id) === value);
@@ -130,6 +133,12 @@ export default function Tasks() {
 							)}
 						</SelectContent>
 					</Select>
+
+					{/* Project Progress Bar */}
+					<div className="w-full text-xs text-muted-foreground flex flex-col items-end">
+						<span>{taskProgressText}</span>
+						<Progress value={taskProgressValue} className="h-2 w-full mt-1" />
+					</div>
 				</div>
 				<Sheet open={isOpen} onOpenChange={setIsOpen} modal={false}>
 					<SheetTrigger asChild>
@@ -164,7 +173,6 @@ export default function Tasks() {
 					</SheetContent>
 				</Sheet>
 			</div>
-
 			{/* Updated table to fix dialog per column issue */}
 			{(() => {
 				const {
