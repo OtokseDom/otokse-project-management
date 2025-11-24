@@ -1,5 +1,5 @@
 "use client";
-import { ArrowUpDown } from "lucide-react";
+import { ArrowUpDown, Info } from "lucide-react";
 import { MoreHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -13,6 +13,7 @@ import { API } from "@/constants/api";
 import { useTaskStatusesStore } from "@/store/taskStatuses/taskStatusesStore";
 import { statusColors } from "@/utils/taskHelpers";
 import { useKanbanColumnsStore } from "@/store/kanbanColumns/kanbanColumnsStore";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 export const columnsTaskStatus = ({ setIsOpen, setUpdateData, dialogOpen, setDialogOpen }) => {
 	const { loading, setLoading } = useLoadContext();
 	const { taskStatuses, removeTaskStatus } = useTaskStatusesStore();
@@ -114,7 +115,15 @@ export const columnsTaskStatus = ({ setIsOpen, setUpdateData, dialogOpen, setDia
 									<MoreHorizontal className="h-4 w-4" />
 								</Button>
 							) : (
-								<span className="text-muted-foreground text-xs">system status</span>
+								<div className="flex gap-2 justify-start items-center text-muted-foreground text-xs">
+									<span className="min-w-fit">system status</span>
+									<Tooltip>
+										<TooltipTrigger>
+											<Info size={16} className="text-muted-foreground hover:cursor-help" />
+										</TooltipTrigger>
+										<TooltipContent>System statuses are used for reports and metrics</TooltipContent>
+									</Tooltip>
+								</div>
 							)}
 						</DropdownMenuTrigger>
 						<DropdownMenuContent align="end">
