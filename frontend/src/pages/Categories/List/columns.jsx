@@ -1,5 +1,5 @@
 "use client";
-import { ArrowUpDown } from "lucide-react";
+import { ArrowUpDown, Edit, Trash2Icon } from "lucide-react";
 import { MoreHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -90,28 +90,30 @@ export const columnsCategory = ({ setIsOpen, setUpdateData, dialogOpen, setDialo
 			cell: ({ row }) => {
 				const category = row.original;
 				return (
-					<DropdownMenu modal={false}>
-						<DropdownMenuTrigger asChild>
-							<Button variant="ghost" className="h-8 w-8 p-0" onClick={(e) => e.stopPropagation()}>
-								<span className="sr-only">Open menu</span>
-								<MoreHorizontal className="h-4 w-4" />
-							</Button>
-						</DropdownMenuTrigger>
-						<DropdownMenuContent align="end">
-							<DropdownMenuItem className="cursor-pointer" onClick={() => handleUpdateCategory(category)}>
-								Update Category
-							</DropdownMenuItem>
-							<DropdownMenuItem
-								className="cursor-pointer"
-								onClick={(e) => {
-									e.stopPropagation();
-									openDialog(category);
-								}}
-							>
-								Delete Category
-							</DropdownMenuItem>
-						</DropdownMenuContent>
-					</DropdownMenu>
+					<div className="flex justify-center items-center">
+						<Button
+							variant="ghost"
+							title="Update task"
+							className="h-8 w-8 p-0 cursor-pointer pointer-events-auto"
+							onClick={(e) => {
+								e.stopPropagation();
+								handleUpdateCategory(category);
+							}}
+						>
+							<Edit size={16} />
+						</Button>
+						<Button
+							variant="ghost"
+							title="Delete task"
+							className="h-8 w-8 p-0 cursor-pointer pointer-events-auto"
+							onClick={(e) => {
+								e.stopPropagation();
+								openDialog(category);
+							}}
+						>
+							<Trash2Icon className="text-destructive" />
+						</Button>
+					</div>
 				);
 			},
 		});
