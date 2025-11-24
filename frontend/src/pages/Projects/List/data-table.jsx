@@ -21,7 +21,11 @@ export function DataTableProjects({ columns, isOpen, setIsOpen, updateData, setU
 	const { loading, setLoading } = useLoadContext();
 	const [sorting, setSorting] = useState([]);
 	const [columnFilters, setColumnFilters] = useState([]);
-	const [columnVisibility, setColumnVisibility] = useState([]);
+	const [columnVisibility, setColumnVisibility] = useState({
+		"actual date": false,
+		"delay reason": false,
+		remarks: false,
+	});
 	const { projects: data } = useProjectsStore();
 	const table = useReactTable({
 		data: data,
