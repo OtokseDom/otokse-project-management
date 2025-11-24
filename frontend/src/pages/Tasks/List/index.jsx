@@ -9,7 +9,7 @@ import { useCategoriesStore } from "@/store/categories/categoriesStore";
 import { useTaskStatusesStore } from "@/store/taskStatuses/taskStatusesStore";
 import GridList from "./grid/gridList";
 import { Button } from "@/components/ui/button";
-import { List, Plus, Rows3 } from "lucide-react";
+import { Plus, Rows3, Table } from "lucide-react";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import TaskForm from "../form";
@@ -42,7 +42,7 @@ export default function Tasks() {
 	const [tableData, setTableData] = useState([]);
 
 	// New view state: 'list' or 'grid'
-	const [view, setView] = useState(() => "list");
+	const [view, setView] = useState(() => "grid");
 
 	useEffect(() => {
 		if (!isOpen) {
@@ -98,12 +98,12 @@ export default function Tasks() {
 					<p>View list of all tasks</p>
 				</div>
 				{/* Tabs */}
-				<div className="ml-4 inline-flex rounded-md bg-muted/5 p-1">
-					<Button variant={view === "list" ? "" : "ghost"} onClick={() => setView("list")}>
-						<List size={16} />
-					</Button>
-					<Button variant={view === "grid" ? "" : "ghost"} onClick={() => setView("grid")}>
+				<div className="gap-1 ml-4 inline-flex rounded-md bg-muted/5 p-1">
+					<Button title="Grid view" variant={view === "grid" ? "" : "ghost"} onClick={() => setView("grid")}>
 						<Rows3 size={16} />
+					</Button>
+					<Button title="Table view" variant={view === "list" ? "" : "ghost"} onClick={() => setView("list")}>
+						<Table size={16} />
 					</Button>
 				</div>
 			</div>
