@@ -137,7 +137,7 @@ export default function Tasks() {
 					{/* Project Progress Bar */}
 					<div className="w-full text-xs text-muted-foreground flex flex-col items-end">
 						<span>{taskProgressText}</span>
-						<Progress value={taskProgressValue} className="h-2 w-full mt-1" />
+						<Progress value={taskProgressValue} progressColor="bg-primary/50" className="h-2 w-full mt-1" />
 					</div>
 				</div>
 				<Sheet open={isOpen} onOpenChange={setIsOpen} modal={false}>
