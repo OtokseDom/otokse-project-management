@@ -300,7 +300,7 @@ export default function TaskGridItem({
 				{hasChildren && (
 					<div className="w-full text-xs text-muted-foreground flex flex-col items-end">
 						<span>{subtaskProgressText}</span>
-						<Progress value={subtaskProgressValue} className="h-2 w-full mt-1" />
+						<Progress value={subtaskProgressValue} progressColor="bg-primary/70" className="h-2 w-full mt-1" />
 					</div>
 				)}
 			</div>
