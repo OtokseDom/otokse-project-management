@@ -1,5 +1,5 @@
 "use client";
-import { ArrowUpDown, Edit, Trash2Icon } from "lucide-react";
+import { ArrowUpDown, Edit, ListTodo, Trash2Icon } from "lucide-react";
 import { MoreHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -13,9 +13,10 @@ import axiosClient from "@/axios.client";
 import { API } from "@/constants/api";
 import { statusColors, priorityColors } from "@/utils/taskHelpers";
 import { useProjectsStore } from "@/store/projects/projectsStore";
+import { Link } from "react-router-dom";
 export const columnsProject = ({ handleDelete, setIsOpen, setUpdateData, dialogOpen, setDialogOpen }) => {
 	const { loading, setLoading } = useLoadContext();
-	const { projects } = useProjectsStore();
+	const { setSelectedProject, projects } = useProjectsStore();
 	const showToast = useToast();
 	const { user } = useAuthContext(); // Get authenticated user details
 	const [selectedProjectId, setSelectedProjectId] = useState(null);
@@ -286,6 +287,17 @@ export const columnsProject = ({ handleDelete, setIsOpen, setUpdateData, dialogO
 							}}
 						>
 							<Edit size={16} />
+						</Button>
+						<Button variant="ghost" title="View tasks" className="h-8 w-8 p-0 cursor-pointer pointer-events-auto">
+							<Link
+								to="/tasks"
+								onClick={(e) => {
+									e.stopPropagation();
+									setSelectedProject(project);
+								}}
+							>
+								<ListTodo size={20} />
+							</Link>
 						</Button>
 						<Button
 							variant="ghost"
