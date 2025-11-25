@@ -1,6 +1,8 @@
 export const createDashboardSlice = (set) => ({
 	// STATE
 	reports: {},
+	dashboardReportsLoading: false,
+	setDashboardReportsLoading: (loading) => set({ dashboardReportsLoading: loading }),
 	selectedUsers: [],
 	selectedProjects: [],
 	filters: {
