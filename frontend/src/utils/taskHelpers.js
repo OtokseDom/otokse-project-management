@@ -15,7 +15,7 @@ import { useUsersStore } from "@/store/users/usersStore";
 export const useTaskHelpers = () => {
 	const { setLoading } = useLoadContext();
 	const { projectFilter, setProjectFilter, userFilter, setUserFilter, setReports } = useDashboardStore();
-	const { setTasks, setTaskHistory, setOptions, setSelectedUser } = useTasksStore();
+	const { setTasks, setTaskHistory, setOptions, setSelectedUser, setTasksLoading } = useTasksStore();
 	const { setTaskDiscussions } = useTaskDiscussionsStore();
 	const { projects, setProjects, setSelectedProject } = useProjectsStore();
 	const { users, setUsers } = useUsersStore();
@@ -25,7 +25,7 @@ export const useTaskHelpers = () => {
 	const { setKanbanColumns } = useKanbanColumnsStore();
 
 	const fetchTasks = async () => {
-		setLoading(true);
+		setTasksLoading(true);
 		try {
 			const res_discussion = await axiosClient.get(API().task_discussion());
 			const res = await axiosClient.get(API().task());
@@ -35,7 +35,7 @@ export const useTaskHelpers = () => {
 		} catch (e) {
 			if (e.message !== "Request aborted") console.error("Error fetching data:", e.message);
 		} finally {
-			setLoading(false);
+			setTasksLoading(false);
 		}
 	};
 
