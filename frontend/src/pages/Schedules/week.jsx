@@ -1,22 +1,19 @@
 "use client";
-import { useLoadContext } from "@/contexts/LoadContextProvider";
 import { format } from "date-fns";
-import { Loader2 } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import TaskForm from "../Tasks/form";
 import { Skeleton } from "@/components/ui/skeleton";
 import History from "@/components/task/History";
-import { flattenTasks, statusColors } from "@/utils/taskHelpers";
+import { statusColors } from "@/utils/taskHelpers";
 import Relations from "@/components/task/Relations";
 import Tabs from "@/components/task/Tabs";
 import { useTasksStore } from "@/store/tasks/tasksStore";
 import { TaskDiscussions } from "@/components/task/Discussion";
 
 export default function Week({ getWeekDays, getTimeSlots, weekstart_date: weekStartDate, isInTimeSlot }) {
-	const { tasks, taskHistory, selectedTaskHistory, setSelectedTaskHistory, setRelations, activeTab, setActiveTab, selectedUser } = useTasksStore();
-
-	const { loading, setLoading } = useLoadContext();
+	const { tasks, taskHistory, selectedTaskHistory, setSelectedTaskHistory, setRelations, activeTab, setActiveTab, selectedUser, tasksLoading } =
+		useTasksStore();
 	const weekDays = getWeekDays(weekStartDate);
 	const timeSlots = getTimeSlots();
 	const [openDialogIndex, setOpenDialogIndex] = useState(null);
@@ -101,7 +98,7 @@ export default function Week({ getWeekDays, getTimeSlots, weekstart_date: weekSt
                                                 ${index === 6 ? "border-r" : ""}
                                             `}
 											>
-												{loading ? (
+												{tasksLoading ? (
 													<div className="flex flex-col w-full">
 														<div className="flex flex-row items-center gap-2">
 															<Skeleton index={timeIndex * 0.5} className="h-3 mt-1 w-1/3 bg-sidebar-border" />
@@ -171,7 +168,13 @@ export default function Week({ getWeekDays, getTimeSlots, weekstart_date: weekSt
 							<SheetContent side="right" className="overflow-y-auto w-full sm:w-[640px]">
 								<SheetHeader>
 									<SheetTitle>
-										<Tabs loading={loading} updateData={updateData} activeTab={activeTab} setActiveTab={setActiveTab} parentId={parentId} />
+										<Tabs
+											loading={tasksLoading}
+											updateData={updateData}
+											activeTab={activeTab}
+											setActiveTab={setActiveTab}
+											parentId={parentId}
+										/>
 									</SheetTitle>
 									<SheetDescription className="sr-only">Navigate through the app using the options below.</SheetDescription>
 								</SheetHeader>
