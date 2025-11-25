@@ -1,21 +1,19 @@
 "use client";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useLoadContext } from "@/contexts/LoadContextProvider";
 import { format } from "date-fns";
 import React, { useEffect, useState } from "react";
 import TaskForm from "../Tasks/form";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { Loader2 } from "lucide-react";
 import History from "@/components/task/History";
-import { flattenTasks, statusColors } from "@/utils/taskHelpers";
+import { statusColors } from "@/utils/taskHelpers";
 import Relations from "@/components/task/Relations";
 import Tabs from "@/components/task/Tabs";
 import { useTasksStore } from "@/store/tasks/tasksStore";
 import { TaskDiscussions } from "@/components/task/Discussion";
 
 export default function Month({ days, currentMonth, getTaskForDate }) {
-	const { loading } = useLoadContext();
-	const { tasks, taskHistory, selectedTaskHistory, setSelectedTaskHistory, setRelations, activeTab, setActiveTab, selectedUser } = useTasksStore();
+	const { tasks, taskHistory, selectedTaskHistory, setSelectedTaskHistory, setRelations, activeTab, setActiveTab, selectedUser, tasksLoading } =
+		useTasksStore();
 
 	// const [tasks, setTasks] = useState(tasks);
 	const [openDialogIndex, setOpenDialogIndex] = useState(null);
@@ -75,14 +73,14 @@ export default function Month({ days, currentMonth, getTaskForDate }) {
 								<div
 									key={index}
 									className={`
-										min-h-24 p-1 border transition-colors duration-200 cursor-pointer rounded-sm
+										min-h-24 h-full p-1 border transition-colors duration-200 cursor-pointer rounded-sm
 										${isCurrentMonth ? "bg-white" : "bg-sidebar text-gray-400"} 
 										${isToday ? "bg-blue-50 border-blue-200" : "border-gray-500"}
 									`}
 								>
 									<div className="flex justify-between items-center">
 										<span className={`text-sm font-medium ${isToday ? "text-blue-600" : ""}`}>{day.getDate()}</span>
-										{loading ? (
+										{tasksLoading ? (
 											<div className="flex flex-col w-full">
 												<Skeleton index={index * 0.5} className="h-4 w-full bg-sidebar-border" />
 											</div>
@@ -92,7 +90,7 @@ export default function Month({ days, currentMonth, getTaskForDate }) {
 											)
 										)}
 									</div>
-									{loading ? (
+									{tasksLoading ? (
 										<div className="flex flex-col w-full">
 											<Skeleton index={index * 0.5} className="h-4 mt-1 w-full bg-sidebar-border" />
 											<Skeleton index={index * 0.5} className="h-4 mt-1 w-full bg-sidebar-border" />
@@ -137,7 +135,13 @@ export default function Month({ days, currentMonth, getTaskForDate }) {
 						<SheetContent side="right" className="overflow-y-auto w-full sm:w-[640px]">
 							<SheetHeader>
 								<SheetTitle>
-									<Tabs loading={loading} updateData={updateData} activeTab={activeTab} setActiveTab={setActiveTab} parentId={parentId} />
+									<Tabs
+										loading={tasksLoading}
+										updateData={updateData}
+										activeTab={activeTab}
+										setActiveTab={setActiveTab}
+										parentId={parentId}
+									/>
 								</SheetTitle>
 								<SheetDescription className="sr-only">Navigate through the app using the options below.</SheetDescription>
 							</SheetHeader>
