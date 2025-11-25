@@ -6,9 +6,12 @@ import { Bar, BarChart, CartesianGrid, XAxis } from "recharts";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { Skeleton } from "../ui/skeleton";
-import { useLoadContext } from "@/contexts/LoadContextProvider";
+import { useDashboardStore } from "@/store/dashboard/dashboardStore";
+import { useUserStore } from "@/store/user/userStore";
 
 export function ChartBarMultiple({ report, variant, type }) {
+	const { dashboardReportsLoading } = useDashboardStore();
+	const { userReportsLoading } = useUserStore();
 	var chartConfig = null;
 	if (variant == "dashboard") {
 		chartConfig = {
@@ -33,7 +36,6 @@ export function ChartBarMultiple({ report, variant, type }) {
 			},
 		};
 	}
-	const { loading } = useLoadContext();
 	return (
 		<Card className={`flex flex-col relative w-full h-full justify-between rounded-2xl`}>
 			<CardHeader className="text-center">
@@ -55,7 +57,7 @@ export function ChartBarMultiple({ report, variant, type }) {
 			</CardHeader>
 			<CardContent>
 				<ChartContainer config={chartConfig}>
-					{loading ? (
+					{dashboardReportsLoading || userReportsLoading ? (
 						<div className="flex flex-col gap-2 items-center justify-center h-full w-full p-8">
 							<Skeleton className=" w-full h-10 rounded-full" />
 							<Skeleton className=" w-full h-10 rounded-full" />
@@ -91,7 +93,7 @@ export function ChartBarMultiple({ report, variant, type }) {
 				</ChartContainer>
 			</CardContent>
 			<CardFooter className="flex-col items-start gap-2 text-sm">
-				{loading ? (
+				{dashboardReportsLoading || userReportsLoading ? (
 					<div className="flex flex-col gap-2 items-center justify-center h-full w-full">
 						<Skeleton className=" w-full h-4 rounded-full" />
 						<Skeleton className=" w-full h-4 rounded-full" />
