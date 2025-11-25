@@ -4,8 +4,9 @@ import { PolarAngleAxis, PolarGrid, Radar, RadarChart } from "recharts";
 
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { useLoadContext } from "@/contexts/LoadContextProvider";
 import { Skeleton } from "../ui/skeleton";
+import { useDashboardStore } from "@/store/dashboard/dashboardStore";
+import { useUserStore } from "@/store/user/userStore";
 
 const chartConfig = {
 	value: {
@@ -16,7 +17,8 @@ const chartConfig = {
 };
 
 export function RadarChartGridFilled({ report }) {
-	const { loading, setLoading } = useLoadContext();
+	const { dashboardReportsLoading } = useDashboardStore();
+	const { userReportsLoading } = useUserStore();
 	return (
 		<Card className="flex flex-col relative h-full rounded-2xl justify-between">
 			<CardHeader className="items-center text-center pb-4">
@@ -25,7 +27,7 @@ export function RadarChartGridFilled({ report }) {
 			</CardHeader>
 			<CardContent className="pb-0">
 				<ChartContainer config={chartConfig} className="mx-auto aspect-square max-h-[250px]">
-					{loading ? (
+					{dashboardReportsLoading || userReportsLoading ? (
 						<div className="flex items-center justify-center h-full w-full p-8">
 							<Skeleton className=" w-full h-full rounded-full" />
 						</div>
@@ -42,7 +44,7 @@ export function RadarChartGridFilled({ report }) {
 				</ChartContainer>
 			</CardContent>
 			<CardFooter className="flex-col gap-2 text-sm">
-				{loading ? (
+				{dashboardReportsLoading || userReportsLoading ? (
 					<div className="flex flex-col gap-2 items-center justify-center h-full w-full p-8">
 						<Skeleton className=" w-full h-4" />
 						<Skeleton className=" w-full h-4" />
