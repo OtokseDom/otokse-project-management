@@ -5,12 +5,14 @@ import { Label, Pie, PieChart } from "recharts";
 
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { useLoadContext } from "@/contexts/LoadContextProvider";
 import { useMemo } from "react";
 import { Skeleton } from "../ui/skeleton";
+import { useDashboardStore } from "@/store/dashboard/dashboardStore";
+import { useUserStore } from "@/store/user/userStore";
 
 export function PieChartDonut({ report, variant }) {
-	const { loading, setLoading } = useLoadContext();
+	const { dashboardReportsLoading } = useDashboardStore();
+	const { userReportsLoading } = useUserStore();
 
 	const chartConfig = {
 		tasks: {
@@ -70,7 +72,7 @@ export function PieChartDonut({ report, variant }) {
 			</CardHeader>
 			<CardContent className="pb-0">
 				<ChartContainer config={chartConfig} className="mx-auto aspect-square max-h-[300px]">
-					{loading ? (
+					{dashboardReportsLoading || userReportsLoading ? (
 						<div className="flex items-center justify-center h-full w-full p-8">
 							<Skeleton className=" w-full h-full rounded-full" />
 						</div>
@@ -102,7 +104,7 @@ export function PieChartDonut({ report, variant }) {
 				</ChartContainer>
 			</CardContent>
 			<CardFooter className="flex flex-wrap gap-2 text-sm">
-				{loading ? (
+				{dashboardReportsLoading || userReportsLoading ? (
 					<div className="flex flex-col gap-2 items-center justify-center h-full w-full p-8">
 						<Skeleton className=" w-full h-4" />
 						<Skeleton className=" w-full h-4" />
