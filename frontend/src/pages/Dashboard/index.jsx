@@ -26,11 +26,22 @@ import { ChartBarLabel } from "@/components/chart/bar-chart-label";
 // TODO: Export report with filter
 // TODO: Notification
 export default function UserProfile() {
-	const { loading, setLoading } = useLoadContext();
 	const { users } = useUsersStore();
 	const { projects, projectsLoaded } = useProjectsStore();
-	const { reports, setReports, userFilter, projectFilter, filters, setFilters, selectedProjects, setSelectedProjects, selectedUsers, setSelectedUsers } =
-		useDashboardStore();
+	const {
+		reports,
+		setReports,
+		userFilter,
+		projectFilter,
+		filters,
+		setFilters,
+		selectedProjects,
+		setSelectedProjects,
+		selectedUsers,
+		setSelectedUsers,
+		dashboardReportsLoading,
+		setDashboardReportsLoading,
+	} = useDashboardStore();
 	// Fetch Hooks
 	const { fetchProjects, fetchUsers, fetchReports } = useTaskHelpers();
 
@@ -56,16 +67,15 @@ export default function UserProfile() {
 		const to = updated.values["Date Range"] ? updated.values["Date Range"]?.split(" to ")[1] : "";
 		const projects = updated.values["Projects"] ?? "";
 		const members = updated.values["Members"] ?? "";
-		setLoading(true);
+		setDashboardReportsLoading(true);
 		try {
 			// Fetch all reports in one call
 			const reportsRes = await axiosClient.get(API().dashboard(from, to, members, projects));
 			setReports(reportsRes.data.data);
-			setLoading(false);
 		} catch (e) {
 			if (e.message !== "Request aborted") console.error("Error fetching data:", e.message);
 		} finally {
-			setLoading(false);
+			setDashboardReportsLoading(false);
 		}
 	};
 
@@ -106,7 +116,7 @@ export default function UserProfile() {
 					</div>
 					<div className="flex flex-row gap-2">
 						<Dialog modal={false} open={isOpen} onOpenChange={setIsOpen}>
-							<DialogTrigger asChild>{!loading && <Button variant="default">Filter</Button>}</DialogTrigger>
+							<DialogTrigger asChild>{!dashboardReportsLoading && <Button variant="default">Filter</Button>}</DialogTrigger>
 							<DialogContent>
 								<DialogHeader>
 									<DialogTitle>Select filter</DialogTitle>
