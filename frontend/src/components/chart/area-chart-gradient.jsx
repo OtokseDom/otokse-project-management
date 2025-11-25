@@ -5,8 +5,9 @@ import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
 
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { useLoadContext } from "@/contexts/LoadContextProvider";
 import { Skeleton } from "../ui/skeleton";
+import { useDashboardStore } from "@/store/dashboard/dashboardStore";
+import { useUserStore } from "@/store/user/userStore";
 
 const chartConfig = {
 	task: {
@@ -17,7 +18,8 @@ const chartConfig = {
 };
 
 export function AreaChartGradient({ report }) {
-	const { loading, setLoading } = useLoadContext();
+	const { dashboardReportsLoading } = useDashboardStore();
+	const { userReportsLoading } = useUserStore();
 
 	return (
 		<Card className="flex flex-col relative h-full rounded-2xl justify-between">
@@ -27,7 +29,7 @@ export function AreaChartGradient({ report }) {
 			</CardHeader>
 			<CardContent>
 				<ChartContainer config={chartConfig}>
-					{loading ? (
+					{dashboardReportsLoading || userReportsLoading ? (
 						<div className="flex flex-col gap-2 items-center justify-center h-full w-full p-8">
 							<Skeleton className=" w-full h-10 rounded-full" />
 							<Skeleton className=" w-full h-10 rounded-full" />
@@ -61,7 +63,7 @@ export function AreaChartGradient({ report }) {
 			</CardContent>
 			<CardFooter>
 				<div className="flex w-full items-start gap-2 text-sm">
-					{loading ? (
+					{dashboardReportsLoading || userReportsLoading ? (
 						<div className="flex flex-col gap-2 items-center justify-center h-full w-full">
 							<Skeleton className=" w-full h-4 rounded-full" />
 							<Skeleton className=" w-full h-4 rounded-full" />
