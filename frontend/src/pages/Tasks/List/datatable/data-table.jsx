@@ -26,7 +26,8 @@ import { useTasksStore } from "@/store/tasks/tasksStore";
 import UpdateDialog from "../updateDialog";
 import DeleteDialog from "../deleteDialog";
 export function DataTableTasks({ columns, data, showLess = true }) {
-	const { loading } = useLoadContext();
+	// const { loading } = useLoadContext();
+	const { tasksLoading } = useTasksStore();
 	const [sorting, setSorting] = useState([]);
 	const [columnFilters, setColumnFilters] = useState([]);
 	const [selectedColumn, setSelectedColumn] = useState(null);
@@ -278,7 +279,7 @@ export function DataTableTasks({ columns, data, showLess = true }) {
 						))}
 					</TableHeader>
 					<TableBody>
-						{loading ? (
+						{tasksLoading ? (
 							<TableRow>
 								<TableCell colSpan={columns.length} className="h-24">
 									<div className="flex items-center justify-center">
