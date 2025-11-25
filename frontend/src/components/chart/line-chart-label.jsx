@@ -5,8 +5,9 @@ import { CartesianGrid, LabelList, Line, LineChart, XAxis } from "recharts";
 
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { useLoadContext } from "@/contexts/LoadContextProvider";
 import { Skeleton } from "../ui/skeleton";
+import { useDashboardStore } from "@/store/dashboard/dashboardStore";
+import { useUserStore } from "@/store/user/userStore";
 
 export const description = "A line chart with a label";
 const chartConfig = {
@@ -18,7 +19,8 @@ const chartConfig = {
 
 // accept optional title and metricLabel props
 export function ChartLineLabel({ report, variant, title = null, metricLabel = null }) {
-	const { loading, setLoading } = useLoadContext();
+	const { dashboardReportsLoading } = useDashboardStore();
+	const { userReportsLoading } = useUserStore();
 
 	// determine total count (supports reports with task_count or data_count)
 	const totalCount = report ? report.task_count ?? report.data_count ?? 0 : 0;
@@ -42,7 +44,7 @@ export function ChartLineLabel({ report, variant, title = null, metricLabel = nu
 			</CardHeader>
 			<CardContent>
 				<ChartContainer config={chartConfig} className="aspect-auto h-[250px] w-full">
-					{loading ? (
+					{dashboardReportsLoading || userReportsLoading ? (
 						<div className="flex flex-col gap-2 items-center justify-center h-full w-full p-8">
 							<Skeleton className=" w-full h-10 rounded-full" />
 							<Skeleton className=" w-full h-10 rounded-full" />
@@ -83,7 +85,7 @@ export function ChartLineLabel({ report, variant, title = null, metricLabel = nu
 				</ChartContainer>
 			</CardContent>
 			<CardFooter className="flex-col items-start gap-2 text-sm">
-				{loading ? (
+				{dashboardReportsLoading || userReportsLoading ? (
 					<div className="flex flex-col gap-2 items-center justify-center h-full w-full">
 						<Skeleton className=" w-full h-4 rounded-full" />
 						<Skeleton className=" w-full h-4 rounded-full" />
