@@ -14,14 +14,14 @@ import { useUsersStore } from "@/store/users/usersStore";
 
 export const useTaskHelpers = () => {
 	const { setLoading } = useLoadContext();
-	const { projectFilter, setProjectFilter, userFilter, setUserFilter, setReports } = useDashboardStore();
+	const { projectFilter, setProjectFilter, userFilter, setUserFilter, setReports, setDashboardReportsLoading } = useDashboardStore();
 	const { setTasks, setTaskHistory, setOptions, setSelectedUser, setTasksLoading } = useTasksStore();
 	const { setTaskDiscussions } = useTaskDiscussionsStore();
 	const { projects, setProjects, setSelectedProject } = useProjectsStore();
 	const { users, setUsers } = useUsersStore();
 	const { setCategories } = useCategoriesStore();
 	const { taskStatuses, setTaskStatuses } = useTaskStatusesStore();
-	const { profileProjectFilter, setProfileProjectFilter, setUserReports } = useUserStore();
+	const { profileProjectFilter, setProfileProjectFilter, setUserReports, setUserReportsLoading } = useUserStore();
 	const { setKanbanColumns } = useKanbanColumnsStore();
 
 	const fetchTasks = async () => {
@@ -117,27 +117,26 @@ export const useTaskHelpers = () => {
 	};
 
 	const fetchReports = async () => {
-		setLoading(true);
+		setDashboardReportsLoading(true);
 		try {
 			const reportsRes = await axiosClient.get(API().dashboard());
 			setReports(reportsRes.data.data);
-			setLoading(false);
 		} catch (e) {
 			if (e.message !== "Request aborted") console.error("Error fetching data:", e.message);
 		} finally {
-			setLoading(false);
+			setDashboardReportsLoading(false);
 		}
 	};
 
 	const fetchUserReports = async (id) => {
-		setLoading(true);
+		setUserReportsLoading(true);
 		try {
 			const reportsRes = await axiosClient.get(API().user_reports(id));
 			setUserReports(reportsRes?.data?.data);
 		} catch (e) {
 			if (e.message !== "Request aborted") console.error("Error fetching data:", e.message);
 		} finally {
-			setLoading(false);
+			setUserReportsLoading(false);
 		}
 	};
 
