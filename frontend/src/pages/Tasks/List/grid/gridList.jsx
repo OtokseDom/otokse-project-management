@@ -1,13 +1,11 @@
 import React from "react";
 import { useTasksStore } from "@/store/tasks/tasksStore";
 import TaskGridItem from "./gridItem";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function GridList({ tasks, setIsOpen, setUpdateData, setParentId, setProjectId, deleteDialogOpen, setDeleteDialogOpen }) {
-	// tasks are expected to include parent_id (null for parents) and children array for subtasks
-	// const { tasks } = useTasksStore();
-
+	const { tasksLoading } = useTasksStore();
 	if (!tasks) return null;
-
 	// show only top-level tasks (parents)
 	const parentTasks = tasks.filter((t) => !t.parent_id);
 
@@ -15,21 +13,30 @@ export default function GridList({ tasks, setIsOpen, setUpdateData, setParentId,
 		<div className="w-full scrollbar-custom mt-10">
 			{/* single column full-span list so each card has maximum horizontal room */}
 			{/* <div className="w-full bg-blue-500/20 border border-blue-500 text-xl font-bold text-center rounded p-2 my-2">⚠️ Under Construction</div> */}
-			<div className="flex flex-col gap-4 w-full">
-				{parentTasks.map((task) => (
-					<TaskGridItem
-						key={task.id}
-						task={task}
-						// pass same handlers used by datatable so the same form/dialog is reused
-						setIsOpen={setIsOpen}
-						setUpdateData={setUpdateData}
-						setParentId={setParentId}
-						setProjectId={setProjectId}
-						deleteDialogOpen={deleteDialogOpen}
-						setDeleteDialogOpen={setDeleteDialogOpen}
-					/>
-				))}
-			</div>
+			{tasksLoading ? (
+				// <div className="flex flex-row space-x-3 w-max h-full">
+				<div className="flex flex-col space-y-2 h-full w-full">
+					{Array.from({ length: 6 }).map((_, i) => (
+						<Skeleton key={i} index={i * 0.9} className="w-full h-44" />
+					))}
+				</div>
+			) : (
+				<div className="flex flex-col gap-4 w-full">
+					{parentTasks.map((task) => (
+						<TaskGridItem
+							key={task.id}
+							task={task}
+							// pass same handlers used by datatable so the same form/dialog is reused
+							setIsOpen={setIsOpen}
+							setUpdateData={setUpdateData}
+							setParentId={setParentId}
+							setProjectId={setProjectId}
+							deleteDialogOpen={deleteDialogOpen}
+							setDeleteDialogOpen={setDeleteDialogOpen}
+						/>
+					))}
+				</div>
+			)}
 		</div>
 	);
 }
