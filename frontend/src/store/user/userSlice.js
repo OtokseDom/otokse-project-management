@@ -3,6 +3,8 @@ export const createUserSlice = (set) => ({
 	userReports: {},
 	profileProjectFilter: [],
 	profileSelectedProjects: [],
+	userReportsLoading: false,
+	setUserReportsLoading: (loading) => set({ userReportsLoading: loading }),
 	profileFilters: {
 		values: {
 			"Date Range": null,
