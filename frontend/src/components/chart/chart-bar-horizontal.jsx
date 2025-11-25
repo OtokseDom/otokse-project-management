@@ -5,12 +5,14 @@ import { Bar, BarChart, CartesianGrid, LabelList, XAxis, YAxis } from "recharts"
 
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { useLoadContext } from "@/contexts/LoadContextProvider";
 import { Skeleton } from "../ui/skeleton";
 import { useMemo } from "react";
+import { useDashboardStore } from "@/store/dashboard/dashboardStore";
+import { useUserStore } from "@/store/user/userStore";
 
 export function ChartBarHorizontal({ report, title = "Report", variant }) {
-	const { loading } = useLoadContext();
+	const { dashboardReportsLoading } = useDashboardStore();
+	const { userReportsLoading } = useUserStore();
 
 	// ✅ extract dynamic data based on reportKey
 	const chartData = report?.chart_data ?? [];
@@ -47,7 +49,7 @@ export function ChartBarHorizontal({ report, title = "Report", variant }) {
 
 			<CardContent>
 				<ChartContainer config={chartConfig}>
-					{loading ? (
+					{dashboardReportsLoading || userReportsLoading ? (
 						<div className="flex flex-col gap-2 items-center justify-center h-full w-full p-8">
 							{Array.from({ length: 4 }).map((_, i) => (
 								<Skeleton key={i} className="w-full h-10 rounded-full" />
@@ -71,7 +73,7 @@ export function ChartBarHorizontal({ report, title = "Report", variant }) {
 			</CardContent>
 
 			<CardFooter className="flex-col items-start gap-2 text-sm">
-				{loading ? (
+				{dashboardReportsLoading || userReportsLoading ? (
 					<div className="flex flex-col gap-2 items-center justify-center h-full w-full">
 						<Skeleton className="w-full h-4 rounded-full" />
 						<Skeleton className="w-full h-4 rounded-full" />
