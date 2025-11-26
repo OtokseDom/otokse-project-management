@@ -13,7 +13,6 @@ import { useEffect, useState } from "react";
 import { useToast } from "@/contexts/ToastContextProvider";
 import axiosClient from "@/axios.client";
 import { useAuthContext } from "@/contexts/AuthContextProvider";
-import { useLoadContext } from "@/contexts/LoadContextProvider";
 import DateInput from "@/components/form/DateInput";
 import { API } from "@/constants/api";
 import { useUsersStore } from "@/store/users/usersStore";
@@ -41,9 +40,8 @@ const formSchema = z.object({
 
 export default function UserForm({ setIsOpen, updateData, userProfileId }) {
 	const { user: user_auth, setUser } = useAuthContext();
-	const { loading, setLoading } = useLoadContext();
 	const showToast = useToast();
-	const { addUser, updateUser } = useUsersStore();
+	const { addUser, updateUser, usersLoading, setUsersLoading } = useUsersStore();
 	const { setUser: setProfileUser } = useUserStore();
 	const { addUserFilter, updateUserFilter } = useDashboardStore();
 	const { fetchTasks } = useTaskHelpers();
@@ -84,7 +82,7 @@ export default function UserForm({ setIsOpen, updateData, userProfileId }) {
 			dob: form.dob ? format(form.dob, "yyyy-MM-dd") : null, // Format to Y-m-d
 			password: "$2y$12$tXliF33idwwMmvk1tiF.ZOotEsqQnuWinaX90NLaw.rEchjbEAXCW", //password: admin123
 		};
-		setLoading(true);
+		setUsersLoading(true);
 		try {
 			if (Object.keys(updateData).length === 0) {
 				const userResponse = await axiosClient.post(API().user(), formattedData);
@@ -107,7 +105,7 @@ export default function UserForm({ setIsOpen, updateData, userProfileId }) {
 			console.error("Error fetching data:", e);
 		} finally {
 			fetchTasks();
-			setLoading(false);
+			setUsersLoading(false);
 			setIsOpen(false);
 		}
 	};
@@ -252,8 +250,9 @@ export default function UserForm({ setIsOpen, updateData, userProfileId }) {
 						}}
 					/>
 				)}
-				<Button type="submit" disabled={loading}>
-					{loading && <Loader2 className="animate-spin mr-5 -ml-11 text-background" />} {Object.keys(updateData).length === 0 ? "Submit" : "Update"}
+				<Button type="submit" disabled={usersLoading}>
+					{usersLoading && <Loader2 className="animate-spin mr-5 -ml-11 text-background" />}{" "}
+					{Object.keys(updateData).length === 0 ? "Submit" : "Update"}
 				</Button>
 			</form>
 		</Form>
