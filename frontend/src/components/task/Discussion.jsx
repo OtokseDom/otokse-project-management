@@ -1,18 +1,15 @@
 // components/task/TaskDiscussions.jsx
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useTaskDiscussionsStore } from "@/store/taskDiscussions/taskDiscussionsStore";
 import { storeTaskDiscussion, deleteTaskDiscussion } from "@/utils/taskDiscussionHelpers";
-import { useTaskHelpers } from "@/utils/taskHelpers";
-import { Skeleton } from "@/components/ui/skeleton";
 
 // shadcn/ui components
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/contexts/ToastContextProvider";
 import { Loader2 } from "lucide-react";
@@ -20,10 +17,9 @@ import { useAuthContext } from "@/contexts/AuthContextProvider";
 
 export const TaskDiscussions = ({ taskId }) => {
 	const { user } = useAuthContext();
-	const { taskDiscussions, addTaskDiscussion, removeTaskDiscussion } = useTaskDiscussionsStore();
+	const { taskDiscussions, addTaskDiscussion, removeTaskDiscussion, taskDiscussionsLoading, setTaskDiscussionsLoading } = useTaskDiscussionsStore();
 	const [newContent, setNewContent] = useState("");
 	const [attachments, setAttachments] = useState([]);
-	const [loading, setLoading] = useState(false);
 	const showToast = useToast();
 	// TODO: Update store on update
 	// TODO: Edit comments
@@ -39,7 +35,7 @@ export const TaskDiscussions = ({ taskId }) => {
 				task_id: taskId,
 				attachments,
 			},
-			setLoading,
+			setTaskDiscussionsLoading,
 			showToast
 		);
 
@@ -51,7 +47,7 @@ export const TaskDiscussions = ({ taskId }) => {
 	};
 
 	const handleDelete = async (id) => {
-		await deleteTaskDiscussion(id, setLoading, showToast);
+		await deleteTaskDiscussion(id, setTaskDiscussionsLoading, showToast);
 		removeTaskDiscussion(id);
 	};
 
@@ -157,7 +153,8 @@ export const TaskDiscussions = ({ taskId }) => {
 											<DialogContent>
 												<DialogHeader>
 													<DialogTitle className="flex gap-4">
-														Are you absolutely sure? {loading && <Loader2 className="animate-spin text-foreground" />}
+														Are you absolutely sure?{" "}
+														{taskDiscussionsLoading && <Loader2 className="animate-spin text-foreground" />}
 													</DialogTitle>
 													<DialogDescription>This action cannot be undone.</DialogDescription>
 												</DialogHeader>
@@ -167,7 +164,7 @@ export const TaskDiscussions = ({ taskId }) => {
 															Close
 														</Button>
 													</DialogClose>
-													<Button disabled={loading} variant="destructive" onClick={() => handleDelete(discussion.id)}>
+													<Button disabled={taskDiscussionsLoading} variant="destructive" onClick={() => handleDelete(discussion.id)}>
 														Delete comment
 													</Button>
 												</DialogFooter>
@@ -199,8 +196,8 @@ export const TaskDiscussions = ({ taskId }) => {
 							onChange={(e) => setAttachments(Array.from(e.target.files))}
 							className="cursor-pointer bg-secondary text-foreground"
 						/>
-						<Button type="submit" className="w-24" disabled={loading}>
-							{loading ? <Loader2 className="animate-spin text-background" /> : "Submit"}
+						<Button type="submit" className="w-24" disabled={taskDiscussionsLoading}>
+							{taskDiscussionsLoading ? <Loader2 className="animate-spin text-background" /> : "Submit"}
 						</Button>
 					</div>
 				</form>
