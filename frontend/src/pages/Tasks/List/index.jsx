@@ -17,7 +17,6 @@ import History from "@/components/task/History";
 import Relations from "@/components/task/Relations";
 import Tabs from "@/components/task/Tabs";
 import { TaskDiscussions } from "@/components/task/Discussion";
-import { useLoadContext } from "@/contexts/LoadContextProvider";
 import { Progress } from "@/components/ui/progress";
 
 export default function Tasks() {
