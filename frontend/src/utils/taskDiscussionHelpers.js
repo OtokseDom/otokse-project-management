@@ -1,8 +1,6 @@
 // utils/taskDiscussionHelpers.js
 import axiosClient from "@/axios.client";
 import { API } from "@/constants/api";
-import { useLoadContext } from "@/contexts/LoadContextProvider";
-import { useToast } from "@/contexts/ToastContextProvider";
 
 export const fetchTaskDiscussions = async () => {
 	const res = await axiosClient.get(API().task_discussion());
