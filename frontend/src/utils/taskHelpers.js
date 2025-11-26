@@ -19,7 +19,7 @@ export const useTaskHelpers = () => {
 	const { setTaskDiscussions } = useTaskDiscussionsStore();
 	const { projects, setProjects, setSelectedProject, setProjectsLoading } = useProjectsStore();
 	const { setUsersLoading, setUsers } = useUsersStore();
-	const { setCategories } = useCategoriesStore();
+	const { setCategories, setCategoriesLoading } = useCategoriesStore();
 	const { taskStatuses, setTaskStatuses } = useTaskStatusesStore();
 	const { profileProjectFilter, setProfileProjectFilter, setUserReports, setUserReportsLoading } = useUserStore();
 	const { setKanbanColumns } = useKanbanColumnsStore();
@@ -93,14 +93,14 @@ export const useTaskHelpers = () => {
 	};
 
 	const fetchCategories = async () => {
-		setLoading(true);
+		setCategoriesLoading(true);
 		try {
 			const res = await axiosClient.get(API().category());
 			setCategories(res?.data?.data);
 		} catch (e) {
 			if (e.message !== "Request aborted") console.error("Error fetching data:", e.message);
 		} finally {
-			setLoading(false);
+			setCategoriesLoading(false);
 		}
 	};
 
