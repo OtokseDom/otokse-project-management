@@ -43,9 +43,8 @@ const formSchema = z.object({
 
 export default function ProjectForm({ setIsOpen, updateData, setUpdateData }) {
 	const { user: user_auth } = useAuthContext();
-	const { loading, setLoading } = useLoadContext();
 	const showToast = useToast();
-	const { addProject, updateProject } = useProjectsStore([]);
+	const { addProject, updateProject, projectsLoading, setProjectsLoading } = useProjectsStore([]);
 	const { updateProjectFilter, addProjectFilter } = useDashboardStore();
 	const { addKanbanColumn } = useKanbanColumnsStore();
 	const { fetchTasks } = useTaskHelpers();
@@ -158,7 +157,7 @@ export default function ProjectForm({ setIsOpen, updateData, setUpdateData }) {
 		}
 	};
 	const handleSubmit = async (form) => {
-		setLoading(true);
+		setProjectsLoading(true);
 		try {
 			const parsedForm = {
 				...form,
@@ -187,7 +186,7 @@ export default function ProjectForm({ setIsOpen, updateData, setUpdateData }) {
 		} finally {
 			setUpdateData({});
 			fetchTasks();
-			setLoading(false);
+			setProjectsLoading(false);
 			setIsOpen(false);
 		}
 	};
@@ -470,8 +469,8 @@ export default function ProjectForm({ setIsOpen, updateData, setUpdateData }) {
 					}}
 				/>
 				{isEditable && (
-					<Button type="submit" disabled={loading}>
-						{loading && <Loader2 className="animate-spin mr-5 -ml-11 text-background" />}{" "}
+					<Button type="submit" disabled={projectsLoading}>
+						{projectsLoading && <Loader2 className="animate-spin mr-5 -ml-11 text-background" />}{" "}
 						{Object.keys(updateData).length === 0 ? "Submit" : "Update"}
 					</Button>
 				)}
