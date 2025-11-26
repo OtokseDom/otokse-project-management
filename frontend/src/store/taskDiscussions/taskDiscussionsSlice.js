@@ -21,4 +21,8 @@ export const createTaskDiscussionsSlice = (set) => ({
 		set((state) => ({
 			taskDiscussions: state.taskDiscussions.filter((d) => d.id !== id),
 		})),
+
+	// Loading State
+	taskDiscussionsLoading: false,
+	setTaskDiscussionsLoading: (loading) => set({ taskDiscussionsLoading: loading }),
 });
