@@ -17,10 +17,10 @@ export const useTaskHelpers = () => {
 	const { projectFilter, setProjectFilter, userFilter, setUserFilter, setReports, setDashboardReportsLoading } = useDashboardStore();
 	const { setTasks, setTaskHistory, setOptions, setSelectedUser, setTasksLoading } = useTasksStore();
 	const { setTaskDiscussions } = useTaskDiscussionsStore();
-	const { projects, setProjects, setSelectedProject, setProjectsLoading } = useProjectsStore();
+	const { setProjects, setSelectedProject, setProjectsLoading } = useProjectsStore();
 	const { setUsersLoading, setUsers } = useUsersStore();
 	const { setCategories, setCategoriesLoading } = useCategoriesStore();
-	const { taskStatuses, setTaskStatuses } = useTaskStatusesStore();
+	const { setTaskStatuses, setTaskStatusesLoading } = useTaskStatusesStore();
 	const { profileProjectFilter, setProfileProjectFilter, setUserReports, setUserReportsLoading } = useUserStore();
 	const { setKanbanColumns } = useKanbanColumnsStore();
 
@@ -105,14 +105,14 @@ export const useTaskHelpers = () => {
 	};
 
 	const fetchTaskStatuses = async () => {
-		setLoading(true);
+		setTaskStatusesLoading(true);
 		try {
 			const res = await axiosClient.get(API().task_status());
 			setTaskStatuses(res?.data?.data);
 		} catch (e) {
 			if (e.message !== "Request aborted") console.error("Error fetching data:", e.message);
 		} finally {
-			setLoading(false);
+			setTaskStatusesLoading(false);
 		}
 	};
 
