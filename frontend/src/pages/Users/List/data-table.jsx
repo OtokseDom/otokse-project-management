@@ -17,8 +17,7 @@ import { useUsersStore } from "@/store/users/usersStore";
 
 // Convert the DataTable component to JavaScript
 export function DataTable({ columns, isOpen, setIsOpen, updateData, setUpdateData }) {
-	const { users: data } = useUsersStore();
-	const { loading } = useLoadContext();
+	const { users: data, usersLoading } = useUsersStore();
 	const { user } = useAuthContext();
 
 	const [sorting, setSorting] = useState([]);
@@ -117,7 +116,7 @@ export function DataTable({ columns, isOpen, setIsOpen, updateData, setUpdateDat
 						))}
 					</TableHeader>
 					<TableBody>
-						{loading ? (
+						{usersLoading ? (
 							<TableRow>
 								<TableCell colSpan={columns.length} className="h-24">
 									<div className="flex items-center justify-center">
