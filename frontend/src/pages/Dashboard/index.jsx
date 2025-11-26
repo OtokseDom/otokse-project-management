@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import axiosClient from "@/axios.client";
 import { SectionCard } from "@/components/chart/section-card";
-import { useLoadContext } from "@/contexts/LoadContextProvider";
 import { PieChartDonut } from "@/components/chart/pie-chart-donut";
 import { ChartPieLabel } from "@/components/chart/pie-chart-label";
 import { ChartBarMultiple } from "@/components/chart/bar-chart-multiple";
