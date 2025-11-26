@@ -12,6 +12,6 @@ export const useTaskDiscussionsStore = () => {
 		updateTaskDiscussion: useAppStore((state) => state.updateTaskDiscussion),
 		removeTaskDiscussion: useAppStore((state) => state.removeTaskDiscussion),
 		taskDiscussionsLoading: useAppStore((state) => state.taskDiscussionsLoading),
-		selectedTaskDiscussionsLoading: useAppStore((state) => state.selectedTaskDiscussionsLoading),
+		setTaskDiscussionsLoading: useAppStore((state) => state.setTaskDiscussionsLoading),
 	};
 };
