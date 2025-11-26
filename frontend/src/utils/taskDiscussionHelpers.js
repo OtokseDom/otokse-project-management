@@ -7,8 +7,8 @@ export const fetchTaskDiscussions = async () => {
 	return res?.data?.data || [];
 };
 
-export const storeTaskDiscussion = async (payload, setLoading, showToast) => {
-	setLoading(true);
+export const storeTaskDiscussion = async (payload, setTaskDiscussionsLoading, showToast) => {
+	setTaskDiscussionsLoading(true);
 	try {
 		const formData = new FormData();
 		formData.append("content", payload.content);
@@ -25,12 +25,12 @@ export const storeTaskDiscussion = async (payload, setLoading, showToast) => {
 		showToast("Failed!", e.response?.data?.message, 3000, "fail");
 		console.error("Error fetching data:", e);
 	} finally {
-		setLoading(false);
+		setTaskDiscussionsLoading(false);
 	}
 };
 
-export const updateTaskDiscussion = async (id, payload, setLoading, showToast) => {
-	setLoading(true);
+export const updateTaskDiscussion = async (id, payload, setTaskDiscussionsLoading, showToast) => {
+	setTaskDiscussionsLoading(true);
 	try {
 		const formData = new FormData();
 		if (payload.content) formData.append("content", payload.content);
@@ -45,12 +45,12 @@ export const updateTaskDiscussion = async (id, payload, setLoading, showToast) =
 		showToast("Failed!", e.response?.data?.message, 3000, "fail");
 		console.error("Error fetching data:", e);
 	} finally {
-		setLoading(false);
+		setTaskDiscussionsLoading(false);
 	}
 };
 
-export const deleteTaskDiscussion = async (id, setLoading, showToast) => {
-	setLoading(true);
+export const deleteTaskDiscussion = async (id, setTaskDiscussionsLoading, showToast) => {
+	setTaskDiscussionsLoading(true);
 	try {
 		const res = await axiosClient.delete(API().task_discussion(id));
 		return res?.data;
@@ -58,6 +58,6 @@ export const deleteTaskDiscussion = async (id, setLoading, showToast) => {
 		showToast("Failed!", e.response?.data?.message, 3000, "fail");
 		console.error("Error fetching data:", e);
 	} finally {
-		setLoading(false);
+		setTaskDiscussionsLoading(false);
 	}
 };
