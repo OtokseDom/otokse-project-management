@@ -17,4 +17,8 @@ export const createTaskStatusesSlice = (set) => ({
 		set((state) => ({
 			taskStatuses: state.taskStatuses.filter((t) => t.id !== id),
 		})),
+
+	// Loading State
+	taskStatusesLoading: false,
+	setTaskStatusesLoading: (loading) => set({ taskStatusesLoading: loading }),
 });
