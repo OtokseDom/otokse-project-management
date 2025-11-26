@@ -6,7 +6,6 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useEffect, useMemo, useState } from "react";
 import { useAuthContext } from "@/contexts/AuthContextProvider";
-import { useLoadContext } from "@/contexts/LoadContextProvider";
 import { useToast } from "@/contexts/ToastContextProvider";
 import axiosClient from "@/axios.client";
 import { API } from "@/constants/api";
@@ -15,15 +14,14 @@ import { statusColors } from "@/utils/taskHelpers";
 import { useKanbanColumnsStore } from "@/store/kanbanColumns/kanbanColumnsStore";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 export const columnsTaskStatus = ({ setIsOpen, setUpdateData, dialogOpen, setDialogOpen }) => {
-	const { loading, setLoading } = useLoadContext();
-	const { taskStatuses, removeTaskStatus } = useTaskStatusesStore();
+	const { taskStatuses, removeTaskStatus, taskStatusesLoading, setTaskStatusesLoading } = useTaskStatusesStore();
 	const { removeKanbanColumnByStatus } = useKanbanColumnsStore();
 	const showToast = useToast();
 	const { user } = useAuthContext(); // Get authenticated user details
 	const [selectedTaskStatusId, setSelectedTaskStatusId] = useState(null);
 	const [hasRelation, setHasRelation] = useState(false);
 	const openDialog = async (taskStatus = {}) => {
-		setLoading(true);
+		setTaskStatusesLoading(true);
 		setDialogOpen(true);
 		setSelectedTaskStatusId(taskStatus.id);
 		try {
@@ -33,7 +31,7 @@ export const columnsTaskStatus = ({ setIsOpen, setUpdateData, dialogOpen, setDia
 			showToast("Failed!", e.response?.data?.message, 3000, "fail");
 			if (e.message !== "Request aborted") console.error("Error fetching data:", e.message);
 		} finally {
-			setLoading(false);
+			setTaskStatusesLoading(false);
 		}
 	};
 	useEffect(() => {
@@ -44,7 +42,7 @@ export const columnsTaskStatus = ({ setIsOpen, setUpdateData, dialogOpen, setDia
 		setUpdateData(taskStatus);
 	};
 	const handleDelete = async (id) => {
-		setLoading(true);
+		setTaskStatusesLoading(true);
 		try {
 			await axiosClient.delete(API().task_status(id));
 			removeTaskStatus(id);
@@ -54,9 +52,9 @@ export const columnsTaskStatus = ({ setIsOpen, setUpdateData, dialogOpen, setDia
 			showToast("Failed!", e.response?.data?.message, 3000, "fail");
 			if (e.message !== "Request aborted") console.error("Error fetching data:", e.message);
 		} finally {
-			// Always stop loading when done
+			// Always stop taskStatusesLoading when done
 			setDialogOpen(false);
-			setLoading(false);
+			setTaskStatusesLoading(false);
 		}
 	};
 	const baseColumns = useMemo(
@@ -168,7 +166,7 @@ export const columnsTaskStatus = ({ setIsOpen, setUpdateData, dialogOpen, setDia
 					</DialogClose>
 					{!hasRelation && (
 						<Button
-							disabled={loading}
+							disabled={taskStatusesLoading}
 							onClick={() => {
 								handleDelete(selectedTaskStatusId);
 								setDialogOpen(false);

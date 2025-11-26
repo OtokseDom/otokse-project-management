@@ -1,14 +1,12 @@
 import axiosClient from "@/axios.client";
 import React, { useEffect, useState } from "react";
-import { useLoadContext } from "@/contexts/LoadContextProvider";
 import { DataTable } from "./data-table";
 import { API } from "@/constants/api";
 import { useTaskStatusesStore } from "@/store/taskStatuses/taskStatusesStore";
 import { columnsTaskStatus } from "./columns";
 
 export default function TaskStatuses() {
-	const { setLoading } = useLoadContext();
-	const { taskStatuses, setTaskStatuses } = useTaskStatusesStore();
+	const { taskStatuses, setTaskStatuses, setTaskStatusesLoading } = useTaskStatusesStore();
 	const [isOpen, setIsOpen] = useState(false);
 	const [updateData, setUpdateData] = useState({});
 	const [dialogOpen, setDialogOpen] = useState(false);
@@ -21,7 +19,7 @@ export default function TaskStatuses() {
 		if (!taskStatuses || taskStatuses.length === 0) fetchData();
 	}, []);
 	const fetchData = async () => {
-		setLoading(true);
+		setTaskStatusesLoading(true);
 		try {
 			// Make both API calls concurrently using Promise.all
 			const taskStatusResponse = await axiosClient.get(API().task_status());
@@ -30,7 +28,7 @@ export default function TaskStatuses() {
 			if (e.message !== "Request aborted") console.error("Error fetching data:", e.message);
 		} finally {
 			// Always stop loading when done
-			setLoading(false);
+			setTaskStatusesLoading(false);
 		}
 	};
 

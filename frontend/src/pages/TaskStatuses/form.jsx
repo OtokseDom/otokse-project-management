@@ -11,7 +11,6 @@ import axiosClient from "@/axios.client";
 import { Loader2 } from "lucide-react";
 import { useToast } from "@/contexts/ToastContextProvider";
 import { useEffect } from "react";
-import { useLoadContext } from "@/contexts/LoadContextProvider";
 import { useAuthContext } from "@/contexts/AuthContextProvider";
 import { API } from "@/constants/api";
 import { useTaskStatusesStore } from "@/store/taskStatuses/taskStatusesStore";
@@ -31,10 +30,9 @@ const formSchema = z.object({
 });
 export default function TaskStatusForm({ setIsOpen, updateData, setUpdateData }) {
 	const { user } = useAuthContext();
-	const { updateTaskStatus, addTaskStatus } = useTaskStatusesStore();
+	const { updateTaskStatus, addTaskStatus, taskStatusesLoading, setTaskStatusesLoading } = useTaskStatusesStore();
 	const { addKanbanColumn } = useKanbanColumnsStore();
 	const { fetchTasks } = useTaskHelpers();
-	const { loading, setLoading } = useLoadContext();
 	const showToast = useToast();
 	const form = useForm({
 		resolver: zodResolver(formSchema),
@@ -58,7 +56,7 @@ export default function TaskStatusForm({ setIsOpen, updateData, setUpdateData })
 
 	const handleSubmit = async (form) => {
 		form.organization_id = user.data.organization_id;
-		setLoading(true);
+		setTaskStatusesLoading(true);
 		try {
 			if (Object.keys(updateData).length === 0) {
 				const taskStatusResponse = await axiosClient.post(API().task_status(), form);
@@ -76,7 +74,7 @@ export default function TaskStatusForm({ setIsOpen, updateData, setUpdateData })
 		} finally {
 			setUpdateData({});
 			fetchTasks();
-			setLoading(false);
+			setTaskStatusesLoading(false);
 			setIsOpen(false);
 		}
 	};
@@ -155,8 +153,9 @@ export default function TaskStatusForm({ setIsOpen, updateData, setUpdateData })
 						);
 					}}
 				/>
-				<Button type="submit" disabled={loading}>
-					{loading && <Loader2 className="animate-spin mr-5 -ml-11 text-background" />} {Object.keys(updateData).length === 0 ? "Submit" : "Update"}
+				<Button type="submit" disabled={taskStatusesLoading}>
+					{taskStatusesLoading && <Loader2 className="animate-spin mr-5 -ml-11 text-background" />}{" "}
+					{Object.keys(updateData).length === 0 ? "Submit" : "Update"}
 				</Button>
 			</form>
 		</Form>
