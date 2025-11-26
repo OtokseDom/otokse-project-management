@@ -17,4 +17,8 @@ export const createCategoriesSlice = (set) => ({
 		set((state) => ({
 			categories: state.categories.filter((t) => t.id !== id),
 		})),
+
+	// Loading state
+	categoriesLoading: false,
+	setCategoriesLoading: (loading) => set({ categoriesLoading: loading }),
 });
