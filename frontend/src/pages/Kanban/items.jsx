@@ -9,7 +9,6 @@ import { Button } from "@/components/ui/button";
 import Relations from "@/components/task/Relations";
 import History from "@/components/task/History";
 import TaskForm from "../Tasks/form";
-import { useLoadContext } from "@/contexts/LoadContextProvider";
 import { useTasksStore } from "@/store/tasks/tasksStore";
 import Tabs from "@/components/task/Tabs";
 import { TaskDiscussions } from "@/components/task/Discussion";
@@ -27,8 +26,7 @@ const Items = ({ item }) => {
 		...item,
 		id: parseInt(item.id.split("-")[1]),
 	};
-	const { loading } = useLoadContext();
-	const { tasks, taskHistory, selectedTaskHistory, setSelectedTaskHistory, setRelations, activeTab, setActiveTab } = useTasksStore();
+	const { tasks, taskHistory, selectedTaskHistory, setSelectedTaskHistory, setRelations, activeTab, setActiveTab, tasksLoading } = useTasksStore();
 
 	// const [tasks, setTasks] = useState(tasks);
 	const [isDialogOpen, setDialogOpen] = useState(null);
@@ -156,7 +154,7 @@ const Items = ({ item }) => {
 			<SheetContent side="right" className="overflow-y-auto w-full sm:w-[640px]">
 				<SheetHeader>
 					<SheetTitle>
-						<Tabs loading={loading} updateData={updateData} activeTab={activeTab} setActiveTab={setActiveTab} parentId={parentId} />
+						<Tabs loading={tasksLoading} updateData={updateData} activeTab={activeTab} setActiveTab={setActiveTab} parentId={parentId} />
 					</SheetTitle>
 					<SheetDescription className="sr-only">Navigate through the app using the options below.</SheetDescription>
 				</SheetHeader>
