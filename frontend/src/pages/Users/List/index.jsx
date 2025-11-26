@@ -10,8 +10,7 @@ import { useTasksStore } from "@/store/tasks/tasksStore";
 
 export default function Users() {
 	const { user } = useAuthContext();
-	const { setLoading } = useLoadContext();
-	const { users, setUsers } = useUsersStore();
+	const { users, setUsers, setUsersLoading } = useUsersStore();
 	const { setOptions } = useTasksStore();
 	const [isOpen, setIsOpen] = useState(false);
 	const [updateData, setUpdateData] = useState({});
@@ -27,7 +26,7 @@ export default function Users() {
 	}, [isOpen]);
 
 	const fetchData = async () => {
-		setLoading(true);
+		setUsersLoading(true);
 		try {
 			const userResponse = await axiosClient.get(API().user());
 			setUsers(userResponse.data.data);
@@ -36,7 +35,7 @@ export default function Users() {
 		} catch (e) {
 			if (e.message !== "Request aborted") console.error("Error fetching data:", e.message);
 		} finally {
-			setLoading(false);
+			setUsersLoading(false);
 		}
 	};
 
