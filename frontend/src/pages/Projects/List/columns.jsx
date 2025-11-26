@@ -1,13 +1,10 @@
 "use client";
 import { ArrowUpDown, Edit, ListTodo, Trash2Icon } from "lucide-react";
-import { MoreHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useEffect, useMemo, useState } from "react";
 import { useAuthContext } from "@/contexts/AuthContextProvider";
 import { format } from "date-fns";
-import { useLoadContext } from "@/contexts/LoadContextProvider";
 import { useToast } from "@/contexts/ToastContextProvider";
 import axiosClient from "@/axios.client";
 import { API } from "@/constants/api";
@@ -15,15 +12,14 @@ import { statusColors, priorityColors } from "@/utils/taskHelpers";
 import { useProjectsStore } from "@/store/projects/projectsStore";
 import { Link } from "react-router-dom";
 export const columnsProject = ({ handleDelete, setIsOpen, setUpdateData, dialogOpen, setDialogOpen }) => {
-	const { loading, setLoading } = useLoadContext();
-	const { setSelectedProject, projects } = useProjectsStore();
+	const { setSelectedProject, projects, projectsLoading, setProjectsLoading } = useProjectsStore();
 	const showToast = useToast();
 	const { user } = useAuthContext(); // Get authenticated user details
 	const [selectedProjectId, setSelectedProjectId] = useState(null);
 	const [hasRelation, setHasRelation] = useState(false);
 
 	const openDialog = async (project = {}) => {
-		setLoading(true);
+		setProjectsLoading(true);
 		setTimeout(() => {
 			setDialogOpen(true);
 		}, 100);
@@ -35,7 +31,7 @@ export const columnsProject = ({ handleDelete, setIsOpen, setUpdateData, dialogO
 			showToast("Failed!", e.response?.data?.message, 3000, "fail");
 			if (e.message !== "Request aborted") console.error("Error fetching data:", e.message);
 		} finally {
-			setLoading(false);
+			setProjectsLoading(false);
 		}
 	};
 	useEffect(() => {
@@ -338,7 +334,7 @@ export const columnsProject = ({ handleDelete, setIsOpen, setUpdateData, dialogO
 					</DialogClose>
 					{!hasRelation && (
 						<Button
-							disabled={loading}
+							disabled={projectsLoading}
 							onClick={() => {
 								handleDelete(selectedProjectId);
 								setDialogOpen(false);
