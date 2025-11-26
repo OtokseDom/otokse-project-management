@@ -10,7 +10,6 @@ import { Textarea } from "@/components/ui/textarea";
 import axiosClient from "@/axios.client";
 import { useToast } from "@/contexts/ToastContextProvider";
 import { useEffect, useRef, useState } from "react";
-import { useLoadContext } from "@/contexts/LoadContextProvider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { format, parseISO } from "date-fns";
 import { AlarmClock, CalculatorIcon, CalendarDays, Loader2, Sparkles } from "lucide-react";
@@ -59,13 +58,12 @@ const formSchema = z.object({
 });
 export default function TaskForm({ parentId, projectId, isOpen, setIsOpen, updateData, setUpdateData }) {
 	const { fetchTasks, fetchReports, fetchUserReports } = useTaskHelpers();
-	const { tasks, relations, setRelations, addRelation, selectedUser, setActiveTab, options } = useTasksStore();
+	const { tasks, relations, setRelations, addRelation, selectedUser, setActiveTab, options, tasksLoading, setTasksLoading } = useTasksStore();
 	const { taskStatuses } = useTaskStatusesStore();
 	const { users } = useUsersStore();
 	const { user } = useUserStore();
 	const { projects } = useProjectsStore();
 	const { categories } = useCategoriesStore();
-	const { loading, setLoading } = useLoadContext();
 	const { user: user_auth } = useAuthContext();
 	const showToast = useToast();
 	const [showMore, setShowMore] = useState(true);
@@ -228,7 +226,7 @@ export default function TaskForm({ parentId, projectId, isOpen, setIsOpen, updat
 	}, [updateData, form, projects, users, categories]);
 
 	const handleSubmit = async (formData) => {
-		setLoading(true);
+		setTasksLoading(true);
 		try {
 			// Parse numeric fields
 			const formatTime = (time) => {
@@ -364,7 +362,7 @@ export default function TaskForm({ parentId, projectId, isOpen, setIsOpen, updat
 				});
 			}
 		} finally {
-			setLoading(false);
+			setTasksLoading(false);
 			fetchReports();
 			setAttachments([]);
 			if (user?.id && Array.isArray(formData.assignees) && formData.assignees.includes(user.id)) {
@@ -1254,8 +1252,8 @@ export default function TaskForm({ parentId, projectId, isOpen, setIsOpen, updat
 				</div>
 				{isEditable ? (
 					<div className="sticky bottom-0 backdrop-blur-sm bg-background/30 backdrop-saturate-150 p-4 mt-auto">
-						<Button type="submit" disabled={loading} className="w-full">
-							{loading && <Loader2 className="animate-spin mr-5 -ml-11 text-background" />}{" "}
+						<Button type="submit" disabled={tasksLoading} className="w-full">
+							{tasksLoading && <Loader2 className="animate-spin mr-5 -ml-11 text-background" />}{" "}
 							{Object.keys(updateData).length === 0 || updateData?.calendar_add || updateData?.kanban_add ? "Submit" : "Update"}
 						</Button>
 					</div>
