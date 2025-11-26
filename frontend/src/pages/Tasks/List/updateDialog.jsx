@@ -17,7 +17,6 @@ import { useUsersStore } from "@/store/users/usersStore";
 import { useTaskStatusesStore } from "@/store/taskStatuses/taskStatusesStore";
 import { useProjectsStore } from "@/store/projects/projectsStore";
 import { useCategoriesStore } from "@/store/categories/categoriesStore";
-import { useLoadContext } from "@/contexts/LoadContextProvider";
 import { useToast } from "@/contexts/ToastContextProvider";
 import { useTaskHelpers } from "@/utils/taskHelpers";
 import { format } from "date-fns";
@@ -32,9 +31,8 @@ const formSchema = z.object({
 	actual_date: z.date().optional().nullable(),
 });
 export default function UpdateDialog({ open, onClose, action, selectedTasks = [] }) {
-	const { loading, setLoading } = useLoadContext();
 	const showToast = useToast();
-	const { options, updateTask, updateMultipleTasks } = useTasksStore();
+	const { options, updateTask, updateMultipleTasks, setTasksLoading } = useTasksStore();
 	const { taskStatuses } = useTaskStatusesStore();
 	const { projects } = useProjectsStore();
 	const { categories } = useCategoriesStore();
@@ -119,7 +117,7 @@ export default function UpdateDialog({ open, onClose, action, selectedTasks = []
 		updateMultipleTasks(updates);
 
 		try {
-			setLoading(true);
+			setTasksLoading(true);
 			await axiosClient.patch(API().task_bulk_update(), {
 				ids,
 				action,
@@ -135,7 +133,7 @@ export default function UpdateDialog({ open, onClose, action, selectedTasks = []
 			console.error("Bulk update failed", e);
 			showToast("Bulk update failed", e.message, 3000, "fail");
 		} finally {
-			setLoading(false);
+			setTasksLoading(false);
 		}
 	};
 	return (
