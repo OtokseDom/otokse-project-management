@@ -17,4 +17,7 @@ export const createUsersSlice = (set) => ({
 		set((state) => ({
 			users: state.users.filter((u) => u.id !== id),
 		})),
+
+	usersLoading: false,
+	setUsersLoading: (loading) => set({ usersLoading: loading }),
 });
