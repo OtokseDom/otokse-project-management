@@ -11,14 +11,10 @@ import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import ProjectForm from "../form";
-import { useLoadContext } from "@/contexts/LoadContextProvider";
-import { useAuthContext } from "@/contexts/AuthContextProvider";
 import { useProjectsStore } from "@/store/projects/projectsStore";
 
 // Convert the DataTable component to JavaScript
 export function DataTableProjects({ columns, isOpen, setIsOpen, updateData, setUpdateData }) {
-	const { user } = useAuthContext();
-	const { loading, setLoading } = useLoadContext();
 	const [sorting, setSorting] = useState([]);
 	const [columnFilters, setColumnFilters] = useState([]);
 	const [columnVisibility, setColumnVisibility] = useState({
@@ -26,7 +22,7 @@ export function DataTableProjects({ columns, isOpen, setIsOpen, updateData, setU
 		"delay reason": false,
 		remarks: false,
 	});
-	const { projects: data } = useProjectsStore();
+	const { projects: data, projectsLoading } = useProjectsStore();
 	const table = useReactTable({
 		data: data,
 		columns,
@@ -61,7 +57,7 @@ export function DataTableProjects({ columns, isOpen, setIsOpen, updateData, setU
 				/>
 				<div className="w-full md:w-fit flex flex-row justify-between gap-2 ml-auto">
 					<Sheet open={isOpen} onOpenChange={setIsOpen} modal={false}>
-						{!loading && (
+						{!projectsLoading && (
 							<SheetTrigger asChild>
 								<Button variant="">Add Project</Button>
 							</SheetTrigger>
@@ -120,7 +116,7 @@ export function DataTableProjects({ columns, isOpen, setIsOpen, updateData, setU
 						))}
 					</TableHeader>
 					<TableBody>
-						{loading ? (
+						{projectsLoading ? (
 							// Show skeleton while loading
 							<TableRow>
 								<TableCell colSpan={columns.length} className="h-24">
