@@ -42,16 +42,25 @@ import { TaskDiscussions } from "@/components/task/Discussion";
 
 export default function UserProfile() {
 	const { id } = useParams();
-	const { user, setUser, userReports, setUserReports, profileFilters, setProfileFilters, profileSelectedProjects, setProfileSelectedProjects } =
-		useUserStore();
+	const {
+		user,
+		setUser,
+		userReports,
+		setUserReports,
+		profileFilters,
+		setProfileFilters,
+		profileSelectedProjects,
+		setProfileSelectedProjects,
+		userReportsLoading,
+		setUserReportsLoading,
+	} = useUserStore();
 	const { projectFilter } = useDashboardStore();
 	const { users } = useUsersStore();
 	const { projects, projectsLoaded } = useProjectsStore();
 	const { categories } = useCategoriesStore();
-	const { tasks, tasksLoaded, setRelations, selectedTaskHistory, activeTab, setActiveTab } = useTasksStore();
+	const { tasks, tasksLoaded, setRelations, selectedTaskHistory, activeTab, setActiveTab, tasksLoading } = useTasksStore();
 	const { taskStatuses } = useTaskStatusesStore();
 	const { fetchTasks, fetchProjects, fetchUsers, fetchCategories, fetchTaskStatuses, fetchUserReports } = useTaskHelpers();
-	const { loading, setLoading } = useLoadContext();
 	const [detailsLoading, setDetailsLoading] = useState(false);
 	const showToast = useToast();
 	const [isOpen, setIsOpen] = useState(false);
@@ -105,20 +114,6 @@ export default function UserProfile() {
 		}
 	};
 
-	const handleDelete = async (id) => {
-		setLoading(true);
-		try {
-			await axiosClient.delete(API().task(id));
-			fetchUserReports(id);
-			showToast("Success!", "Task deleted.", 3000);
-		} catch (e) {
-			showToast("Failed!", e.response?.data?.message, 3000, "fail");
-			if (e.message !== "Request aborted") console.error("Error fetching data:", e.message);
-		} finally {
-			setLoading(false);
-		}
-	};
-
 	const handleRemoveFilter = async (key) => {
 		const updated = {
 			values: { ...profileFilters.values },
@@ -130,15 +125,15 @@ export default function UserProfile() {
 		const from = updated.values["Date Range"] ? updated.values["Date Range"]?.split(" to ")[0] : "";
 		const to = updated.values["Date Range"] ? updated.values["Date Range"]?.split(" to ")[1] : "";
 		const projects = updated.values["Projects"] ?? "";
-		setLoading(true);
+		setUserReportsLoading(true);
 		try {
 			const reportsRes = await axiosClient.get(API().user_reports(id, from, to, projects));
 			setUserReports(reportsRes?.data?.data);
-			setLoading(false);
+			setUserReportsLoading(false);
 		} catch (e) {
 			if (e.message !== "Request aborted") console.error("Error fetching data:", e.message);
 		} finally {
-			setLoading(false);
+			setUserReportsLoading(false);
 		}
 	};
 
@@ -201,7 +196,7 @@ export default function UserProfile() {
 				<div className="md:col-span-12">
 					<div className="flex flex-wrap justify-start items-center gap-4">
 						<Dialog modal={false} open={isOpenFilter} onOpenChange={setIsOpenFilter}>
-							<DialogTrigger asChild>{!loading && <Button variant="default">Filter</Button>}</DialogTrigger>
+							<DialogTrigger asChild>{!userReportsLoading && <Button variant="default">Filter</Button>}</DialogTrigger>
 							<DialogContent>
 								<DialogHeader>
 									<DialogTitle>Select filter</DialogTitle>
@@ -433,7 +428,13 @@ export default function UserProfile() {
 							<SheetContent side="right" className="overflow-y-auto w-full sm:w-[640px] p-2 md:p-6">
 								<SheetHeader>
 									<SheetTitle>
-										<Tabs loading={loading} updateData={updateData} activeTab={activeTab} setActiveTab={setActiveTab} parentId={parentId} />
+										<Tabs
+											loading={tasksLoading}
+											updateData={updateData}
+											activeTab={activeTab}
+											setActiveTab={setActiveTab}
+											parentId={parentId}
+										/>
 									</SheetTitle>
 									<SheetDescription className="sr-only">Navigate through the app using the options below.</SheetDescription>
 								</SheetHeader>
