@@ -9,16 +9,14 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTr
 import History from "@/components/task/History";
 import Relations from "@/components/task/Relations";
 import TaskForm from "../Tasks/form";
-import { useLoadContext } from "@/contexts/LoadContextProvider";
 import { useTasksStore } from "@/store/tasks/tasksStore";
 import Tabs from "@/components/task/Tabs";
 import { useProjectsStore } from "@/store/projects/projectsStore";
 
 const Container = ({ id, children, title, color, onAddItem }) => {
 	// Task Form
-	const { loading } = useLoadContext();
 	const { selectedProject } = useProjectsStore();
-	const { tasks, taskHistory, selectedTaskHistory, setSelectedTaskHistory, setRelations, activeTab, setActiveTab } = useTasksStore();
+	const { selectedTaskHistory, setRelations, activeTab, setActiveTab, tasksLoading } = useTasksStore();
 	const { fetchTasks } = useTaskHelpers();
 	const [isOpenDialog, setIsOpenDialog] = useState(null);
 	const [updateData, setUpdateData] = useState({});
@@ -98,7 +96,7 @@ const Container = ({ id, children, title, color, onAddItem }) => {
 					<SheetContent side="right" className="overflow-y-auto w-[400px] sm:w-[540px]">
 						<SheetHeader>
 							<SheetTitle>
-								<Tabs loading={loading} updateData={updateData} activeTab={activeTab} setActiveTab={setActiveTab} parentId={parentId} />
+								<Tabs loading={tasksLoading} updateData={updateData} activeTab={activeTab} setActiveTab={setActiveTab} parentId={parentId} />
 							</SheetTitle>
 							<SheetDescription className="sr-only">Navigate through the app using the options below.</SheetDescription>
 						</SheetHeader>
