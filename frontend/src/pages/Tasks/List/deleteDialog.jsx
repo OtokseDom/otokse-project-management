@@ -5,13 +5,13 @@ import { Button } from "@/components/ui/button";
 import { API } from "@/constants/api";
 import axiosClient from "@/axios.client";
 import { useTaskHelpers } from "@/utils/taskHelpers";
-import { useLoadContext } from "@/contexts/LoadContextProvider";
 import { useToast } from "@/contexts/ToastContextProvider";
+import { useTasksStore } from "@/store/tasks/tasksStore";
 
 export default function DeleteDialog({ dialogOpen, setDialogOpen, hasRelation, selectedTaskId, selectedTasks = [], clearSelection }) {
 	const showToast = useToast();
 	const { fetchTasks, fetchReports } = useTaskHelpers();
-	const { tasksLoading, setTasksLoading } = useLoadContext();
+	const { tasksLoading, setTasksLoading } = useTasksStore();
 	const ids = selectedTasks.map((t) => t.id);
 	const isBulk = ids.length > 1;
 	const hasAnyRelation = selectedTasks.some((t) => t.children && t.children.length > 0);
