@@ -76,8 +76,7 @@ export default function UserProfile() {
 	const [tableData, setTableData] = useState([]);
 	const [view, setView] = useState(() => "grid");
 	const [filteredUserTasks, setFilteredUserTasks] = useState([]);
-	const [filteredTasks, setFilteredTasks] = useState([]);
-	const [selectedProject, setSelectedProject] = useState(null);
+	const [selectedProject, setSelectedProject] = useState();
 
 	// Filter tasks assigned to this user
 	useEffect(() => {
@@ -92,10 +91,8 @@ export default function UserProfile() {
 		if (selectedProject) {
 			const filtered = filteredUserTasks.filter((task) => task.project_id === selectedProject.id);
 			if (filtered !== null) setTableData(flattenTasks(filtered));
-			setFilteredTasks(flattenTasks(filtered));
 		} else {
 			if (filteredUserTasks !== null) setTableData(flattenTasks(filteredUserTasks));
-			setFilteredTasks(flattenTasks(filteredUserTasks));
 		}
 	}, [tasks, selectedProject]);
 
@@ -118,6 +115,7 @@ export default function UserProfile() {
 		if (!categories || categories.length === 0) fetchCategories();
 		if ((!tasks || tasks.length === 0) && !tasksLoaded) fetchTasks();
 		if ((!projects || projects.length === 0) && !projectsLoaded) fetchProjects();
+		setSelectedProject(null);
 	}, []);
 
 	// Fetch user details and reports when ID changes
@@ -540,7 +538,7 @@ export default function UserProfile() {
 							<>
 								{view === "list" ? (
 									<>
-										<DataTableTasks columns={taskColumns} data={filteredTasks} showLess={true} />
+										<DataTableTasks columns={taskColumns} data={tableData} showLess={true} />
 										{dialog}
 										{bulkDialog}
 									</>
@@ -548,7 +546,7 @@ export default function UserProfile() {
 									<>
 										<GridList
 											// tasks={tableData}
-											tasks={filteredTasks}
+											tasks={tableData}
 											setIsOpen={setIsOpen}
 											setUpdateData={setUpdateData}
 											setParentId={setParentId}
