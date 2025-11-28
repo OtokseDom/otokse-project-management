@@ -1,10 +1,8 @@
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { ArrowLeft, Plus, Rows3, Table } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
-import { useLoadContext } from "@/contexts/LoadContextProvider";
 import axiosClient from "@/axios.client";
-import { useToast } from "@/contexts/ToastContextProvider";
 import { columnsTask } from "@/pages/Tasks/List/datatable/columns";
 import { DataTableTasks } from "@/pages/Tasks/List/datatable/data-table";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -15,15 +13,13 @@ import { RadarChartGridFilled } from "@/components/chart/radar-chart-grid-filled
 import { ChartLineLabel } from "@/components/chart/line-chart-label";
 import { ChartBarMultiple } from "@/components/chart/bar-chart-multiple";
 import { ChartBarLabel } from "@/components/chart/bar-chart-label";
-import { ChartBarHorizontal } from "@/components/chart/chart-bar-horizontal";
-import { useAuthContext } from "@/contexts/AuthContextProvider";
 import UserDetails from "@/pages/Users/Show/details";
 import { SectionCard } from "@/components/chart/section-card";
 import FilterForm from "@/components/form/filter-form";
 import FilterTags from "@/components/form/FilterTags";
 import { API } from "@/constants/api";
 import GalaxyProgressBar from "@/components/design/GalaxyProgressBar";
-import { flattenTasks, useTaskHelpers } from "@/utils/taskHelpers";
+import { flattenTasks, getProfileProjectProgress, useTaskHelpers } from "@/utils/taskHelpers";
 import { useUsersStore } from "@/store/users/usersStore";
 import { useProjectsStore } from "@/store/projects/projectsStore";
 import { useCategoriesStore } from "@/store/categories/categoriesStore";
@@ -33,12 +29,14 @@ import UserForm from "../form";
 import { useTaskStatusesStore } from "@/store/taskStatuses/taskStatusesStore";
 import { useDashboardStore } from "@/store/dashboard/dashboardStore";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import TaskForm from "../../Tasks/form.jsx";
 import History from "@/components/task/History";
 import Relations from "@/components/task/Relations";
 import Tabs from "@/components/task/Tabs";
 import { TaskDiscussions } from "@/components/task/Discussion";
 import GridList from "@/pages/Tasks/List/grid/gridList";
+import { Progress } from "@/components/ui/progress";
 // TODO: Project Filter and search by title
 
 export default function UserProfile() {
@@ -77,12 +75,31 @@ export default function UserProfile() {
 	const [parentId, setParentId] = useState(null);
 	const [tableData, setTableData] = useState([]);
 	const [view, setView] = useState(() => "grid");
+	const [filteredUserTasks, setFilteredUserTasks] = useState([]);
+	const [filteredTasks, setFilteredTasks] = useState([]);
+	const [selectedProject, setSelectedProject] = useState(null);
 
+	// Filter tasks assigned to this user
 	useEffect(() => {
 		const filteredUserTasks = tasks.filter((task) => Array.isArray(task.assignees) && task.assignees.some((user) => user.id === parseInt(id)));
+		setFilteredUserTasks(filteredUserTasks);
 		setTableData(flattenTasks(filteredUserTasks));
 	}, [tasks, id]);
+	// Apply project filter to user tasks
+	const { text: taskProgressText, value: taskProgressValue } = getProfileProjectProgress(id);
 
+	useEffect(() => {
+		if (selectedProject) {
+			const filtered = filteredUserTasks.filter((task) => task.project_id === selectedProject.id);
+			if (filtered !== null) setTableData(flattenTasks(filtered));
+			setFilteredTasks(flattenTasks(filtered));
+		} else {
+			if (filteredUserTasks !== null) setTableData(flattenTasks(filteredUserTasks));
+			setFilteredTasks(flattenTasks(filteredUserTasks));
+		}
+	}, [tasks, selectedProject]);
+
+	// Reset form state when sheet is closed
 	useEffect(() => {
 		if (!isOpen) {
 			setUpdateData({});
@@ -93,6 +110,7 @@ export default function UserProfile() {
 		}
 	}, [isOpen]);
 
+	// Fetch necessary data on mount
 	useEffect(() => {
 		document.title = "Task Management | User Profile";
 		if (!taskStatuses || taskStatuses.length === 0) fetchTaskStatuses();
@@ -102,11 +120,13 @@ export default function UserProfile() {
 		if ((!projects || projects.length === 0) && !projectsLoaded) fetchProjects();
 	}, []);
 
+	// Fetch user details and reports when ID changes
 	useEffect(() => {
 		if (Object.keys(user).length === 0 || parseInt(user.id) !== parseInt(id)) fetchDetails();
 		if (!userReports || userReports.length === 0 || user.id != parseInt(id)) fetchUserReports(id);
 	}, [id]);
 
+	// Fetch user details function
 	const fetchDetails = async () => {
 		setDetailsLoading(true);
 		try {
@@ -119,6 +139,7 @@ export default function UserProfile() {
 		}
 	};
 
+	// Handle removing a filter
 	const handleRemoveFilter = async (key) => {
 		const updated = {
 			values: { ...profileFilters.values },
@@ -434,7 +455,38 @@ export default function UserProfile() {
 					</div>
 
 					<div className="w-full justify-between flex items-center my-4 gap-2">
-						<div>filter here</div>
+						<div className="flex flex-col gap-2 justify-between w-[350px] ml-2 md:ml-0">
+							<Select
+								onValueChange={(value) => {
+									const selected = projects.find((project) => String(project.id) === value);
+									setSelectedProject(selected);
+								}}
+								value={selectedProject ? String(selectedProject.id) : ""}
+							>
+								<SelectTrigger>
+									<SelectValue placeholder="All Projects" />
+								</SelectTrigger>
+								<SelectContent>
+									<SelectItem value={null}>All Projects</SelectItem>
+									{Array.isArray(projects) && projects.length > 0 ? (
+										projects.map((project) => (
+											// <SelectItem key={project.id} value={project.id}>
+											<SelectItem key={project.id} value={String(project.id)}>
+												{project.title}
+											</SelectItem>
+										))
+									) : (
+										<SelectItem disabled>No projects available</SelectItem>
+									)}
+								</SelectContent>
+							</Select>
+
+							{/* Project Progress Bar */}
+							<div className="w-full text-xs text-muted-foreground flex flex-col items-end">
+								<span>{taskProgressText}</span>
+								<Progress value={taskProgressValue} progressColor="bg-primary/50" className="h-2 w-full mt-1" />
+							</div>
+						</div>
 						<Sheet open={isOpen} onOpenChange={setIsOpen} modal={false}>
 							<SheetTrigger asChild>
 								<Button variant="">
@@ -488,15 +540,15 @@ export default function UserProfile() {
 							<>
 								{view === "list" ? (
 									<>
-										<DataTableTasks columns={taskColumns} data={tableData} showLess={true} />
+										<DataTableTasks columns={taskColumns} data={filteredTasks} showLess={true} />
 										{dialog}
 										{bulkDialog}
 									</>
 								) : (
 									<>
 										<GridList
-											tasks={tableData}
-											// tasks={filteredTasks}
+											// tasks={tableData}
+											tasks={filteredTasks}
 											setIsOpen={setIsOpen}
 											setUpdateData={setUpdateData}
 											setParentId={setParentId}
