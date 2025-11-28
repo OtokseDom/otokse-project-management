@@ -72,7 +72,7 @@ export default function Tasks() {
 		}
 	}, [tasks, selectedProject]);
 
-	const { text: taskProgressText, value: taskProgressValue } = getProjectProgress(selectedProject);
+	const { text: taskProgressText, value: taskProgressValue } = getProjectProgress();
 
 	return (
 		<div className="w-screen md:w-full bg-card text-card-foreground border border-border rounded-2xl container p-4 md:p-10 shadow-md">
