@@ -1,5 +1,5 @@
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, Plus } from "lucide-react";
+import { ArrowLeft, Plus, Rows3, Table } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { useLoadContext } from "@/contexts/LoadContextProvider";
@@ -38,10 +38,13 @@ import History from "@/components/task/History";
 import Relations from "@/components/task/Relations";
 import Tabs from "@/components/task/Tabs";
 import { TaskDiscussions } from "@/components/task/Discussion";
+import GridList from "@/pages/Tasks/List/grid/gridList";
 // TODO: Project Filter and search by title
 
 export default function UserProfile() {
 	const { id } = useParams();
+	const [detailsLoading, setDetailsLoading] = useState(false);
+	// Stores
 	const {
 		user,
 		setUser,
@@ -60,18 +63,20 @@ export default function UserProfile() {
 	const { categories } = useCategoriesStore();
 	const { tasks, tasksLoaded, setRelations, selectedTaskHistory, activeTab, setActiveTab, tasksLoading } = useTasksStore();
 	const { taskStatuses } = useTaskStatusesStore();
+	// Helpers
 	const { fetchTasks, fetchProjects, fetchUsers, fetchCategories, fetchTaskStatuses, fetchUserReports } = useTaskHelpers();
-	const [detailsLoading, setDetailsLoading] = useState(false);
-	const showToast = useToast();
+	// Dialogs and Sheets
 	const [isOpen, setIsOpen] = useState(false);
 	const [isOpenUser, setIsOpenUser] = useState(false);
 	const [isOpenFilter, setIsOpenFilter] = useState(false);
 	const [updateData, setUpdateData] = useState({});
 	const [dialogOpen, setDialogOpen] = useState(false);
+	const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 	// const [dialogOpenTask, setDialogOpenTask] = useState(false);
 	const [projectId, setProjectId] = useState(null); //for adding subtasks from relations tab
 	const [parentId, setParentId] = useState(null);
 	const [tableData, setTableData] = useState([]);
+	const [view, setView] = useState(() => "grid");
 
 	useEffect(() => {
 		const filteredUserTasks = tasks.filter((task) => Array.isArray(task.assignees) && task.assignees.some((user) => user.id === parseInt(id)));
@@ -399,22 +404,33 @@ export default function UserProfile() {
 				<SectionTitle icon="📋">Tasks</SectionTitle>
 
 				<div className="md:col-span-12 min-h-[500px] max-h-[700px] overflow-auto scrollbar-custom bg-card text-card-foreground border border-border rounded-2xl container p-4 md:p-10 shadow-md">
-					<div>
-						<h1 className="font-extrabold text-xl">Tasks</h1>
-						<p>
-							View list of all tasks
-							{userReports?.user_tasks?.filters?.from && userReports?.user_tasks?.filters?.to
-								? ` for ${new Date(userReports?.user_tasks?.filters.from).toLocaleDateString("en-CA", {
-										month: "short",
-										day: "numeric",
-										year: "numeric",
-								  })} - ${new Date(userReports?.user_tasks?.filters.to).toLocaleDateString("en-CA", {
-										month: "short",
-										day: "numeric",
-										year: "numeric",
-								  })}`
-								: ""}
-						</p>
+					<div className="flex items-center justify-between">
+						<div>
+							<h1 className=" font-extrabold text-3xl">Tasks</h1>
+							<p>
+								View list of all tasks
+								{userReports?.user_tasks?.filters?.from && userReports?.user_tasks?.filters?.to
+									? ` for ${new Date(userReports?.user_tasks?.filters.from).toLocaleDateString("en-CA", {
+											month: "short",
+											day: "numeric",
+											year: "numeric",
+									  })} - ${new Date(userReports?.user_tasks?.filters.to).toLocaleDateString("en-CA", {
+											month: "short",
+											day: "numeric",
+											year: "numeric",
+									  })}`
+									: ""}
+							</p>
+						</div>
+						{/* Tabs */}
+						<div className="gap-1 ml-4 inline-flex rounded-md bg-muted/5 p-1">
+							<Button title="Grid view" variant={view === "grid" ? "" : "ghost"} onClick={() => setView("grid")}>
+								<Rows3 size={16} />
+							</Button>
+							<Button title="Table view" variant={view === "list" ? "" : "ghost"} onClick={() => setView("list")}>
+								<Table size={16} />
+							</Button>
+						</div>
 					</div>
 
 					<div className="w-full justify-between flex items-center my-4 gap-2">
@@ -470,20 +486,28 @@ export default function UserProfile() {
 						});
 						return (
 							<>
-								<DataTableTasks
-									columns={taskColumns}
-									data={tableData}
-									// updateData={updateData}
-									// setUpdateData={setUpdateData}
-									// isOpen={isOpenTask}
-									// setIsOpen={setIsOpenTask}
-									// parentId={parentId}
-									// setParentId={setParentId}
-									// fetchData={fetchTasks}
-									showLess={true}
-								/>
-								{dialog}
-								{bulkDialog}
+								{view === "list" ? (
+									<>
+										<DataTableTasks columns={taskColumns} data={tableData} showLess={true} />
+										{dialog}
+										{bulkDialog}
+									</>
+								) : (
+									<>
+										<GridList
+											tasks={tableData}
+											// tasks={filteredTasks}
+											setIsOpen={setIsOpen}
+											setUpdateData={setUpdateData}
+											setParentId={setParentId}
+											setProjectId={setProjectId}
+											deleteDialogOpen={deleteDialogOpen}
+											setDeleteDialogOpen={setDeleteDialogOpen}
+										/>
+										{dialog}
+										{bulkDialog}
+									</>
+								)}
 							</>
 						);
 					})()}
