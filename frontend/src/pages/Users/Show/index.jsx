@@ -167,7 +167,7 @@ export default function UserProfile() {
 		<div className="flex flex-col w-screen md:w-full container p-5 md:p-0 sm:text-sm -mt-10">
 			<div
 				className={`fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm z-40 transition-opacity duration-300 pointer-events-none ${
-					isOpen || isOpenUser || isOpenFilter || dialogOpen ? "opacity-100" : "opacity-0"
+					isOpen || isOpenUser || isOpenFilter || dialogOpen || deleteDialogOpen ? "opacity-100" : "opacity-0"
 				}`}
 				aria-hidden="true"
 			/>
