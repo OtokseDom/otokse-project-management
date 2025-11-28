@@ -11,6 +11,7 @@ import { useTasksStore } from "@/store/tasks/tasksStore";
 import { useTaskStatusesStore } from "@/store/taskStatuses/taskStatusesStore";
 import { useUserStore } from "@/store/user/userStore";
 import { useUsersStore } from "@/store/users/usersStore";
+import { useEffect, useState } from "react";
 
 export const useTaskHelpers = () => {
 	const { setLoading } = useLoadContext();
@@ -231,5 +232,34 @@ export function getProjectProgress() {
 	}).length;
 	const value = tasksCount > 0 ? (completedCount / tasksCount) * 100 : 0;
 	const text = `${completedCount}/${tasksCount} (${value.toFixed(2)}%) tasks completed for ${selectedProject ? "selected project" : "all projects"}`;
+	return { value, text };
+}
+
+export function getProfileProjectProgress(id) {
+	const { profileSelectedProjects } = useUserStore();
+	const { tasks } = useTasksStore();
+	const { taskStatuses } = useTaskStatusesStore();
+	const [filteredUserTasks, setFilteredUserTasks] = useState([]);
+	let projectTasks = [];
+
+	// Filter tasks assigned to this user
+	useEffect(() => {
+		const filteredUserTasks = tasks.filter((task) => Array.isArray(task.assignees) && task.assignees.some((user) => user.id === parseInt(id)));
+		setFilteredUserTasks(filteredUserTasks);
+	}, [tasks, id]);
+	// If project tasks is empty, all projects selected
+	if (profileSelectedProjects) {
+		projectTasks = filteredUserTasks.filter((task) => task.project_id === profileSelectedProjects.id && task.parent_id === null);
+	} else {
+		projectTasks = filteredUserTasks;
+	}
+	const tasksCount = projectTasks.length;
+	const completedCount = projectTasks.filter((task) => {
+		const status = taskStatuses.find((s) => s.id === task.status_id);
+		const name = status?.name ?? "Unknown";
+		return name === "Completed";
+	}).length;
+	const value = tasksCount > 0 ? (completedCount / tasksCount) * 100 : 0;
+	const text = `${completedCount}/${tasksCount} (${value.toFixed(2)}%) tasks completed for ${profileSelectedProjects ? "selected project" : "all projects"}`;
 	return { value, text };
 }
