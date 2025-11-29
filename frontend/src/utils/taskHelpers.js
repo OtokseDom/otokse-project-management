@@ -1,7 +1,6 @@
 // src/utils/taskHelpers.js
 import axiosClient from "@/axios.client";
 import { API } from "@/constants/api";
-import { useLoadContext } from "@/contexts/LoadContextProvider";
 import { useCategoriesStore } from "@/store/categories/categoriesStore";
 import { useDashboardStore } from "@/store/dashboard/dashboardStore";
 import { useKanbanColumnsStore } from "@/store/kanbanColumns/kanbanColumnsStore";
@@ -14,10 +13,9 @@ import { useUsersStore } from "@/store/users/usersStore";
 import { useEffect, useState } from "react";
 
 export const useTaskHelpers = () => {
-	const { setLoading } = useLoadContext();
 	const { projectFilter, setProjectFilter, userFilter, setUserFilter, setReports, setDashboardReportsLoading } = useDashboardStore();
 	const { setTasks, setTaskHistory, setOptions, setSelectedUser, setTasksLoading } = useTasksStore();
-	const { setTaskDiscussions, setTaskDiscussionsLoaded } = useTaskDiscussionsStore();
+	const { setTaskDiscussions, setTaskDiscussionsLoading } = useTaskDiscussionsStore();
 	const { setProjects, setSelectedProject, setProjectsLoading } = useProjectsStore();
 	const { setUsersLoading, setUsers } = useUsersStore();
 	const { setCategories, setCategoriesLoading } = useCategoriesStore();
@@ -28,11 +26,11 @@ export const useTaskHelpers = () => {
 	const fetchTasks = async () => {
 		setTasksLoading(true);
 		try {
-			const res_discussion = await axiosClient.get(API().task_discussion());
+			// const res_discussion = await axiosClient.get(API().task_discussion());
 			const res = await axiosClient.get(API().task());
 			setTasks(res?.data?.data?.tasks);
 			setTaskHistory(res?.data?.data?.task_history);
-			setTaskDiscussions(res_discussion?.data?.data);
+			// setTaskDiscussions(res_discussion?.data?.data);
 		} catch (e) {
 			if (e.message !== "Request aborted") console.error("Error fetching data:", e.message);
 		} finally {
@@ -41,14 +39,14 @@ export const useTaskHelpers = () => {
 	};
 
 	const fetchTaskDiscussions = async () => {
-		setTaskDiscussionsLoaded(true);
+		setTaskDiscussionsLoading(true);
 		try {
 			const res = await axiosClient.get(API().task_discussion());
 			setTaskDiscussions(res?.data?.data);
 		} catch (e) {
 			if (e.message !== "Request aborted") console.error("Error fetching data:", e.message);
 		} finally {
-			setTaskDiscussionsLoaded(false);
+			setTaskDiscussionsLoading(false);
 		}
 	};
 
