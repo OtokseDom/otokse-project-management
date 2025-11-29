@@ -2,11 +2,6 @@
 import axiosClient from "@/axios.client";
 import { API } from "@/constants/api";
 
-export const fetchTaskDiscussions = async () => {
-	const res = await axiosClient.get(API().task_discussion());
-	return res?.data?.data || [];
-};
-
 export const storeTaskDiscussion = async (payload, setTaskDiscussionsLoading, showToast) => {
 	setTaskDiscussionsLoading(true);
 	try {
