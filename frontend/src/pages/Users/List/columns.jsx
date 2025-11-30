@@ -1,5 +1,5 @@
 "use client";
-import { ArrowUpDown, MoreHorizontal, User2 } from "lucide-react";
+import { ArrowUpDown, Eye, MoreHorizontal, User2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useAuthContext } from "@/contexts/AuthContextProvider";
@@ -183,6 +183,18 @@ export const columns = ({ setIsOpen, setUpdateData }) => {
 							</DropdownMenuItem>
 						</DropdownMenuContent>
 					</DropdownMenu>
+				);
+			},
+		});
+	} else {
+		baseColumns.push({
+			id: "actions",
+			cell: ({ row }) => {
+				const userRow = row.original;
+				return (
+					<Link title="View profile" to={`/users/${userRow.id}`}>
+						<Eye className="text-muted-foreground" size={16} />
+					</Link>
 				);
 			},
 		});
