@@ -89,7 +89,7 @@ export default function UserForm({ setIsOpen, updateData, userProfileId }) {
 				addUser(userResponse.data.data);
 				addOption({ value: userResponse.data.data.id, label: userResponse.data.data.name });
 				addUserFilter(userResponse.data.data);
-				showToast("Success!", "User added.", 3000);
+				showToast("Success!", "User added. Default password is 'admin123'", 3000);
 			} else {
 				const userResponse = await axiosClient.put(API().user(updateData?.id), formattedData);
 				updateUser(updateData.id, userResponse.data.data);
