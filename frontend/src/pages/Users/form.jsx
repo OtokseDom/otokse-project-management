@@ -36,6 +36,7 @@ const formSchema = z.object({
 	status: z.string().refine((data) => data.trim() !== "", {
 		message: "Status is required.",
 	}),
+	password: z.string().optional(),
 });
 
 export default function UserForm({ setIsOpen, updateData, userProfileId }) {
@@ -58,11 +59,12 @@ export default function UserForm({ setIsOpen, updateData, userProfileId }) {
 			role: "",
 			email: "",
 			status: "",
+			password: "",
 		},
 	});
 	useEffect(() => {
 		if (updateData) {
-			const { name, position, dob, role, email, status } = updateData;
+			const { name, position, dob, role, email, status, password } = updateData;
 			form.reset({
 				name,
 				position,
@@ -70,18 +72,25 @@ export default function UserForm({ setIsOpen, updateData, userProfileId }) {
 				role,
 				email,
 				status,
+				password,
 			});
 			setDate(dob ? parseISO(dob) : undefined);
 		}
 	}, [updateData, form]);
 
 	const handleSubmit = async (form) => {
-		const formattedData = {
+		let formattedData = {
 			...form,
 			organization_id: user_auth.data.organization_id,
 			dob: form.dob ? format(form.dob, "yyyy-MM-dd") : null, // Format to Y-m-d
-			password: "$2y$12$tXliF33idwwMmvk1tiF.ZOotEsqQnuWinaX90NLaw.rEchjbEAXCW", //password: admin123
+			password: "$2y$12$tXliF33idwwMmvk1tiF.ZOotEsqQnuWinaX90NLaw.rEchjbEAXCW", //default: admin123
 		};
+		// Remove password field if empty during update
+		if (Object.keys(updateData).length !== 0 && form.password !== "") {
+			formattedData.password = form.password;
+		} else if (Object.keys(updateData).length !== 0 && form.password === "") {
+			delete formattedData.password;
+		}
 		setUsersLoading(true);
 		try {
 			if (Object.keys(updateData).length === 0) {
@@ -113,6 +122,49 @@ export default function UserForm({ setIsOpen, updateData, userProfileId }) {
 	return (
 		<Form {...form}>
 			<form onSubmit={form.handleSubmit(handleSubmit)} className="flex flex-col gap-4 max-w-md w-full">
+				{user_auth?.data?.role !== "Employee" && (
+					<FormField
+						control={form.control}
+						name="status"
+						render={({ field }) => {
+							const statuses = [
+								{ id: 1, name: "Pending" },
+								{ id: 2, name: "Active" },
+								{ id: 3, name: "Inactive" },
+								{ id: 4, name: "Rejected" },
+								{ id: 5, name: "Banned" },
+							];
+							return (
+								<FormItem>
+									<FormLabel>Status</FormLabel>
+									<Select
+										disabled={user_auth?.data?.role === "Employee"}
+										onValueChange={field.onChange}
+										defaultValue={updateData?.status || field.value}
+									>
+										<FormControl>
+											<SelectTrigger>
+												<SelectValue placeholder="Select a status"></SelectValue>
+											</SelectTrigger>
+										</FormControl>
+										<SelectContent>
+											{Array.isArray(statuses) && statuses.length > 0 ? (
+												statuses?.map((status) => (
+													<SelectItem key={status?.id} value={status?.name.toLowerCase()}>
+														{status?.name}
+													</SelectItem>
+												))
+											) : (
+												<SelectItem disabled>No statuses available</SelectItem>
+											)}
+										</SelectContent>
+									</Select>
+									<FormMessage />
+								</FormItem>
+							);
+						}}
+					/>
+				)}
 				<FormField
 					control={form.control}
 					name="name"
@@ -207,48 +259,25 @@ export default function UserForm({ setIsOpen, updateData, userProfileId }) {
 						return <DateInput field={field} label={"Birthday"} placeholder={"Pick a date"} disableFuture={true} />;
 					}}
 				/>
-				{user_auth?.data?.role !== "Employee" && (
+				{(user_auth?.data?.role !== "Employee" && user_auth?.data?.role !== "Manager") || user_auth?.data?.id === parseInt(updateData?.id) ? (
 					<FormField
 						control={form.control}
-						name="status"
+						name="password"
 						render={({ field }) => {
-							const statuses = [
-								{ id: 1, name: "Pending" },
-								{ id: 2, name: "Active" },
-								{ id: 3, name: "Inactive" },
-								{ id: 4, name: "Rejected" },
-								{ id: 5, name: "Banned" },
-							];
 							return (
 								<FormItem>
-									<FormLabel>Status</FormLabel>
-									<Select
-										disabled={user_auth?.data?.role === "Employee"}
-										onValueChange={field.onChange}
-										defaultValue={updateData?.status || field.value}
-									>
-										<FormControl>
-											<SelectTrigger>
-												<SelectValue placeholder="Select a status"></SelectValue>
-											</SelectTrigger>
-										</FormControl>
-										<SelectContent>
-											{Array.isArray(statuses) && statuses.length > 0 ? (
-												statuses?.map((status) => (
-													<SelectItem key={status?.id} value={status?.name.toLowerCase()}>
-														{status?.name}
-													</SelectItem>
-												))
-											) : (
-												<SelectItem disabled>No statuses available</SelectItem>
-											)}
-										</SelectContent>
-									</Select>
+									<FormLabel>Password</FormLabel>
+									<FormControl>
+										<Input type="password" placeholder="Password" {...field} />
+									</FormControl>
+									<p className="text-muted-foreground text-xs">Leave empty to keep the current password.</p>
 									<FormMessage />
 								</FormItem>
 							);
 						}}
 					/>
+				) : (
+					""
 				)}
 				<Button type="submit" disabled={usersLoading}>
 					{usersLoading && <Loader2 className="animate-spin mr-5 -ml-11 text-background" />}{" "}
