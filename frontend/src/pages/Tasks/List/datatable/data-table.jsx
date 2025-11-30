@@ -26,7 +26,6 @@ import { useTasksStore } from "@/store/tasks/tasksStore";
 import UpdateDialog from "../updateDialog";
 import DeleteDialog from "../deleteDialog";
 export function DataTableTasks({ columns, data, showLess = true }) {
-	// const { loading } = useLoadContext();
 	const { tasksLoading } = useTasksStore();
 	const [sorting, setSorting] = useState([]);
 	const [columnFilters, setColumnFilters] = useState([]);
@@ -34,7 +33,6 @@ export function DataTableTasks({ columns, data, showLess = true }) {
 	const [filterValue, setFilterValue] = useState("");
 	const [bulkAction, setBulkAction] = useState(null);
 	const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-	// TODO: Task datatable filter
 
 	// Helper to clear selection and reset dialogs
 	const clearSelection = () => {

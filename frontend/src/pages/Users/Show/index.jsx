@@ -37,7 +37,6 @@ import Tabs from "@/components/task/Tabs";
 import { TaskDiscussions } from "@/components/task/Discussion";
 import GridList from "@/pages/Tasks/List/grid/gridList";
 import { Progress } from "@/components/ui/progress";
-// TODO: Project Filter and search by title
 
 export default function UserProfile() {
 	const { id } = useParams();

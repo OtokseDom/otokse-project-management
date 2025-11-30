@@ -24,7 +24,6 @@ export const TaskDiscussions = ({ taskId }) => {
 	const [newContent, setNewContent] = useState("");
 	const [attachments, setAttachments] = useState([]);
 	const showToast = useToast();
-	// TODO: Update store on update
 	// TODO: Edit comments
 	// TODO: Replies
 	// TODO: Mention users
