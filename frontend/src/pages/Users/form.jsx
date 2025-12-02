@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 // Calendar
 import { format, parseISO } from "date-fns";
-import { Loader2 } from "lucide-react";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useToast } from "@/contexts/ToastContextProvider";
 import axiosClient from "@/axios.client";
@@ -47,6 +47,7 @@ export default function UserForm({ setIsOpen, updateData, userProfileId }) {
 	const { addUserFilter, updateUserFilter } = useDashboardStore();
 	const { fetchTasks } = useTaskHelpers();
 	const { addOption } = useTasksStore();
+	const [showPassword, setShowPassword] = useState(false);
 
 	const [date, setDate] = useState();
 
@@ -267,9 +268,16 @@ export default function UserForm({ setIsOpen, updateData, userProfileId }) {
 							return (
 								<FormItem>
 									<FormLabel>Password</FormLabel>
-									<FormControl>
-										<Input type="password" placeholder="Password" {...field} />
-									</FormControl>
+									<div className="flex items-start gap-2">
+										<FormControl>
+											<Input type={showPassword ? "text" : "password"} placeholder="Password" {...field} />
+										</FormControl>
+										{showPassword ? (
+											<EyeOff size={24} className="mt-2 hover:cursor-pointer" onClick={() => setShowPassword(false)} />
+										) : (
+											<Eye size={24} className="mt-2 hover:cursor-pointer" onClick={() => setShowPassword(true)} />
+										)}
+									</div>
 									<p className="text-muted-foreground text-xs">Leave empty to keep the current password.</p>
 									<FormMessage />
 								</FormItem>
