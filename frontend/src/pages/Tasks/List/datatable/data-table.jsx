@@ -215,9 +215,9 @@ export function DataTableTasks({ columns, data, showLess = true }) {
 					<Button size="sm" className="text-xs" onClick={() => setBulkAction("actual_date")}>
 						<CalendarCheck2 /> Update Actual Date
 					</Button>
-					<Button size="sm" className="text-xs" variant="destructive" onClick={() => setBulkAction("delete")}>
+					{/* <Button size="sm" className="text-xs" variant="destructive" onClick={() => setBulkAction("delete")}>
 						<Trash2 className="text-destructive-foreground" /> Delete
-					</Button>
+					</Button> */}
 				</div>
 			)}
 			<div className="flex justify-between items-center w-full m-0">
