@@ -164,7 +164,7 @@ class ReportService
             ),
             'time_efficiency' => round((clone $baseQuery)->where('status_id', $completed)->avg(DB::raw('time_estimate / time_taken * 100')), 2),
             'completion_rate' => $taskCompletionQuery,
-            'average_delay_days' => round((clone $baseQueryXSubtasks)->where('status_id', '!=', $cancelled)->avg('delay_days'), 0),
+            'average_delay_days' => round((clone $baseQueryXSubtasks)->where('status_id', '!=', $cancelled)->avg('delay_days'), 2),
             'total_delay_days' => round((clone $baseQueryXSubtasks)->where('status_id', '!=', $cancelled)->sum('delay_days'), 2),
             'average_days_per_task' => round((clone $baseQueryXSubtasks)->where('status_id', $completed)->avg('days_taken'), 2),
             'tasks_ahead_of_schedule' => $taskAheadOfScheduleQuery->count(),
