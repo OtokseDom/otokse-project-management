@@ -162,7 +162,7 @@ export default function TaskGridItem({
 								setBulkAction("priority");
 								setSelectedTasks([task]);
 							}}
-							className={`text-xs px-2 py-1 rounded-md font-medium hover:cursor-pointer ${priorityClass}`}
+							className={`text-xs min-w-fit px-2 py-1 rounded-md font-medium hover:cursor-pointer ${priorityClass}`}
 						>
 							{priority}
 						</span>
@@ -173,7 +173,7 @@ export default function TaskGridItem({
 								setBulkAction("category");
 								setSelectedTasks([task]);
 							}}
-							className="px-2 py-1 rounded-md bg-background/50 border-2 border-foreground/50 text-foreground text-xs gap-2 cursor-pointer"
+							className="px-2 py-1 min-w-fit rounded-md bg-background/50 border-2 border-foreground/50 text-foreground text-xs gap-2 cursor-pointer"
 						>
 							{category}
 						</span>

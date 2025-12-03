@@ -214,6 +214,7 @@ export default function UserProfile() {
 				<SectionCard
 					description="Avg Tasks Completed per Day"
 					showBadge={false}
+					tooltip={`Avg tasks per day with status = "Completed"`}
 					value={`${reports?.section_cards?.average_tasks_completed_per_day} tasks`}
 					variant="dashboard"
 				/>
@@ -274,16 +275,24 @@ export default function UserProfile() {
 			<SectionTitle icon="🌟">Efficiency Metrics</SectionTitle>
 
 			<div className="flex flex-col md:flex-row gap-4 md:col-span-12 overflow-auto">
-				<SectionCard description="Avg Time Efficiency" showBadge={false} value={`${reports?.section_cards?.time_efficiency}%`} variant="dashboard" />
+				<SectionCard
+					description="Avg Time Efficiency"
+					showBadge={false}
+					tooltip={`(time estimate / time taken) * 100 of tasks with status = "Completed"`}
+					value={`${reports?.section_cards?.time_efficiency}%`}
+					variant="dashboard"
+				/>
 				<SectionCard
 					description="Avg Days Taken per Task"
 					showBadge={false}
+					tooltip={`Avg "Days Taken" of tasks with status = "Completed"`}
 					value={`${reports?.section_cards?.average_days_per_task} days`}
 					variant="dashboard"
 				/>
 				<SectionCard
 					description="Tasks Ahead of Schedule"
 					showBadge={false}
+					tooltip={`Total count of tasks where "Actual Date" < "End Date" AND status = "Completed"`}
 					value={`${reports?.section_cards?.tasks_ahead_of_schedule} tasks`}
 					variant="dashboard"
 				/>
@@ -307,7 +316,13 @@ export default function UserProfile() {
 			<SectionTitle icon="💯">Quality & Consistency Metrics</SectionTitle>
 
 			<div className="flex flex-col md:flex-row gap-4 md:col-span-12 overflow-auto">
-				<SectionCard description="Members Avg Performance (5)" showBadge={false} value={reports?.section_cards?.avg_performance} variant="dashboard" />
+				<SectionCard
+					description="Members Avg Performance (5)"
+					showBadge={false}
+					tooltip={`Avg "Performance Rating" of all tasks for all members`}
+					value={reports?.section_cards?.avg_performance}
+					variant="dashboard"
+				/>
 				<SectionCard description="📊 Performance Variance" showBadge={false} value="Coming Soon" variant="dashboard" />
 			</div>
 

@@ -1,7 +1,6 @@
 // src/utils/taskHelpers.js
 import axiosClient from "@/axios.client";
 import { API } from "@/constants/api";
-import { useLoadContext } from "@/contexts/LoadContextProvider";
 import { useCategoriesStore } from "@/store/categories/categoriesStore";
 import { useDashboardStore } from "@/store/dashboard/dashboardStore";
 import { useKanbanColumnsStore } from "@/store/kanbanColumns/kanbanColumnsStore";
@@ -11,12 +10,12 @@ import { useTasksStore } from "@/store/tasks/tasksStore";
 import { useTaskStatusesStore } from "@/store/taskStatuses/taskStatusesStore";
 import { useUserStore } from "@/store/user/userStore";
 import { useUsersStore } from "@/store/users/usersStore";
+import { useEffect, useState } from "react";
 
 export const useTaskHelpers = () => {
-	const { setLoading } = useLoadContext();
 	const { projectFilter, setProjectFilter, userFilter, setUserFilter, setReports, setDashboardReportsLoading } = useDashboardStore();
 	const { setTasks, setTaskHistory, setOptions, setSelectedUser, setTasksLoading } = useTasksStore();
-	const { setTaskDiscussions, setTaskDiscussionsLoaded } = useTaskDiscussionsStore();
+	const { setTaskDiscussions, setTaskDiscussionsLoading } = useTaskDiscussionsStore();
 	const { setProjects, setSelectedProject, setProjectsLoading } = useProjectsStore();
 	const { setUsersLoading, setUsers } = useUsersStore();
 	const { setCategories, setCategoriesLoading } = useCategoriesStore();
@@ -27,11 +26,11 @@ export const useTaskHelpers = () => {
 	const fetchTasks = async () => {
 		setTasksLoading(true);
 		try {
-			const res_discussion = await axiosClient.get(API().task_discussion());
+			// const res_discussion = await axiosClient.get(API().task_discussion());
 			const res = await axiosClient.get(API().task());
 			setTasks(res?.data?.data?.tasks);
 			setTaskHistory(res?.data?.data?.task_history);
-			setTaskDiscussions(res_discussion?.data?.data);
+			// setTaskDiscussions(res_discussion?.data?.data);
 		} catch (e) {
 			if (e.message !== "Request aborted") console.error("Error fetching data:", e.message);
 		} finally {
@@ -40,14 +39,14 @@ export const useTaskHelpers = () => {
 	};
 
 	const fetchTaskDiscussions = async () => {
-		setTaskDiscussionsLoaded(true);
+		setTaskDiscussionsLoading(true);
 		try {
 			const res = await axiosClient.get(API().task_discussion());
 			setTaskDiscussions(res?.data?.data);
 		} catch (e) {
 			if (e.message !== "Request aborted") console.error("Error fetching data:", e.message);
 		} finally {
-			setTaskDiscussionsLoaded(false);
+			setTaskDiscussionsLoading(false);
 		}
 	};
 
@@ -231,5 +230,34 @@ export function getProjectProgress() {
 	}).length;
 	const value = tasksCount > 0 ? (completedCount / tasksCount) * 100 : 0;
 	const text = `${completedCount}/${tasksCount} (${value.toFixed(2)}%) tasks completed for ${selectedProject ? "selected project" : "all projects"}`;
+	return { value, text };
+}
+
+export function getProfileProjectProgress(id) {
+	const { profileSelectedProjects } = useUserStore();
+	const { tasks } = useTasksStore();
+	const { taskStatuses } = useTaskStatusesStore();
+	const [filteredUserTasks, setFilteredUserTasks] = useState([]);
+	let projectTasks = [];
+
+	// Filter tasks assigned to this user
+	useEffect(() => {
+		const filteredUserTasks = tasks.filter((task) => Array.isArray(task.assignees) && task.assignees.some((user) => user.id === parseInt(id)));
+		setFilteredUserTasks(filteredUserTasks);
+	}, [tasks, id]);
+	// If project tasks is empty, all projects selected
+	if (profileSelectedProjects) {
+		projectTasks = filteredUserTasks.filter((task) => task.project_id === profileSelectedProjects.id && task.parent_id === null);
+	} else {
+		projectTasks = filteredUserTasks;
+	}
+	const tasksCount = projectTasks.length;
+	const completedCount = projectTasks.filter((task) => {
+		const status = taskStatuses.find((s) => s.id === task.status_id);
+		const name = status?.name ?? "Unknown";
+		return name === "Completed";
+	}).length;
+	const value = tasksCount > 0 ? (completedCount / tasksCount) * 100 : 0;
+	const text = `${completedCount}/${tasksCount} (${value.toFixed(2)}%) tasks completed for ${profileSelectedProjects ? "selected project" : "all projects"}`;
 	return { value, text };
 }
