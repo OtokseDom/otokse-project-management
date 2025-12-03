@@ -217,7 +217,13 @@ export default function UserProfile() {
 					value={`${reports?.section_cards?.average_tasks_completed_per_day} tasks`}
 					variant="dashboard"
 				/>
-				<SectionCard description="📊 Subtasks per Parent Task" showBadge={false} value="Coming Soon" variant="dashboard" />
+				<SectionCard
+					description="Subtasks per Parent Task"
+					showBadge={false}
+					tooltip={`Subtasks/Partent tasks`}
+					value={`${reports?.section_cards?.subtasks_per_parent_task} tasks`}
+					variant="dashboard"
+				/>
 			</div>
 
 			<div className="md:col-span-4">
