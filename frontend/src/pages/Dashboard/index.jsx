@@ -190,7 +190,6 @@ export default function UserProfile() {
 					value={`${reports?.section_cards?.delay_frequency_percentage}%`}
 					variant="dashboard"
 				/>
-				<SectionCard description="📊 Tasks Before Deadline %" showBadge={false} value="Coming Soon" variant="dashboard" />
 			</div>
 
 			<div className="md:col-span-4">
@@ -290,7 +289,7 @@ export default function UserProfile() {
 					variant="dashboard"
 				/>
 				<SectionCard
-					description="Tasks Ahead of Schedule"
+					description="Tasks Completed Ahead of Schedule"
 					showBadge={false}
 					tooltip={`Total count of tasks where "Actual Date" < "End Date" AND status = "Completed"`}
 					value={`${reports?.section_cards?.tasks_ahead_of_schedule} tasks`}
