@@ -147,6 +147,14 @@ class ReportService
             $taskCompletionQuery = round(($completedTasks / $totalTasks) * 100, 2);
         }
 
+        // Subtasks per parent task
+        $parentCount = $this->task->where('organization_id', $this->organization_id)->whereNull('parent_id')->whereHas('children')->count();
+        $childrenCount = $this->task->where('organization_id', $this->organization_id)->whereNotNull('parent_id')->count();
+        $subtasksPerParentTask = 0;
+        if ($parentCount !== 0 && $childrenCount !== 0) {
+            $subtasksPerParentTask = round($childrenCount / $parentCount, 2);
+        }
+
         // Execute all queries
         $data = [
             'avg_performance' => round((clone $baseQuery)->avg('performance_rating'), 2),
@@ -173,6 +181,7 @@ class ReportService
             'average_actual_days' => round((clone $baseQuery)->where('status_id', $completed)->avg('days_taken'), 2),
             'delay_frequency_percentage' => round((clone $baseQuery)->where('status_id', '!=', $cancelled)
                 ->selectRaw('(SUM(CASE WHEN delay_days > 0 THEN 1 ELSE 0 END) * 100.0) / NULLIF(COUNT(*), 0) AS delay_percent')->value('delay_percent'), 2),
+            'subtasks_per_parent_task' => $subtasksPerParentTask,
             'filters' => $filter
         ];
 
