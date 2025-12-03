@@ -638,7 +638,7 @@ class ReportService
         $data = [
             'chart_data' => $chart_data,
             'runs' => $runs,
-            'data_count' => $taskCount, //data_count is used by the chart
+            'data_count' => $userCount, //data_count is used by the chart
             'filters' => $filter
         ];
 
