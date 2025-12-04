@@ -20,4 +20,6 @@ export const API = (version = "v1") => ({
 	task_bulk_update: () => `/${version}/tasks/bulk-update`,
 	task_bulk_delete: () => `/${version}/tasks/bulk-delete`,
 	task_attachment_delete: (id = "") => `/${version}/tasks/attachments/${id}`,
+	task_positions_get: (context = "", contextId = null) => `/${version}/task-positions/${context}${contextId ? `/${contextId}` : ""}`,
+	task_positions_update: () => `/${version}/task-positions/update`,
 });
