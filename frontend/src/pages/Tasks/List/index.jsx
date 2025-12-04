@@ -185,6 +185,9 @@ export default function Tasks() {
 					setUpdateData,
 				});
 
+				const context = selectedProject ? "project" : "all_projects";
+				const contextId = selectedProject?.id || null;
+
 				return (
 					<>
 						{view === "list" ? (
@@ -203,6 +206,8 @@ export default function Tasks() {
 									setProjectId={setProjectId}
 									deleteDialogOpen={deleteDialogOpen}
 									setDeleteDialogOpen={setDeleteDialogOpen}
+									context={context}
+									contextId={contextId}
 								/>
 								{dialog}
 								{bulkDialog}
