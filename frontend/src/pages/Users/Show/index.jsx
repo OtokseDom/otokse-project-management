@@ -259,7 +259,7 @@ export default function UserProfile() {
 				{/* ========================================== */}
 				<SectionTitle icon="⌛">Timeliness & Delay Metrics</SectionTitle>
 
-				<div className="flex flex-col md:flex-row gap-4 md:col-span-12 overflow-auto">
+				<div className="flex flex-col md:flex-row gap-4 md:col-span-12">
 					<SectionCard variant="" description="Completion Rate" showBadge={false} value={`${userReports?.section_cards?.completion_rate}%`} />
 					<SectionCard variant="" description="Avg Delayed Days" showBadge={false} value={userReports?.section_cards?.average_delay_days} />
 					<SectionCard variant="" description="Total Project Delayed Days" showBadge={false} value={userReports?.section_cards?.total_delay_days} />
@@ -280,7 +280,7 @@ export default function UserProfile() {
 				{/* ========================================== */}
 				<SectionTitle icon="🫙">Work Output & Volume</SectionTitle>
 
-				<div className="flex flex-col md:flex-row gap-4 md:col-span-12 overflow-auto">
+				<div className="flex flex-col md:flex-row gap-4 md:col-span-12">
 					<SectionCard
 						description="📊 Avg Tasks Completed per Day"
 						showBadge={false}
@@ -345,7 +345,7 @@ export default function UserProfile() {
 				{/* ========================================== */}
 				<SectionTitle icon="🌟">Efficiency Metrics</SectionTitle>
 
-				<div className="flex flex-col md:flex-row gap-4 md:col-span-12 overflow-auto">
+				<div className="flex flex-col md:flex-row gap-4 md:col-span-12">
 					<SectionCard description="Time Efficiency" showBadge={false} value={`${userReports?.section_cards?.time_efficiency}%`} variant="" />
 					<SectionCard
 						description="Avg Days Taken per Task"
@@ -382,7 +382,7 @@ export default function UserProfile() {
 				{/* ========================================== */}
 				<SectionTitle icon="💯">Quality & Consistency Metrics</SectionTitle>
 
-				<div className="flex flex-col md:flex-row gap-4 md:col-span-12 overflow-auto">
+				<div className="flex flex-col md:flex-row gap-4 md:col-span-12">
 					<SectionCard description="Performance Rating (5)" showBadge={false} value={`${userReports?.section_cards?.avg_performance}`} variant="" />
 					<SectionCard description="📊 Performance Variance" showBadge={false} value="Coming Soon" variant="" />
 				</div>
@@ -400,7 +400,7 @@ export default function UserProfile() {
 				{/* ========================================== */}
 				<SectionTitle icon="💪">Workload & Balance Metrics</SectionTitle>
 
-				<div className="flex flex-col md:flex-row gap-4 md:col-span-12 overflow-auto">
+				<div className="flex flex-col md:flex-row gap-4 md:col-span-12">
 					<SectionCard
 						description="Avg Estimated Days"
 						showBadge={false}
