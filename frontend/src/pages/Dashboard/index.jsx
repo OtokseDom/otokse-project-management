@@ -161,7 +161,7 @@ export default function UserProfile() {
 			{/* ========================================== */}
 			<SectionTitle icon="⌛">Timeliness & Delay Metrics</SectionTitle>
 
-			<div className="flex flex-col md:flex-row gap-4 md:col-span-12 overflow-auto">
+			<div className="flex flex-col md:flex-row gap-4 md:col-span-12">
 				<SectionCard
 					description="Avg Completion Rate"
 					showBadge={false}
@@ -209,7 +209,7 @@ export default function UserProfile() {
 			{/* ========================================== */}
 			<SectionTitle icon="🫙">Work Output & Volume</SectionTitle>
 
-			<div className="flex flex-col md:flex-row gap-4 md:col-span-12 overflow-auto">
+			<div className="flex flex-col md:flex-row gap-4 md:col-span-12">
 				<SectionCard
 					description="Avg Tasks Completed per Day"
 					showBadge={false}
@@ -279,7 +279,7 @@ export default function UserProfile() {
 			{/* ========================================== */}
 			<SectionTitle icon="🌟">Efficiency Metrics</SectionTitle>
 
-			<div className="flex flex-col md:flex-row gap-4 md:col-span-12 overflow-auto">
+			<div className="flex flex-col md:flex-row gap-4 md:col-span-12">
 				<SectionCard
 					description="Avg Time Efficiency"
 					showBadge={false}
@@ -320,7 +320,7 @@ export default function UserProfile() {
 			{/* ========================================== */}
 			<SectionTitle icon="💯">Quality & Consistency Metrics</SectionTitle>
 
-			<div className="flex flex-col md:flex-row gap-4 md:col-span-12 overflow-auto">
+			<div className="flex flex-col md:flex-row gap-4 md:col-span-12">
 				<SectionCard
 					description="Members Avg Performance (5)"
 					showBadge={false}
@@ -344,7 +344,7 @@ export default function UserProfile() {
 			{/* ========================================== */}
 			<SectionTitle icon="💪">Workload & Balance Metrics</SectionTitle>
 
-			<div className="flex flex-col md:flex-row gap-4 md:col-span-12 overflow-auto">
+			<div className="flex flex-col md:flex-row gap-4 md:col-span-12">
 				<SectionCard description="📊 Avg Estimated Days per User" showBadge={false} value="Coming Soon" variant="dashboard" />
 				<SectionCard description="📊 Avg Actual Days per User" showBadge={false} value="Coming Soon" variant="dashboard" />
 				<SectionCard description="📊 Workload Balance Index" showBadge={false} value="Coming Soon" variant="dashboard" />
@@ -364,7 +364,7 @@ export default function UserProfile() {
 			{/* ========================================== */}
 			<SectionTitle icon="📈">Trend & Progress Metrics</SectionTitle>
 
-			<div className="flex flex-col md:flex-row gap-4 md:col-span-12 overflow-auto">
+			<div className="flex flex-col md:flex-row gap-4 md:col-span-12">
 				<SectionCard description="📊 Productivity Trend (WoW)" showBadge={false} value="Coming Soon" variant="dashboard" />
 				<SectionCard description="📊 Delay Trend Status" showBadge={false} value="Coming Soon" variant="dashboard" />
 			</div>
@@ -382,7 +382,7 @@ export default function UserProfile() {
 			{/* ========================================== */}
 			<SectionTitle icon="📊">Comparative Metrics</SectionTitle>
 
-			<div className="flex flex-col md:flex-row gap-4 md:col-span-12 overflow-auto">
+			<div className="flex flex-col md:flex-row gap-4 md:col-span-12">
 				<SectionCard description="📊 Most Improved Users" showBadge={false} value="Coming Soon" variant="dashboard" />
 			</div>
 
