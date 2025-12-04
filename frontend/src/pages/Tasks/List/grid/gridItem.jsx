@@ -1,7 +1,24 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { ChevronDown, ChevronUp, Edit, Plus, MoreHorizontal, Copy, Trash2, User, CalendarDaysIcon, Target, CircleDot, Circle, GoalIcon } from "lucide-react";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import {
+	ChevronDown,
+	ChevronUp,
+	Edit,
+	Plus,
+	MoreHorizontal,
+	Copy,
+	Trash2,
+	User,
+	CalendarDaysIcon,
+	Target,
+	CircleDot,
+	Circle,
+	GoalIcon,
+	GripVertical,
+} from "lucide-react";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import UpdateDialog from "../updateDialog";
@@ -23,7 +40,15 @@ export default function TaskGridItem({
 	const [open, setOpen] = useState(false);
 	const [bulkAction, setBulkAction] = useState(null);
 	const [selectedTasks, setSelectedTasks] = useState(null);
-	// const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+
+	// DnD Kit integration
+	const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+		id: `grid-item-${task.id}`,
+		data: {
+			type: "grid-item",
+			task: task,
+		},
+	});
 
 	const hasChildren = Array.isArray(task.children) && task.children.length > 0;
 
@@ -43,7 +68,6 @@ export default function TaskGridItem({
 	const category = task.category?.name ?? null;
 	const projectName = task.project?.title ?? task.project?.name ?? null;
 
-	// assignees array handling
 	const assignees = Array.isArray(task.assignees) ? task.assignees : [];
 	const assigneeNames = assignees.map((a) => a.name);
 
@@ -52,7 +76,6 @@ export default function TaskGridItem({
 	const priorityClass = priorityColors?.[priority] ?? "bg-muted/20 text-muted-foreground";
 
 	const openEdit = (task) => {
-		// reuse datatable form/dialog
 		setUpdateData(task);
 		setIsOpen(true);
 		const filteredHistory = taskHistory.filter((th) => th.task_id === task.id);
@@ -120,8 +143,19 @@ export default function TaskGridItem({
 	const { text: subtaskProgressText, value: subtaskProgressValue } = getSubtaskProgress(task);
 
 	return (
-		<div className="bg-sidebar text-card-foreground border border-border rounded-lg p-4 flex flex-col shadow-sm w-full">
+		<div
+			ref={setNodeRef}
+			style={{
+				transform: CSS.Translate.toString(transform),
+				transition,
+				opacity: isDragging ? 0.5 : 1,
+			}}
+			className="bg-sidebar text-card-foreground border border-border rounded-lg p-4 flex flex-col shadow-sm w-full"
+		>
 			{/* Header */}
+			<div className="w-full py-1 hover:cursor-grab active:cursor-grabbing" {...listeners} {...attributes}>
+				<GripVertical size={16} />
+			</div>
 			<div className="flex flex-col md:flex-row items-start justify-between gap-2">
 				<div className="min-w-0 flex flex-col order-2 md:order-1 gap-2">
 					<div className="flex gap-2">
@@ -409,7 +443,7 @@ export default function TaskGridItem({
 					dialogOpen={deleteDialogOpen}
 					setDialogOpen={handleDeleteDialogClose}
 					selectedTasks={selectedTasks}
-					clearSelection={clearSelection} // Pass the callback
+					clearSelection={clearSelection}
 				/>
 			) : (
 				<UpdateDialog open={!!bulkAction} onClose={() => setBulkAction(null)} action={bulkAction} selectedTasks={selectedTasks} />
