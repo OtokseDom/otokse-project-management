@@ -106,24 +106,24 @@ export const columnsTaskStatus = ({ setIsOpen, setUpdateData, dialogOpen, setDia
 				const taskStatus = row.original;
 				return (
 					<DropdownMenu modal={false}>
-						<DropdownMenuTrigger asChild>
-							{!["Pending", "In Progress", "Completed", "For Review", "On Hold", "Delayed", "Cancelled"].includes(taskStatus?.name) ? (
+						{!["Pending", "In Progress", "Completed", "For Review", "On Hold", "Delayed", "Cancelled"].includes(taskStatus?.name) ? (
+							<DropdownMenuTrigger asChild>
 								<Button variant="ghost" className="h-8 w-8 p-0">
 									<span className="sr-only">Open menu</span>
 									<MoreHorizontal className="h-4 w-4" />
 								</Button>
-							) : (
-								<div className="flex gap-2 justify-start items-center text-muted-foreground text-xs">
-									<span className="min-w-fit">system status</span>
-									<Tooltip>
-										<TooltipTrigger>
-											<Info size={16} className="text-muted-foreground hover:cursor-help" />
-										</TooltipTrigger>
-										<TooltipContent>System statuses are used for reports and metrics</TooltipContent>
-									</Tooltip>
-								</div>
-							)}
-						</DropdownMenuTrigger>
+							</DropdownMenuTrigger>
+						) : (
+							<div className="flex gap-2 justify-start items-center text-muted-foreground text-xs">
+								<span className="min-w-fit">system status</span>
+								<Tooltip>
+									<TooltipTrigger>
+										<Info size={16} className="text-muted-foreground hover:cursor-help" />
+									</TooltipTrigger>
+									<TooltipContent>System statuses are used for reports and metrics</TooltipContent>
+								</Tooltip>
+							</div>
+						)}
 						<DropdownMenuContent align="end">
 							<DropdownMenuItem className="cursor-pointer" onClick={() => handleUpdateTaskStatus(taskStatus)}>
 								Update Task Status
