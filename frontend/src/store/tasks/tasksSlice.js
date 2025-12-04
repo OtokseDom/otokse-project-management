@@ -1,5 +1,5 @@
 // ...existing code...
-export const createTasksSlice = (set) => ({
+export const createTasksSlice = (set, get) => ({
 	// ...existing code...
 	// Merge/replace tasks from backend (bulk update)
 	mergeTasks: (updatedTasks) =>
@@ -127,4 +127,72 @@ export const createTasksSlice = (set) => ({
 				tasks: state.tasks.map((t) => affectedMap.get(t.id) ?? t),
 			};
 		}),
+	// Position management
+	taskPositions: {}, // { "context-contextId": { taskId: position } }
+
+	setTaskPositions: (context, contextId, positions) =>
+		set((state) => {
+			const positionMap = {};
+			positions.forEach((pos) => {
+				positionMap[pos.task_id] = pos.position;
+			});
+			return {
+				taskPositions: {
+					...state.taskPositions,
+					[`${context}-${contextId}`]: positionMap,
+				},
+			};
+		}),
+
+	updateTaskPositionLocal: (taskId, context, contextId, affectedTasks) =>
+		set((state) => {
+			const key = `${context}-${contextId}`;
+			const positionMap = { ...state.taskPositions[key] };
+
+			// Update all affected tasks
+			affectedTasks.forEach((task) => {
+				positionMap[task.id] = task.position;
+			});
+
+			return {
+				taskPositions: {
+					...state.taskPositions,
+					[key]: positionMap,
+				},
+			};
+		}),
+
+	getTaskPositionMap: (context, contextId) => {
+		const state = get();
+		return state.taskPositions[`${context}-${contextId}`] || {};
+	},
+
+	// Helper to get sorted tasks by position
+	getSortedTasks: (tasks, context, contextId) => {
+		const state = get();
+		const positionMap = state.taskPositions[`${context}-${contextId}`] || {};
+
+		// Filter parent tasks only
+		const parentTasks = tasks.filter((t) => !t.parent_id);
+
+		// Sort by position if exists, otherwise by id
+		return parentTasks.sort((a, b) => {
+			const posA = positionMap[a.id];
+			const posB = positionMap[b.id];
+
+			// Both have positions
+			if (posA !== undefined && posB !== undefined) {
+				return posA - posB;
+			}
+
+			// Only A has position
+			if (posA !== undefined) return -1;
+
+			// Only B has position
+			if (posB !== undefined) return 1;
+
+			// Neither has position, sort by id
+			return a.id - b.id;
+		});
+	},
 });

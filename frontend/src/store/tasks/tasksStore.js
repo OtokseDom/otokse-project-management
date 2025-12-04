@@ -43,5 +43,11 @@ export const useTasksStore = () => {
 		mergeTaskPositions: useAppStore((state) => state.mergeTaskPositions),
 		// Merge tasks after bulk update
 		mergeTasks: useAppStore((state) => state.mergeTasks),
+		// Task Positions
+		taskPositions: useAppStore((state) => state.taskPositions),
+		setTaskPositions: useAppStore((state) => state.setTaskPositions),
+		updateTaskPositionLocal: useAppStore((state) => state.updateTaskPositionLocal),
+		getTaskPositionMap: useAppStore((state) => state.getTaskPositionMap),
+		getSortedTasks: useAppStore((state) => state.getSortedTasks),
 	};
 };
