@@ -144,14 +144,14 @@ export const createTasksSlice = (set, get) => ({
 			};
 		}),
 
-	updateTaskPositionLocal: (taskId, context, contextId, affectedTasks) =>
+	updateTaskPositionLocal: (context, contextId, updatedPositions) =>
 		set((state) => {
 			const key = `${context}-${contextId}`;
 			const positionMap = { ...state.taskPositions[key] };
 
 			// Update all affected tasks
-			affectedTasks.forEach((task) => {
-				positionMap[task.id] = task.position;
+			updatedPositions.forEach((pos) => {
+				positionMap[pos.task_id] = pos.position;
 			});
 
 			return {
@@ -175,24 +175,25 @@ export const createTasksSlice = (set, get) => ({
 		// Filter parent tasks only
 		const parentTasks = tasks.filter((t) => !t.parent_id);
 
-		// Sort by position if exists, otherwise by id
-		return parentTasks.sort((a, b) => {
-			const posA = positionMap[a.id];
-			const posB = positionMap[b.id];
+		// Separate positioned and unpositioned tasks
+		const positioned = [];
+		const unpositioned = [];
 
-			// Both have positions
-			if (posA !== undefined && posB !== undefined) {
-				return posA - posB;
+		parentTasks.forEach((task) => {
+			if (positionMap[task.id] !== undefined) {
+				positioned.push(task);
+			} else {
+				unpositioned.push(task);
 			}
-
-			// Only A has position
-			if (posA !== undefined) return -1;
-
-			// Only B has position
-			if (posB !== undefined) return 1;
-
-			// Neither has position, sort by id
-			return a.id - b.id;
 		});
+
+		// Sort positioned by position
+		positioned.sort((a, b) => positionMap[a.id] - positionMap[b.id]);
+
+		// Sort unpositioned by id
+		unpositioned.sort((a, b) => a.id - b.id);
+
+		// Return positioned first, then unpositioned
+		return [...positioned, ...unpositioned];
 	},
 });

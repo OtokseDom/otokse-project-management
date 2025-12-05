@@ -58,55 +58,57 @@ export default function GridList({ tasks, setIsOpen, setUpdateData, setParentId,
 		}
 
 		const activeTask = sortedTasks[activeIndex];
-		const overTask = sortedTasks[overIndex];
 		const newPosition = overIndex + 1;
 
-		// Determine affected tasks (all tasks between old and new position)
-		const minIndex = Math.min(activeIndex, overIndex);
-		const maxIndex = Math.max(activeIndex, overIndex);
-		const affectedTasks = [];
+		// Optimistic update - calculate affected tasks locally first
+		const affectedPositions = [];
+		affectedPositions.push({
+			task_id: activeTask.id,
+			position: newPosition,
+		});
 
-		// Build the new position map for affected tasks
+		// Calculate which tasks are affected based on movement direction
 		if (activeIndex < overIndex) {
-			// Moving down
-			for (let i = activeIndex; i < overIndex; i++) {
-				affectedTasks.push({
-					id: sortedTasks[i + 1].id,
-					position: i + 1,
+			// Moving down: tasks between activeIndex and overIndex shift up
+			for (let i = activeIndex + 1; i <= overIndex; i++) {
+				affectedPositions.push({
+					task_id: sortedTasks[i].id,
+					position: i,
 				});
 			}
-			affectedTasks.push({
-				id: activeTask.id,
-				position: newPosition,
-			});
 		} else {
-			// Moving up
-			for (let i = overIndex + 1; i <= activeIndex; i++) {
-				affectedTasks.push({
-					id: sortedTasks[i].id,
-					position: i + 1,
+			// Moving up: tasks between overIndex and activeIndex shift down
+			for (let i = overIndex; i < activeIndex; i++) {
+				affectedPositions.push({
+					task_id: sortedTasks[i].id,
+					position: i + 2,
 				});
 			}
-			affectedTasks.push({
-				id: activeTask.id,
-				position: newPosition,
-			});
 		}
 
 		// Optimistic update in store
-		updateTaskPositionLocal(activeTask.id, context, contextId, affectedTasks);
+		updateTaskPositionLocal(context, contextId, affectedPositions);
 
 		try {
 			// Call backend to persist position
-			await axiosClient.patch(API().task_positions_update(), {
+			const response = await axiosClient.patch(API().task_positions_update(), {
 				task_id: activeTask.id,
 				context: context,
 				context_id: contextId || null,
 				position: newPosition,
 			});
+
+			// Backend returns all affected positions, merge them
+			if (response.data.data && Array.isArray(response.data.data)) {
+				const backendPositions = response.data.data.map((pos) => ({
+					task_id: pos.task_id,
+					position: pos.position,
+				}));
+				updateTaskPositionLocal(context, contextId, backendPositions);
+			}
 		} catch (error) {
 			console.error("Failed to update task position:", error);
-			// Optionally refetch positions on error
+			// Refetch positions on error
 			try {
 				const response = await axiosClient.get(API().task_positions_get(context, contextId));
 				if (response.data.data) {

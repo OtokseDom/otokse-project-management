@@ -43,7 +43,7 @@ class TaskPositionController extends Controller
     {
         $validated = $request->validated();
 
-        $taskPosition = $this->taskPosition->updateTaskPosition(
+        $result = $this->taskPosition->updateTaskPosition(
             $validated['task_id'],
             $validated['context'],
             $validated['context_id'] ?? null,
@@ -51,8 +51,11 @@ class TaskPositionController extends Controller
             $this->userData->organization_id
         );
 
+        // Combine primary and affected tasks
+        $allUpdated = collect([$result['primary']])->merge($result['affected']);
+
         return apiResponse(
-            new TaskPositionResource($taskPosition),
+            TaskPositionResource::collection($allUpdated),
             'Task position updated successfully.'
         );
     }
