@@ -29,3 +29,4 @@ Homestead.json
 .phpactor.json
 auth.json
 frontend/.env
+docker-compose.yml
