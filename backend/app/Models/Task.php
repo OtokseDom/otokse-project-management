@@ -262,6 +262,10 @@ class Task extends Model
                         $t->decrement('position');
                     });
             }
+            if ($original['project_id'] !== $validated['project_id']) {
+                // If task project was changed, remove old task position entry
+                TaskPosition::where('task_id', $task->id)->where('context', 'project')->delete();
+            }
 
             // Finally update task to its new project/status/position
             $task->update($validated);
