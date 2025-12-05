@@ -196,4 +196,19 @@ export const createTasksSlice = (set, get) => ({
 		// Return positioned first, then unpositioned
 		return [...positioned, ...unpositioned];
 	},
+
+	// ... new: positions loaded tracking per context/contextId
+	positionsLoaded: {}, // { "context-contextId": true }
+
+	// mark a context as loaded/unloaded
+	setPositionsLoaded: (context, contextId, loaded = true) =>
+		set((state) => {
+			const key = `${context}-${contextId ?? "null"}`;
+			return { positionsLoaded: { ...state.positionsLoaded, [key]: loaded } };
+		}),
+	// helper to read loaded flag (useful outside React component if needed)
+	isPositionsLoaded: (context, contextId) => {
+		const key = `${context}-${contextId ?? "null"}`;
+		return !!get().positionsLoaded[key];
+	},
 });

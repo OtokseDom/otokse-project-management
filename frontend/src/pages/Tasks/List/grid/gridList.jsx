@@ -3,33 +3,44 @@ import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, us
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import debounce from "lodash.debounce";
 import { useTasksStore } from "@/store/tasks/tasksStore";
+import { useAppStore } from "@/store/appStore";
 import TaskGridItem from "./gridItem";
 import { Skeleton } from "@/components/ui/skeleton";
 import { API } from "@/constants/api";
 import axiosClient from "@/axios.client";
 
 export default function GridList({ tasks, setIsOpen, setUpdateData, setParentId, setProjectId, deleteDialogOpen, setDeleteDialogOpen, context, contextId }) {
-	const { tasksLoading, setTaskPositions, updateTaskPositionLocal, getSortedTasks } = useTasksStore();
-	const [activeId, setActiveId] = useState(null);
-	const [positionsLoaded, setPositionsLoaded] = useState(false);
+	const { tasksLoading, setTaskPositions, updateTaskPositionLocal, getSortedTasks, positionsLoaded, setPositionsLoaded } = useTasksStore();
 
-	// Fetch positions on mount or when context/contextId changes
+	const [activeId, setActiveId] = useState(null);
+
+	// Compute key for this context
+	const ctxKey = `${context}-${contextId ?? "null"}`;
+	const loaded = !!positionsLoaded[ctxKey];
+
+	// Fetch positions on mount or when context/contextId changes, but only if not loaded already
 	useEffect(() => {
+		let cancelled = false;
 		const fetchPositions = async () => {
+			// if already loaded for this context, skip fetching
+			if (loaded) return setPositionsLoaded(context, contextId, true);
 			try {
 				const response = await axiosClient.get(API().task_positions_get(context, contextId));
-				if (response.data.data) {
+				if (!cancelled && response.data.data) {
 					setTaskPositions(context, contextId, response.data.data);
+					setPositionsLoaded(context, contextId, true);
 				}
 			} catch (error) {
 				console.error("Failed to fetch task positions:", error);
-			} finally {
-				setPositionsLoaded(true);
 			}
 		};
 
 		fetchPositions();
-	}, [context, contextId, setTaskPositions]);
+		return () => {
+			cancelled = true;
+		};
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [context, contextId, setTaskPositions, setPositionsLoaded, loaded]);
 
 	if (!tasks) return null;
 
@@ -90,7 +101,7 @@ export default function GridList({ tasks, setIsOpen, setUpdateData, setParentId,
 		updateTaskPositionLocal(context, contextId, affectedPositions);
 
 		try {
-			// Get all task IDs in current context
+			// Get all task IDs in current context to ensure backend can create missing positions
 			const allTaskIds = sortedTasks.map((t) => t.id);
 
 			// Call backend to persist position
@@ -109,14 +120,17 @@ export default function GridList({ tasks, setIsOpen, setUpdateData, setParentId,
 					position: pos.position,
 				}));
 				updateTaskPositionLocal(context, contextId, backendPositions);
+				// mark as loaded since now DB has positions for this context
+				setPositionsLoaded(context, contextId, true);
 			}
 		} catch (error) {
 			console.error("Failed to update task position:", error);
-			// Refetch positions on error
+			// Refetch positions on error (only if previously not loaded or to reconcile state)
 			try {
 				const response = await axiosClient.get(API().task_positions_get(context, contextId));
 				if (response.data.data) {
 					setTaskPositions(context, contextId, response.data.data);
+					setPositionsLoaded(context, contextId, true);
 				}
 			} catch (e) {
 				console.error("Failed to refetch positions:", e);
@@ -126,7 +140,7 @@ export default function GridList({ tasks, setIsOpen, setUpdateData, setParentId,
 		}
 	}, 50);
 
-	if (tasksLoading || !positionsLoaded) {
+	if (tasksLoading || !loaded) {
 		return (
 			<div className="w-full scrollbar-custom mt-10">
 				<div className="flex flex-col space-y-2 h-full w-full">

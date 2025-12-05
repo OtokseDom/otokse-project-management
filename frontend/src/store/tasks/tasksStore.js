@@ -49,5 +49,8 @@ export const useTasksStore = () => {
 		updateTaskPositionLocal: useAppStore((state) => state.updateTaskPositionLocal),
 		getTaskPositionMap: useAppStore((state) => state.getTaskPositionMap),
 		getSortedTasks: useAppStore((state) => state.getSortedTasks),
+		positionsLoaded: useAppStore((state) => state.positionsLoaded),
+		setPositionsLoaded: useAppStore((state) => state.setPositionsLoaded),
+		isPositionsLoaded: useAppStore((state) => state.isPositionsLoaded),
 	};
 };
