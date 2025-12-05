@@ -1,28 +1,27 @@
 "use client";
-import { ArrowUpDown } from "lucide-react";
+import { ArrowUpDown, Info } from "lucide-react";
 import { MoreHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useEffect, useMemo, useState } from "react";
 import { useAuthContext } from "@/contexts/AuthContextProvider";
-import { useLoadContext } from "@/contexts/LoadContextProvider";
 import { useToast } from "@/contexts/ToastContextProvider";
 import axiosClient from "@/axios.client";
 import { API } from "@/constants/api";
 import { useTaskStatusesStore } from "@/store/taskStatuses/taskStatusesStore";
 import { statusColors } from "@/utils/taskHelpers";
 import { useKanbanColumnsStore } from "@/store/kanbanColumns/kanbanColumnsStore";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 export const columnsTaskStatus = ({ setIsOpen, setUpdateData, dialogOpen, setDialogOpen }) => {
-	const { loading, setLoading } = useLoadContext();
-	const { taskStatuses, removeTaskStatus } = useTaskStatusesStore();
+	const { taskStatuses, removeTaskStatus, taskStatusesLoading, setTaskStatusesLoading } = useTaskStatusesStore();
 	const { removeKanbanColumnByStatus } = useKanbanColumnsStore();
 	const showToast = useToast();
 	const { user } = useAuthContext(); // Get authenticated user details
 	const [selectedTaskStatusId, setSelectedTaskStatusId] = useState(null);
 	const [hasRelation, setHasRelation] = useState(false);
 	const openDialog = async (taskStatus = {}) => {
-		setLoading(true);
+		setTaskStatusesLoading(true);
 		setDialogOpen(true);
 		setSelectedTaskStatusId(taskStatus.id);
 		try {
@@ -32,7 +31,7 @@ export const columnsTaskStatus = ({ setIsOpen, setUpdateData, dialogOpen, setDia
 			showToast("Failed!", e.response?.data?.message, 3000, "fail");
 			if (e.message !== "Request aborted") console.error("Error fetching data:", e.message);
 		} finally {
-			setLoading(false);
+			setTaskStatusesLoading(false);
 		}
 	};
 	useEffect(() => {
@@ -43,7 +42,7 @@ export const columnsTaskStatus = ({ setIsOpen, setUpdateData, dialogOpen, setDia
 		setUpdateData(taskStatus);
 	};
 	const handleDelete = async (id) => {
-		setLoading(true);
+		setTaskStatusesLoading(true);
 		try {
 			await axiosClient.delete(API().task_status(id));
 			removeTaskStatus(id);
@@ -53,9 +52,9 @@ export const columnsTaskStatus = ({ setIsOpen, setUpdateData, dialogOpen, setDia
 			showToast("Failed!", e.response?.data?.message, 3000, "fail");
 			if (e.message !== "Request aborted") console.error("Error fetching data:", e.message);
 		} finally {
-			// Always stop loading when done
+			// Always stop taskStatusesLoading when done
 			setDialogOpen(false);
-			setLoading(false);
+			setTaskStatusesLoading(false);
 		}
 	};
 	const baseColumns = useMemo(
@@ -107,16 +106,24 @@ export const columnsTaskStatus = ({ setIsOpen, setUpdateData, dialogOpen, setDia
 				const taskStatus = row.original;
 				return (
 					<DropdownMenu modal={false}>
-						<DropdownMenuTrigger asChild>
-							{!["Pending", "In Progress", "Completed", "For Review", "On Hold", "Delayed", "Cancelled"].includes(taskStatus?.name) ? (
+						{!["Pending", "In Progress", "Completed", "For Review", "On Hold", "Delayed", "Cancelled"].includes(taskStatus?.name) ? (
+							<DropdownMenuTrigger asChild>
 								<Button variant="ghost" className="h-8 w-8 p-0">
 									<span className="sr-only">Open menu</span>
 									<MoreHorizontal className="h-4 w-4" />
 								</Button>
-							) : (
-								<span className="text-muted-foreground text-xs">system status</span>
-							)}
-						</DropdownMenuTrigger>
+							</DropdownMenuTrigger>
+						) : (
+							<div className="flex gap-2 justify-start items-center text-muted-foreground text-xs">
+								<span className="min-w-fit">system status</span>
+								<Tooltip>
+									<TooltipTrigger>
+										<Info size={16} className="text-muted-foreground hover:cursor-help" />
+									</TooltipTrigger>
+									<TooltipContent>System statuses are used for reports and metrics</TooltipContent>
+								</Tooltip>
+							</div>
+						)}
 						<DropdownMenuContent align="end">
 							<DropdownMenuItem className="cursor-pointer" onClick={() => handleUpdateTaskStatus(taskStatus)}>
 								Update Task Status
@@ -159,7 +166,7 @@ export const columnsTaskStatus = ({ setIsOpen, setUpdateData, dialogOpen, setDia
 					</DialogClose>
 					{!hasRelation && (
 						<Button
-							disabled={loading}
+							disabled={taskStatusesLoading}
 							onClick={() => {
 								handleDelete(selectedTaskStatusId);
 								setDialogOpen(false);

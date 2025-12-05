@@ -115,15 +115,15 @@ class TaskController extends Controller
         $validated = $request->validate([
             'ids' => 'required|array',
             'ids.*' => 'integer|exists:tasks,id',
-            'action' => 'required|string|in:status,assignees,project,category',
-            'value' => 'required',
+            'action' => 'required|string|in:status,assignees,project,category,priority,start_date,end_date,actual_date',
+            'value' => 'nullable',
         ]);
         $organization_id = $this->userData->organization_id;
         $userId = $this->userData->id;
 
         $ids = $validated['ids'];
         $action = $validated['action'];
-        $value = $validated['value'];
+        $value = $validated['value'] ?? null;
         // For assignees, value should be array
         if ($action === 'assignees' && !is_array($value)) {
             $value = [$value];
@@ -146,67 +146,5 @@ class TaskController extends Controller
         $result = $this->task->bulkDelete($ids, $deleteSubtasks, $organization_id);
 
         return apiResponse($result, 'Tasks deleted successfully');
-    }
-
-    public function uploadTaskImage(Request $request)
-    {
-        $request->validate([
-            'image' => 'required|image|max:5120', // 5MB
-        ]);
-        $org_id = $this->userData->organization_id;
-        $path = "images/{$org_id}";
-        $file = $request->file('image');
-        $filename = uniqid('taskimg_') . '.' . $file->getClientOriginalExtension();
-
-        // Ensure directory exists
-        Storage::makeDirectory($path);
-
-        // Save to storage/app/images/{org}
-        $file->storeAs($path, $filename);
-
-        // Return full URL (including API prefix) so frontend doesn’t need to guess
-        $url = url("api/v1/tasks/images/{$org_id}/{$filename}");
-        // Return a URL for the frontend to access (you may need a download endpoint)
-        return response()->json([
-            'success' => true,
-            'url' => $url,
-            'filename' => $filename,
-            'org' => $org_id,
-        ]);
-    }
-
-    // Optional: Serve images securely (not public)
-    public function getTaskImage($org, $filename)
-    {
-        $path = "images/{$org}/{$filename}";
-        if (!Storage::exists($path)) {
-            Log::error("Image not found: $path");
-            abort(404);
-        }
-        $mime = Storage::mimeType($path);
-        $file = Storage::get($path);
-        return response($file, 200)
-            ->header('Access-Control-Allow-Origin', '*')
-            ->header('Content-Type', $mime)
-            ->header('Cache-Control', 'public, max-age=86400');
-    }
-
-    public function deleteTaskImage(Request $request)
-    {
-        $url = $request->input('url');
-        if (!$url) return response()->json(['error' => 'No URL provided'], 400);
-
-        // Match /api/v1/tasks/images/{org}/{filename}
-        $matches = [];
-        if (preg_match('#/api/v1/tasks/images/([^/]+)/([^/]+)$#', $url, $matches)) {
-            $org = $matches[1];
-            $filename = $matches[2];
-            $path = "images/{$org}/{$filename}";
-            if (Storage::exists($path)) {
-                Storage::delete($path);
-                return response()->json(['success' => true]);
-            }
-        }
-        return response()->json(['error' => 'File not found'], 404);
     }
 }

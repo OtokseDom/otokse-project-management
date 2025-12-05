@@ -11,6 +11,7 @@ export const API = (version = "v1") => ({
 	user: (id = "") => `/${version}/user${id ? `/${id}` : ""}`,
 	user_reports: (id = "", from = "", to = "", projects = "") => `/${version}/user/${id}/reports?from=${from}&to=${to}&projects=${projects}`,
 	task: (id = "") => `/${version}/task${id ? `/${id}` : ""}`,
+	task_discussion: (id = "") => `/${version}/task-discussion${id ? `/${id}` : ""}`,
 	organization: (id = "") => `/${version}/organization${id ? `/${id}` : ""}`,
 	organization_generate_code: (id) => `/${version}/organization/${id}/generate-code`,
 	dashboard: (from = "", to = "", users = "", projects = "") => `/${version}/dashboard?from=${from}&to=${to}&users=${users}&projects=${projects}`,
@@ -18,7 +19,7 @@ export const API = (version = "v1") => ({
 	task_move: (id = "") => `/${version}/tasks/${id}/move`,
 	task_bulk_update: () => `/${version}/tasks/bulk-update`,
 	task_bulk_delete: () => `/${version}/tasks/bulk-delete`,
-	task_upload_image: () => `/${version}/tasks/upload-image`,
-	task_get_image: (org = "", filename = "") => `/${version}/tasks/images/${org}/${filename}`,
-	task_delete_image: () => `/${version}/tasks/delete-image`,
+	task_attachment_delete: (id = "") => `/${version}/tasks/attachments/${id}`,
+	task_positions_get: (context = "", contextId = null) => `/${version}/task-positions/${context}${contextId ? `/${contextId}` : ""}`,
+	task_positions_update: () => `/${version}/task-positions/update`,
 });

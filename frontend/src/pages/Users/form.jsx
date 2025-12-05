@@ -8,12 +8,11 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 // Calendar
 import { format, parseISO } from "date-fns";
-import { Loader2 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useToast } from "@/contexts/ToastContextProvider";
 import axiosClient from "@/axios.client";
 import { useAuthContext } from "@/contexts/AuthContextProvider";
-import { useLoadContext } from "@/contexts/LoadContextProvider";
 import DateInput from "@/components/form/DateInput";
 import { API } from "@/constants/api";
 import { useUsersStore } from "@/store/users/usersStore";
@@ -37,17 +36,18 @@ const formSchema = z.object({
 	status: z.string().refine((data) => data.trim() !== "", {
 		message: "Status is required.",
 	}),
+	password: z.string().optional(),
 });
 
-export default function UserForm({ setIsOpen, updateData, setUpdateData, userProfileId }) {
+export default function UserForm({ setIsOpen, updateData, userProfileId }) {
 	const { user: user_auth, setUser } = useAuthContext();
-	const { loading, setLoading } = useLoadContext();
 	const showToast = useToast();
-	const { addUser, updateUser } = useUsersStore();
+	const { addUser, updateUser, usersLoading, setUsersLoading } = useUsersStore();
 	const { setUser: setProfileUser } = useUserStore();
 	const { addUserFilter, updateUserFilter } = useDashboardStore();
 	const { fetchTasks } = useTaskHelpers();
 	const { addOption } = useTasksStore();
+	const [showPassword, setShowPassword] = useState(false);
 
 	const [date, setDate] = useState();
 
@@ -60,11 +60,12 @@ export default function UserForm({ setIsOpen, updateData, setUpdateData, userPro
 			role: "",
 			email: "",
 			status: "",
+			password: "",
 		},
 	});
 	useEffect(() => {
 		if (updateData) {
-			const { name, position, dob, role, email, status } = updateData;
+			const { name, position, dob, role, email, status, password } = updateData;
 			form.reset({
 				name,
 				position,
@@ -72,26 +73,33 @@ export default function UserForm({ setIsOpen, updateData, setUpdateData, userPro
 				role,
 				email,
 				status,
+				password,
 			});
 			setDate(dob ? parseISO(dob) : undefined);
 		}
 	}, [updateData, form]);
 
 	const handleSubmit = async (form) => {
-		const formattedData = {
+		let formattedData = {
 			...form,
 			organization_id: user_auth.data.organization_id,
 			dob: form.dob ? format(form.dob, "yyyy-MM-dd") : null, // Format to Y-m-d
-			password: "$2y$12$tXliF33idwwMmvk1tiF.ZOotEsqQnuWinaX90NLaw.rEchjbEAXCW", //password: admin123
+			password: "$2y$12$tXliF33idwwMmvk1tiF.ZOotEsqQnuWinaX90NLaw.rEchjbEAXCW", //default: admin123
 		};
-		setLoading(true);
+		// Remove password field if empty during update
+		if (Object.keys(updateData).length !== 0 && form.password !== "") {
+			formattedData.password = form.password;
+		} else if (Object.keys(updateData).length !== 0 && form.password === "") {
+			delete formattedData.password;
+		}
+		setUsersLoading(true);
 		try {
 			if (Object.keys(updateData).length === 0) {
 				const userResponse = await axiosClient.post(API().user(), formattedData);
 				addUser(userResponse.data.data);
 				addOption({ value: userResponse.data.data.id, label: userResponse.data.data.name });
 				addUserFilter(userResponse.data.data);
-				showToast("Success!", "User added.", 3000);
+				showToast("Success!", "User added. Default password is 'admin123'", 3000);
 			} else {
 				const userResponse = await axiosClient.put(API().user(updateData?.id), formattedData);
 				updateUser(updateData.id, userResponse.data.data);
@@ -106,9 +114,8 @@ export default function UserForm({ setIsOpen, updateData, setUpdateData, userPro
 			showToast("Failed!", e.response?.data?.message, 3000, "fail");
 			console.error("Error fetching data:", e);
 		} finally {
-			setUpdateData({});
 			fetchTasks();
-			setLoading(false);
+			setUsersLoading(false);
 			setIsOpen(false);
 		}
 	};
@@ -116,6 +123,49 @@ export default function UserForm({ setIsOpen, updateData, setUpdateData, userPro
 	return (
 		<Form {...form}>
 			<form onSubmit={form.handleSubmit(handleSubmit)} className="flex flex-col gap-4 max-w-md w-full">
+				{user_auth?.data?.role !== "Employee" && (
+					<FormField
+						control={form.control}
+						name="status"
+						render={({ field }) => {
+							const statuses = [
+								{ id: 1, name: "Pending" },
+								{ id: 2, name: "Active" },
+								{ id: 3, name: "Inactive" },
+								{ id: 4, name: "Rejected" },
+								{ id: 5, name: "Banned" },
+							];
+							return (
+								<FormItem>
+									<FormLabel>Status</FormLabel>
+									<Select
+										disabled={user_auth?.data?.role === "Employee"}
+										onValueChange={field.onChange}
+										defaultValue={updateData?.status || field.value}
+									>
+										<FormControl>
+											<SelectTrigger>
+												<SelectValue placeholder="Select a status"></SelectValue>
+											</SelectTrigger>
+										</FormControl>
+										<SelectContent>
+											{Array.isArray(statuses) && statuses.length > 0 ? (
+												statuses?.map((status) => (
+													<SelectItem key={status?.id} value={status?.name.toLowerCase()}>
+														{status?.name}
+													</SelectItem>
+												))
+											) : (
+												<SelectItem disabled>No statuses available</SelectItem>
+											)}
+										</SelectContent>
+									</Select>
+									<FormMessage />
+								</FormItem>
+							);
+						}}
+					/>
+				)}
 				<FormField
 					control={form.control}
 					name="name"
@@ -210,51 +260,36 @@ export default function UserForm({ setIsOpen, updateData, setUpdateData, userPro
 						return <DateInput field={field} label={"Birthday"} placeholder={"Pick a date"} disableFuture={true} />;
 					}}
 				/>
-				{user_auth?.data?.role !== "Employee" && (
+				{(user_auth?.data?.role !== "Employee" && user_auth?.data?.role !== "Manager") || user_auth?.data?.id === parseInt(updateData?.id) ? (
 					<FormField
 						control={form.control}
-						name="status"
+						name="password"
 						render={({ field }) => {
-							const statuses = [
-								{ id: 1, name: "Pending" },
-								{ id: 2, name: "Active" },
-								{ id: 3, name: "Inactive" },
-								{ id: 4, name: "Rejected" },
-								{ id: 5, name: "Banned" },
-							];
 							return (
 								<FormItem>
-									<FormLabel>Status</FormLabel>
-									<Select
-										disabled={user_auth?.data?.role === "Employee"}
-										onValueChange={field.onChange}
-										defaultValue={updateData?.status || field.value}
-									>
+									<FormLabel>Password</FormLabel>
+									<div className="flex items-start gap-2">
 										<FormControl>
-											<SelectTrigger>
-												<SelectValue placeholder="Select a status"></SelectValue>
-											</SelectTrigger>
+											<Input type={showPassword ? "text" : "password"} placeholder="Password" {...field} />
 										</FormControl>
-										<SelectContent>
-											{Array.isArray(statuses) && statuses.length > 0 ? (
-												statuses?.map((status) => (
-													<SelectItem key={status?.id} value={status?.name.toLowerCase()}>
-														{status?.name}
-													</SelectItem>
-												))
-											) : (
-												<SelectItem disabled>No statuses available</SelectItem>
-											)}
-										</SelectContent>
-									</Select>
+										{showPassword ? (
+											<EyeOff size={24} className="mt-2 hover:cursor-pointer" onClick={() => setShowPassword(false)} />
+										) : (
+											<Eye size={24} className="mt-2 hover:cursor-pointer" onClick={() => setShowPassword(true)} />
+										)}
+									</div>
+									<p className="text-muted-foreground text-xs">Leave empty to keep the current password.</p>
 									<FormMessage />
 								</FormItem>
 							);
 						}}
 					/>
+				) : (
+					""
 				)}
-				<Button type="submit" disabled={loading}>
-					{loading && <Loader2 className="animate-spin mr-5 -ml-11 text-background" />} {Object.keys(updateData).length === 0 ? "Submit" : "Update"}
+				<Button type="submit" disabled={usersLoading}>
+					{usersLoading && <Loader2 className="animate-spin mr-5 -ml-11 text-background" />}{" "}
+					{Object.keys(updateData).length === 0 ? "Submit" : "Update"}
 				</Button>
 			</form>
 		</Form>

@@ -14,6 +14,7 @@ import {
 	FolderKanban,
 	ListCheck,
 	KanbanSquareDashedIcon,
+	ListOrderedIcon,
 } from "lucide-react";
 import logo from "../assets/logo.png";
 
@@ -32,7 +33,8 @@ import {
 	SidebarTrigger,
 	SidebarMenuSub,
 	SidebarMenuSubItem,
-	useSidebar, // for auto closing sidebar on mobile location change
+	useSidebar,
+	SidebarMenuSubButton, // for auto closing sidebar on mobile location change
 } from "@/components/ui/sidebar";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "./ui/dropdown-menu";
 import { Link, useNavigate, useLocation } from "react-router-dom";
@@ -195,7 +197,7 @@ export function AppSidebar() {
 			<SidebarHeader>
 				<SidebarMenu>
 					<div className="flex justify-between cursor-pointer">
-						<img src={logo} className="overflow-hidden transition-all w-20" alt="logo" onClick={() => navigate("/")} />
+						<img title="Dashboard" src={logo} className="overflow-hidden transition-all w-20" alt="logo" onClick={() => navigate("/")} />
 						<SidebarTrigger className="hidden md:flex w-8 h-8" />
 					</div>
 				</SidebarMenu>
@@ -211,7 +213,7 @@ export function AppSidebar() {
 									<Link key={item.title} to={item.url} onClick={() => setCurrentPath(item.url)}>
 										<SidebarMenuItem key={item.title}>
 											<SidebarMenuButton isActive={currentPath === item.url || currentPath.startsWith(item.url + "/")} asChild>
-												<span>
+												<span title={item.title}>
 													<item.icon />
 													{item.title}
 												</span>
@@ -223,7 +225,7 @@ export function AppSidebar() {
 										<SidebarMenuItem>
 											<CollapsibleTrigger asChild>
 												<SidebarMenuButton isActive={currentPath === item.url || currentPath.startsWith(item.url + "/")} asChild>
-													<span className="flex flex-row justify-between">
+													<span title={item.title} className="flex flex-row justify-between">
 														<span className="flex items-center gap-2">
 															<item.icon size={16} />
 															{item.title}
@@ -274,15 +276,15 @@ export function AppSidebar() {
 				</SidebarGroup>
 			</SidebarContent>
 			<SidebarFooter>
-				<SidebarMenu>
+				<SidebarMenu className="mb-8 md:mb-0">
 					<SidebarMenuItem>
 						{theme == "light" ? (
-							<SidebarMenuButton onClick={toggleDark}>
+							<SidebarMenuButton title="Toggle dark mode" onClick={toggleDark}>
 								<MoonStar size={16} />
 								<span className="ml-2">Dark Mode</span>
 							</SidebarMenuButton>
 						) : (
-							<SidebarMenuButton onClick={toggleDark}>
+							<SidebarMenuButton title="Toggle light mode" onClick={toggleDark}>
 								<Sun size={16} />
 								<span className="ml-2">Light Mode</span>
 							</SidebarMenuButton>
@@ -291,7 +293,7 @@ export function AppSidebar() {
 					<SidebarMenuItem>
 						<DropdownMenu>
 							<DropdownMenuTrigger asChild>
-								<SidebarMenuButton>
+								<SidebarMenuButton title={`Profile | ${user?.data?.name}`}>
 									<User2 /> {user?.data?.name}
 									<ChevronUp className="ml-auto" />
 								</SidebarMenuButton>
@@ -304,18 +306,19 @@ export function AppSidebar() {
 							</DropdownMenuContent>
 						</DropdownMenu>
 					</SidebarMenuItem>
-					<SidebarMenuItem className="block md:hidden">
-						{theme == "light" ? (
-							<SidebarMenuButton onClick={toggleDark}>
-								<MoonStar size={16} />
-								<span className="ml-2">Dark Mode</span>
-							</SidebarMenuButton>
-						) : (
-							<SidebarMenuButton onClick={toggleDark}>
-								<Sun size={16} />
-								<span className="ml-2">Light Mode</span>
-							</SidebarMenuButton>
-						)}
+					<SidebarMenuItem className="flex flex-row justify-evenly gap-4 border-t pt-1 cursor-pointer">
+						<SidebarMenuSubButton
+							onClick={() => window.open("https://github.com/OtokseDom/otokse-project-management", "_blank")}
+							className="w-fit py-0 text-xs text-muted-foreground hover:underline"
+						>
+							<span>About this project</span>
+						</SidebarMenuSubButton>
+						<SidebarMenuSubButton
+							onClick={() => window.open("https://github.com/OtokseDom/otokse-project-management/issues", "_blank")}
+							className="w-fit py-0 text-xs text-muted-foreground hover:underline"
+						>
+							<span>Report Issues</span>
+						</SidebarMenuSubButton>
 					</SidebarMenuItem>
 				</SidebarMenu>
 			</SidebarFooter>

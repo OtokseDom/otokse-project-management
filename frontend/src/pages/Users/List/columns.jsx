@@ -1,5 +1,5 @@
 "use client";
-import { ArrowUpDown, MoreHorizontal, User2 } from "lucide-react";
+import { ArrowUpDown, Eye, MoreHorizontal, User2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useAuthContext } from "@/contexts/AuthContextProvider";
@@ -14,10 +14,9 @@ import { useUsersStore } from "@/store/users/usersStore";
 import { useDashboardStore } from "@/store/dashboard/dashboardStore";
 
 export const columns = ({ setIsOpen, setUpdateData }) => {
-	const { users, updateUser, removeUser } = useUsersStore();
+	const { users, updateUser, removeUser, setUsersLoading, usersLoading } = useUsersStore();
 	const { removeUserFilter } = useDashboardStore();
 	const { user } = useAuthContext();
-	const { loading, setLoading } = useLoadContext();
 	const showToast = useToast();
 	const [dialogOpen, setDialogOpen] = useState(false);
 	const [dialogType, setDialogType] = useState(null);
@@ -25,7 +24,7 @@ export const columns = ({ setIsOpen, setUpdateData }) => {
 	const [hasRelation, setHasRelation] = useState(false);
 
 	const openDialog = async (type, userData = {}) => {
-		setLoading(true);
+		setUsersLoading(true);
 		setDialogType(type);
 		setDialogOpen(true);
 		setSelectedUser(userData.id);
@@ -36,7 +35,7 @@ export const columns = ({ setIsOpen, setUpdateData }) => {
 			showToast("Failed!", e.response?.data?.message, 3000, "fail");
 			if (e.message !== "Request aborted") console.error("Error fetching data:", e.message);
 		} finally {
-			setLoading(false);
+			setUsersLoading(false);
 		}
 	};
 	useEffect(() => {
@@ -53,7 +52,7 @@ export const columns = ({ setIsOpen, setUpdateData }) => {
 	};
 
 	const handleApproval = async (userRow = {}) => {
-		setLoading(true);
+		setUsersLoading(true);
 		try {
 			const form = { ...userRow, status: "active" };
 			const res = await axiosClient.put(API().user(userRow?.id), form);
@@ -66,11 +65,11 @@ export const columns = ({ setIsOpen, setUpdateData }) => {
 		} catch (e) {
 			showToast("Failed!", e.response?.data?.message, 3000, "fail");
 		} finally {
-			setLoading(false);
+			setUsersLoading(false);
 		}
 	};
 	const handleDelete = async (id) => {
-		setLoading(true);
+		setUsersLoading(true);
 		try {
 			const userResponse = await axiosClient.delete(API().user(id));
 			removeUser(id);
@@ -80,7 +79,7 @@ export const columns = ({ setIsOpen, setUpdateData }) => {
 			showToast("Failed!", e.response?.data?.message, 3000, "fail");
 			if (e.message !== "Request aborted") console.error("Error fetching data:", e.message);
 		} finally {
-			setLoading(false);
+			setUsersLoading(false);
 		}
 	};
 	const baseColumns = useMemo(
@@ -170,20 +169,41 @@ export const columns = ({ setIsOpen, setUpdateData }) => {
 							<DropdownMenuItem>
 								<Link to={`/users/${userRow.id}`}>View Profile</Link>
 							</DropdownMenuItem>
-							<DropdownMenuItem className="cursor-pointer" onClick={(e) => handleUpdateUser(userRow, e)}>
-								Update User
-							</DropdownMenuItem>
-							<DropdownMenuItem
-								className="cursor-pointer"
-								onClick={(e) => {
-									e.stopPropagation();
-									openDialog("delete", userRow);
-								}}
-							>
-								Delete Account
-							</DropdownMenuItem>
+							{user?.data?.role === "Superadmin" ||
+							user?.data?.role === "Admin" ||
+							(user?.data?.role === "Manager" && userRow.role === "Employee") ||
+							user?.data?.id === userRow.id ? (
+								<>
+									<DropdownMenuItem className="cursor-pointer" onClick={(e) => handleUpdateUser(userRow, e)}>
+										Update User
+									</DropdownMenuItem>
+									<DropdownMenuItem
+										className="cursor-pointer"
+										onClick={(e) => {
+											e.stopPropagation();
+											openDialog("delete", userRow);
+										}}
+									>
+										Delete Account
+									</DropdownMenuItem>
+								</>
+							) : (
+								""
+							)}
 						</DropdownMenuContent>
 					</DropdownMenu>
+				);
+			},
+		});
+	} else {
+		baseColumns.push({
+			id: "actions",
+			cell: ({ row }) => {
+				const userRow = row.original;
+				return (
+					<Link title="View profile" to={`/users/${userRow.id}`}>
+						<Eye className="text-muted-foreground" size={16} />
+					</Link>
 				);
 			},
 		});
@@ -212,7 +232,7 @@ export const columns = ({ setIsOpen, setUpdateData }) => {
 					</DialogClose>
 					{!hasRelation && (
 						<Button
-							disabled={loading}
+							disabled={usersLoading}
 							onClick={() => {
 								if (dialogType === "reject") handleDelete(selectedUser);
 								else if (dialogType === "delete") handleDelete(selectedUser);

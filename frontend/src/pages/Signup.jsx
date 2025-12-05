@@ -119,7 +119,9 @@ export default function Signup() {
 									<span className={`${theme === "dark" ? "text-purple-200" : "text-gray-700"} w-full`}>Create Organization</span>
 								</label>
 							</div>
-							<label className={`block text-sm font-medium mb-2 ${theme === "dark" ? "text-purple-200" : "text-gray-700"}`}>Organization</label>
+							<label className={`block text-sm font-medium mb-2 ${theme === "dark" ? "text-purple-200" : "text-gray-700"}`}>
+								{hasOrgCode ? "Organization Code" : "Organization Name"}
+							</label>
 							{hasOrgCode ? (
 								<input
 									ref={orgCodeRef}
@@ -227,17 +229,19 @@ export default function Signup() {
 					</form>
 
 					<div className="text-center mt-6">
-						<p className={`${theme === "dark" ? "text-purple-200" : "text-gray-600"}`}>
-							Already have an account?{" "}
-							<Link
-								to="/login"
-								className={`font-medium transition-colors duration-300 ${
-									theme === "dark" ? "text-purple-300 hover:text-white" : "text-purple-600 hover:text-purple-800"
-								}`}
-							>
-								Sign In
-							</Link>
-						</p>
+						{!loading && (
+							<p className={`${theme === "dark" ? "text-purple-200" : "text-gray-600"}`}>
+								Already have an account?{" "}
+								<Link
+									to={loading ? "#" : "/login"}
+									className={`font-medium transition-colors duration-300 ${
+										theme === "dark" ? "text-purple-300 hover:text-white" : "text-purple-600 hover:text-purple-800"
+									}`}
+								>
+									Sign In
+								</Link>
+							</p>
+						)}
 					</div>
 				</div>
 				<div className="mt-5 text-muted-foreground text-center">© 2025 Dominic Escoto. All rights reserved.</div>

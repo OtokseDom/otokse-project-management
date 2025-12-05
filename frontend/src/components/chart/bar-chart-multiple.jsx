@@ -6,18 +6,21 @@ import { Bar, BarChart, CartesianGrid, XAxis } from "recharts";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { Skeleton } from "../ui/skeleton";
-import { useLoadContext } from "@/contexts/LoadContextProvider";
+import { useDashboardStore } from "@/store/dashboard/dashboardStore";
+import { useUserStore } from "@/store/user/userStore";
 
 export function ChartBarMultiple({ report, variant, type }) {
+	const { dashboardReportsLoading } = useDashboardStore();
+	const { userReportsLoading } = useUserStore();
 	var chartConfig = null;
 	if (variant == "dashboard") {
 		chartConfig = {
 			underrun: {
-				label: "Underrun (hr) ",
+				label: "Underrun (days) ",
 				color: "hsl(var(--chart-1))",
 			},
 			overrun: {
-				label: "Overrun (hr) ",
+				label: "Overrun (days) ",
 				color: "hsl(270 70% 50%)", // Purple
 			},
 		};
@@ -33,11 +36,10 @@ export function ChartBarMultiple({ report, variant, type }) {
 			},
 		};
 	}
-	const { loading } = useLoadContext();
 	return (
-		<Card className={`flex flex-col relative w-full h-full justify-between ${variant == "dashboard" ? "bg-primary-foreground rounded-md" : ""}`}>
-			<CardHeader className="">
-				<CardTitle>
+		<Card className={`flex flex-col relative w-full h-full justify-between rounded-2xl`}>
+			<CardHeader className="text-center">
+				<CardTitle className="text-lg">
 					{variant == "dashboard"
 						? type == "category"
 							? "Time Overruns vs Underruns per Category"
@@ -55,7 +57,7 @@ export function ChartBarMultiple({ report, variant, type }) {
 			</CardHeader>
 			<CardContent>
 				<ChartContainer config={chartConfig}>
-					{loading ? (
+					{dashboardReportsLoading || userReportsLoading ? (
 						<div className="flex flex-col gap-2 items-center justify-center h-full w-full p-8">
 							<Skeleton className=" w-full h-10 rounded-full" />
 							<Skeleton className=" w-full h-10 rounded-full" />
@@ -63,7 +65,7 @@ export function ChartBarMultiple({ report, variant, type }) {
 							<Skeleton className=" w-full h-10 rounded-full" />
 						</div>
 					) : report?.data_count == 0 ? (
-						<div className="flex items-center justify-center fw-full h-full text-3xl text-gray-500">No Tasks Yet</div>
+						<div className="flex items-center justify-center fw-full h-full text-lg text-gray-500">No Tasks Yet</div>
 					) : (
 						<BarChart accessibilityLayer data={report?.chart_data}>
 							<CartesianGrid vertical={false} />
@@ -91,7 +93,7 @@ export function ChartBarMultiple({ report, variant, type }) {
 				</ChartContainer>
 			</CardContent>
 			<CardFooter className="flex-col items-start gap-2 text-sm">
-				{loading ? (
+				{dashboardReportsLoading || userReportsLoading ? (
 					<div className="flex flex-col gap-2 items-center justify-center h-full w-full">
 						<Skeleton className=" w-full h-4 rounded-full" />
 						<Skeleton className=" w-full h-4 rounded-full" />
@@ -103,7 +105,7 @@ export function ChartBarMultiple({ report, variant, type }) {
 						{/* Underruns */}
 						{Math.abs(report?.runs["under"]) > 0 ? (
 							<div className="flex gap-2 leading-none font-medium">
-								Total Underruns (hrs):
+								Total Underruns ({variant == "dashboard" ? "days" : "hrs"}):
 								<span className="flex flex-row gap-4 text-green-500">
 									{Math.abs(report.runs["under"])} <Zap className="h-4 w-4" />
 								</span>
@@ -117,7 +119,7 @@ export function ChartBarMultiple({ report, variant, type }) {
 						{/* Overruns */}
 						{(variant == "dashboard" && report?.runs["over"] > 0) || (variant != "dashboard" && report?.runs["over"] < 0) ? (
 							<div className="flex gap-2 leading-none font-medium">
-								Total Overruns (hrs):
+								Total Overruns ({variant == "dashboard" ? "days" : "hrs"}):
 								<span className="flex flex-row gap-4 text-red-500">
 									{report.runs["over"]} <ClockAlert className="h-4 w-4" />
 								</span>

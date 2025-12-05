@@ -10,7 +10,6 @@ import { ScrollContextProvider } from "./contexts/ScrollContextProvider";
 import { ToastProvider } from "@radix-ui/react-toast";
 import { ToastContextProvider } from "./contexts/ToastContextProvider";
 import { LoadContextProvider } from "./contexts/LoadContextProvider";
-import { Analytics } from "@vercel/analytics/react";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
 	// Strict mode rerenders everything twice to detect side effects
@@ -23,7 +22,6 @@ ReactDOM.createRoot(document.getElementById("root")).render(
 							<LoadContextProvider>
 								<ThemeProvider>
 									<RouterProvider router={router} />
-									{process.env.NODE_ENV === "production" && <Analytics />}
 								</ThemeProvider>
 							</LoadContextProvider>
 						</ScrollContextProvider>

@@ -14,7 +14,7 @@ export const columns = [
 			const name = row.original.name;
 			const position = row.original.position;
 			return (
-				<div className="min-w-52">
+				<div>
 					<b>{name}</b>
 					<br />
 					<span className="text-sm text-muted-foreground">{position}</span>

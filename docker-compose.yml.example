@@ -1,0 +1,56 @@
+version: "3.8"
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: otokse_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: example_db
+      MYSQL_ROOT_PASSWORD: example_root_password
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - shared_backend
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: otokse_backend
+    restart: unless-stopped
+    ports:
+      - "8001:80"
+    environment:
+      - APP_ENV=local
+      - APP_DEBUG=true
+      - APP_URL=http://localhost:8001
+      - DB_HOST=otokse_mysql
+      - DB_PORT=3306
+      - DB_DATABASE=example_db
+      - DB_USERNAME=example_user
+      - DB_PASSWORD=example_password
+    depends_on:
+      - mysql
+    networks:
+      - shared_backend
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: otokse_frontend
+    restart: unless-stopped
+    ports:
+      - "8002:80"
+    depends_on:
+      - backend
+    networks:
+      - shared_backend
+
+volumes:
+  mysql_data:
+
+networks:
+  shared_backend:
+    external: true

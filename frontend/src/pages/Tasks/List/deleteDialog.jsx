@@ -5,20 +5,19 @@ import { Button } from "@/components/ui/button";
 import { API } from "@/constants/api";
 import axiosClient from "@/axios.client";
 import { useTaskHelpers } from "@/utils/taskHelpers";
-import { useLoadContext } from "@/contexts/LoadContextProvider";
 import { useToast } from "@/contexts/ToastContextProvider";
+import { useTasksStore } from "@/store/tasks/tasksStore";
 
 export default function DeleteDialog({ dialogOpen, setDialogOpen, hasRelation, selectedTaskId, selectedTasks = [], clearSelection }) {
-	const { loading, setLoading } = useLoadContext();
 	const showToast = useToast();
-	const { fetchTasks } = useTaskHelpers();
-
+	const { fetchTasks, fetchReports } = useTaskHelpers();
+	const { tasksLoading, setTasksLoading } = useTasksStore();
 	const ids = selectedTasks.map((t) => t.id);
 	const isBulk = ids.length > 1;
 	const hasAnyRelation = selectedTasks.some((t) => t.children && t.children.length > 0);
 
 	const handleDelete = async (ids, deleteSubtasks = false) => {
-		setLoading(true);
+		setTasksLoading(true);
 		try {
 			if (isBulk) {
 				await axiosClient.delete(API().task_bulk_delete(), {
@@ -30,13 +29,14 @@ export default function DeleteDialog({ dialogOpen, setDialogOpen, hasRelation, s
 				});
 			}
 			fetchTasks();
+			fetchReports();
 			showToast("Success!", "Task(s) deleted.", 3000);
 			if (clearSelection) clearSelection(); // <-- Only clear after success
 		} catch (e) {
 			showToast("Failed!", e.response?.data?.message, 3000, "fail");
 			if (e.message !== "Request aborted") console.error("Error fetching data:", e.message);
 		} finally {
-			setLoading(false);
+			setTasksLoading(false);
 		}
 	};
 	return (
@@ -63,7 +63,7 @@ export default function DeleteDialog({ dialogOpen, setDialogOpen, hasRelation, s
 					</DialogClose>
 					{hasAnyRelation && (
 						<Button
-							disabled={loading}
+							disabled={tasksLoading}
 							variant="destructive"
 							onClick={() => {
 								setDialogOpen(false);
@@ -74,7 +74,7 @@ export default function DeleteDialog({ dialogOpen, setDialogOpen, hasRelation, s
 						</Button>
 					)}
 					<Button
-						disabled={loading}
+						disabled={tasksLoading}
 						onClick={() => {
 							setDialogOpen(false);
 							handleDelete(ids, false);

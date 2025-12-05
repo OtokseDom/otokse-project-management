@@ -1,25 +1,23 @@
 "use client";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useLoadContext } from "@/contexts/LoadContextProvider";
 import { format } from "date-fns";
 import React, { useEffect, useState } from "react";
 import TaskForm from "../Tasks/form";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { Loader2 } from "lucide-react";
 import History from "@/components/task/History";
-import { flattenTasks, statusColors } from "@/utils/taskHelpers";
+import { statusColors } from "@/utils/taskHelpers";
 import Relations from "@/components/task/Relations";
 import Tabs from "@/components/task/Tabs";
 import { useTasksStore } from "@/store/tasks/tasksStore";
+import { TaskDiscussions } from "@/components/task/Discussion";
 
-export default function Month({ days, currentMonth, getTaskForDate, fetchData }) {
-	const { loading } = useLoadContext();
-	const { tasks, taskHistory, selectedTaskHistory, setSelectedTaskHistory, setRelations, activeTab, setActiveTab, selectedUser } = useTasksStore();
+export default function Month({ days, currentMonth, getTaskForDate }) {
+	const { tasks, taskHistory, selectedTaskHistory, setSelectedTaskHistory, setRelations, activeTab, setActiveTab, selectedUser, tasksLoading } =
+		useTasksStore();
 
 	// const [tasks, setTasks] = useState(tasks);
 	const [openDialogIndex, setOpenDialogIndex] = useState(null);
 	const [updateData, setUpdateData] = useState({});
-	const [taskAdded, setTaskAdded] = useState(false);
 	const [parentId, setParentId] = useState(null); //for adding subtasks from relations tab
 
 	useEffect(() => {
@@ -28,14 +26,28 @@ export default function Month({ days, currentMonth, getTaskForDate, fetchData })
 			setActiveTab("update");
 			setParentId(null);
 		}
+		if (openDialogIndex !== null && !updateData.id) {
+			setUpdateData({
+				calendar_add: true,
+				assignee: selectedUser.id !== "undefined" ? selectedUser : null,
+				assignee_id: selectedUser.id !== "undefined" ? selectedUser.id : null,
+				start_date: format(days[openDialogIndex], "yyyy-MM-dd"),
+				end_date: format(days[openDialogIndex], "yyyy-MM-dd"),
+			});
+		}
 	}, [openDialogIndex]);
 	return (
 		<div className="grid grid-cols-7 gap-0 md:gap-1">
 			<div
-				className={`fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm z-40 transition-opacity duration-300 pointer-events-none ${
-					openDialogIndex ? "opacity-100" : "opacity-0"
+				className={`fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm z-40 transition-opacity duration-300 ${
+					openDialogIndex !== null ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
 				}`}
 				aria-hidden="true"
+				onClick={(e) => {
+					e.stopPropagation();
+					e.preventDefault();
+					setOpenDialogIndex(null);
+				}}
 			/>
 			{["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
 				<div key={day} className="p-2 font-semibold text-center text-foreground">
@@ -53,13 +65,6 @@ export default function Month({ days, currentMonth, getTaskForDate, fetchData })
 						<SheetTrigger
 							asChild
 							onClick={() => {
-								setUpdateData({
-									calendar_add: true,
-									assignee: selectedUser.id !== "undefined" ? selectedUser : null,
-									assignee_id: selectedUser.id !== "undefined" ? selectedUser.id : null,
-									start_date: format(day, "yyyy-MM-dd"),
-									end_date: format(day, "yyyy-MM-dd"),
-								});
 								setOpenDialogIndex(index);
 							}}
 						>
@@ -68,14 +73,14 @@ export default function Month({ days, currentMonth, getTaskForDate, fetchData })
 								<div
 									key={index}
 									className={`
-										min-h-24 p-1 border transition-colors duration-200 cursor-pointer rounded-sm
+										min-h-24 h-full p-1 border transition-colors duration-200 cursor-pointer rounded-sm
 										${isCurrentMonth ? "bg-white" : "bg-sidebar text-gray-400"} 
 										${isToday ? "bg-blue-50 border-blue-200" : "border-gray-500"}
 									`}
 								>
 									<div className="flex justify-between items-center">
 										<span className={`text-sm font-medium ${isToday ? "text-blue-600" : ""}`}>{day.getDate()}</span>
-										{loading ? (
+										{tasksLoading ? (
 											<div className="flex flex-col w-full">
 												<Skeleton index={index * 0.5} className="h-4 w-full bg-sidebar-border" />
 											</div>
@@ -85,7 +90,7 @@ export default function Month({ days, currentMonth, getTaskForDate, fetchData })
 											)
 										)}
 									</div>
-									{loading ? (
+									{tasksLoading ? (
 										<div className="flex flex-col w-full">
 											<Skeleton index={index * 0.5} className="h-4 mt-1 w-full bg-sidebar-border" />
 											<Skeleton index={index * 0.5} className="h-4 mt-1 w-full bg-sidebar-border" />
@@ -93,8 +98,9 @@ export default function Month({ days, currentMonth, getTaskForDate, fetchData })
 										</div>
 									) : (
 										<div className="mt-1 space-y-1 overflow-y-auto max-h-20">
-											{(dayTasks || []).slice(0, 3).map((task) => (
+											{(dayTasks || []).map((task) => (
 												<div
+													title={task.title}
 													key={task.id}
 													onClick={(e) => {
 														//set update tasks when a task is clicked
@@ -120,16 +126,22 @@ export default function Month({ days, currentMonth, getTaskForDate, fetchData })
 													</div>
 												</div>
 											))}
-											{dayTasks?.length > 3 && <div className="text-xs text-blue-600">+{dayTasks?.length - 3} more</div>}
+											{/* {dayTasks?.length > 3 && <div className="text-xs text-blue-600">+{dayTasks?.length - 3} more</div>} */}
 										</div>
 									)}
 								</div>
 							</div>
 						</SheetTrigger>
-						<SheetContent side="right" className="overflow-y-auto w-[400px] sm:w-[540px]">
+						<SheetContent side="right" className="overflow-y-auto w-full sm:w-[640px]">
 							<SheetHeader>
 								<SheetTitle>
-									<Tabs loading={loading} updateData={updateData} activeTab={activeTab} setActiveTab={setActiveTab} parentId={parentId} />
+									<Tabs
+										loading={tasksLoading}
+										updateData={updateData}
+										activeTab={activeTab}
+										setActiveTab={setActiveTab}
+										parentId={parentId}
+									/>
 								</SheetTitle>
 								<SheetDescription className="sr-only">Navigate through the app using the options below.</SheetDescription>
 							</SheetHeader>
@@ -137,22 +149,15 @@ export default function Month({ days, currentMonth, getTaskForDate, fetchData })
 								<History selectedTaskHistory={selectedTaskHistory} />
 							) : activeTab == "relations" ? (
 								<Relations setUpdateData={setUpdateData} setParentId={setParentId} />
+							) : activeTab == "discussions" ? (
+								<TaskDiscussions taskId={updateData?.id} />
 							) : (
 								<TaskForm
-									// tasks={flattenTasks(tasks)}
-									// projects={projects}
-									// users={users}
-									// categories={categories}
 									isOpen={isDialogOpen}
 									setIsOpen={(open) => setOpenDialogIndex(open ? index : null)}
 									updateData={updateData}
 									setUpdateData={setUpdateData}
-									fetchData={fetchData}
-									setTaskAdded={setTaskAdded}
-									// setRelations={setRelations}
 									parentId={parentId}
-									// selectedTaskHistory={selectedTaskHistory}
-									// setActiveTab={setActiveTab}
 								/>
 							)}
 						</SheetContent>

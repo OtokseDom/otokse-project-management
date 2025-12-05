@@ -1,80 +1,66 @@
 "use client";
 
-import { ArrowBigDownDash, ArrowBigUpDash, TrendingUp } from "lucide-react";
+import { ArrowBigDownDash, ArrowBigUpDash } from "lucide-react";
 import { Bar, BarChart, CartesianGrid, LabelList, XAxis, YAxis } from "recharts";
 
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { useLoadContext } from "@/contexts/LoadContextProvider";
 import { Skeleton } from "../ui/skeleton";
 import { useMemo } from "react";
+import { useDashboardStore } from "@/store/dashboard/dashboardStore";
+import { useUserStore } from "@/store/user/userStore";
 
-export const description = "A horizontal bar chart";
+export function ChartBarHorizontal({ report, title = "Report", variant }) {
+	const { dashboardReportsLoading } = useDashboardStore();
+	const { userReportsLoading } = useUserStore();
 
-const chartData = [
-	{ user: "January", task: 186 },
-	{ user: "February", task: 305 },
-	{ user: "March", task: 237 },
-	{ user: "April", task: 73 },
-	{ user: "May", task: 209 },
-	{ user: "June", task: 214 },
-];
+	// ✅ extract dynamic data based on reportKey
+	const chartData = report?.chart_data ?? [];
+	const highest = report?.highest ?? null;
+	const lowest = report?.lowest ?? null;
+	const dataCount = report?.data_count ?? 0;
+	const filters = report?.filters ?? {};
 
-export function ChartBarHorizontal({ report, variant }) {
-	const { loading, setLoading } = useLoadContext();
-
-	const totalTasks = useMemo(() => {
-		return report?.chart_data?.reduce((acc, curr) => acc + curr.tasks, 0);
-	}, [report]);
 	const chartConfig = {
 		task: {
 			label: "Task",
 			color: "hsl(var(--chart-1))",
-			// color: "hsl(270 70% 50%)", // Purple
 		},
 	};
+
 	return (
-		<Card className={`flex flex-col relative w-full h-full justify-between ${variant == "dashboard" ? "bg-primary-foreground rounded-md" : ""}`}>
-			<CardHeader>
-				<CardTitle>User Task Load</CardTitle>
+		<Card className="flex flex-col relative w-full h-full justify-between rounded-2xl">
+			<CardHeader className="text-center">
+				<CardTitle className="text-lg">{title || "Bar Chart Report"}</CardTitle>
 				<CardDescription>
-					{report?.filters?.from && report?.filters?.to
-						? `${new Date(report.filters.from).toLocaleDateString("en-CA", { month: "short", day: "numeric", year: "numeric" })} - ${new Date(
-								report.filters.to
-						  ).toLocaleDateString("en-CA", { month: "short", day: "numeric", year: "numeric" })}`
+					{filters?.from && filters?.to
+						? `${new Date(filters.from).toLocaleDateString("en-CA", {
+								month: "short",
+								day: "numeric",
+								year: "numeric",
+						  })} - ${new Date(filters.to).toLocaleDateString("en-CA", {
+								month: "short",
+								day: "numeric",
+								year: "numeric",
+						  })}`
 						: "All Time"}
 				</CardDescription>
 			</CardHeader>
+
 			<CardContent>
 				<ChartContainer config={chartConfig}>
-					{loading ? (
+					{dashboardReportsLoading || userReportsLoading ? (
 						<div className="flex flex-col gap-2 items-center justify-center h-full w-full p-8">
-							<Skeleton className=" w-full h-10 rounded-full" />
-							<Skeleton className=" w-full h-10 rounded-full" />
-							<Skeleton className=" w-full h-10 rounded-full" />
-							<Skeleton className=" w-full h-10 rounded-full" />
+							{Array.from({ length: 4 }).map((_, i) => (
+								<Skeleton key={i} className="w-full h-10 rounded-full" />
+							))}
 						</div>
-					) : totalTasks == 0 ? (
-						<div className="flex items-center justify-center fw-full h-full text-3xl text-gray-500">No Tasks Yet</div>
+					) : dataCount === 0 ? (
+						<div className="flex items-center justify-center fw-full h-full text-lg text-gray-500">No Tasks Yet</div>
 					) : (
-						<BarChart
-							accessibilityLayer
-							data={report?.chart_data}
-							layout="vertical"
-							margin={{
-								right: 16,
-							}}
-						>
+						<BarChart accessibilityLayer data={chartData} layout="vertical" margin={{ right: 16 }}>
 							<CartesianGrid horizontal={false} />
-							<YAxis
-								dataKey="user"
-								type="category"
-								tickLine={false}
-								tickMargin={10}
-								axisLine={false}
-								tickFormatter={(value) => value.slice(0, 3)}
-								hide
-							/>
+							<YAxis dataKey="user" type="category" tickLine={false} tickMargin={10} axisLine={false} width={100} />
 							<XAxis dataKey="task" type="number" hide />
 							<ChartTooltip cursor={false} content={<ChartTooltipContent indicator="line" />} />
 							<Bar dataKey="task" layout="vertical" fill="var(--color-task)" radius={4}>
@@ -85,25 +71,46 @@ export function ChartBarHorizontal({ report, variant }) {
 					)}
 				</ChartContainer>
 			</CardContent>
+
 			<CardFooter className="flex-col items-start gap-2 text-sm">
-				{loading ? (
+				{dashboardReportsLoading || userReportsLoading ? (
 					<div className="flex flex-col gap-2 items-center justify-center h-full w-full">
-						<Skeleton className=" w-full h-4 rounded-full" />
-						<Skeleton className=" w-full h-4 rounded-full" />
+						<Skeleton className="w-full h-4 rounded-full" />
+						<Skeleton className="w-full h-4 rounded-full" />
 					</div>
-				) : totalTasks == 0 ? (
+				) : dataCount === 0 ? (
 					""
 				) : (
 					<>
-						<div className="leading-none font-medium">
-							<ArrowBigUpDash size={16} className="inline text-green-500" /> <b> {report?.highest?.user}</b> has the highest task load of{" "}
-							<b> {report?.highest?.task}</b> tasks
-						</div>
-						<div className="leading-none font-medium">
-							<ArrowBigDownDash size={16} className="inline text-red-500" /> <b>{report?.lowest?.user}</b> has the lowest task load of{" "}
-							<b> {report?.lowest?.task}</b> tasks
-						</div>
-						<div className="text-muted-foreground leading-none">Showing all {report?.count} users</div>
+						{highest && (
+							<div className="leading-none font-medium">
+								<ArrowBigUpDash size={16} className="inline text-green-500" /> <b>{highest.user}</b> has the{" "}
+								{title === "Tasks Completed per User" ? (
+									<>
+										most completed tasks <b>({highest.task})</b>
+									</>
+								) : (
+									<>
+										highest task load of <b>{highest.task}</b> tasks
+									</>
+								)}
+							</div>
+						)}
+						{lowest && (
+							<div className="leading-none font-medium">
+								<ArrowBigDownDash size={16} className="inline text-red-500" /> <b>{lowest.user}</b> has the{" "}
+								{title === "Tasks Completed per User" ? (
+									<>
+										least completed tasks of <b>({lowest.task})</b>
+									</>
+								) : (
+									<>
+										lowest task load of <b>{lowest.task}</b> tasks
+									</>
+								)}
+							</div>
+						)}
+						<div className="text-muted-foreground leading-none">Showing {dataCount} tasks total</div>
 					</>
 				)}
 			</CardFooter>

@@ -6,9 +6,12 @@ export const useTasksStore = () => {
 		tasks: useAppStore((state) => state.tasks),
 		tasksLoaded: useAppStore((state) => state.tasksLoaded),
 		setTasksLoaded: useAppStore((state) => state.setTasksLoaded),
+		tasksLoading: useAppStore((state) => state.tasksLoading),
+		setTasksLoading: useAppStore((state) => state.setTasksLoading),
 		setTasks: useAppStore((state) => state.setTasks),
 		addTask: useAppStore((state) => state.addTask),
 		updateTask: useAppStore((state) => state.updateTask),
+		updateMultipleTasks: useAppStore((state) => state.updateMultipleTasks),
 		removeTask: useAppStore((state) => state.removeTask),
 		// Task History
 		taskHistory: useAppStore((state) => state.taskHistory),
@@ -40,5 +43,14 @@ export const useTasksStore = () => {
 		mergeTaskPositions: useAppStore((state) => state.mergeTaskPositions),
 		// Merge tasks after bulk update
 		mergeTasks: useAppStore((state) => state.mergeTasks),
+		// Task Positions
+		taskPositions: useAppStore((state) => state.taskPositions),
+		setTaskPositions: useAppStore((state) => state.setTaskPositions),
+		updateTaskPositionLocal: useAppStore((state) => state.updateTaskPositionLocal),
+		getTaskPositionMap: useAppStore((state) => state.getTaskPositionMap),
+		getSortedTasks: useAppStore((state) => state.getSortedTasks),
+		positionsLoaded: useAppStore((state) => state.positionsLoaded),
+		setPositionsLoaded: useAppStore((state) => state.setPositionsLoaded),
+		isPositionsLoaded: useAppStore((state) => state.isPositionsLoaded),
 	};
 };

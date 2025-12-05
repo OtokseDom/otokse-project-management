@@ -10,7 +10,6 @@ import axiosClient from "@/axios.client";
 import { Loader2 } from "lucide-react";
 import { useToast } from "@/contexts/ToastContextProvider";
 import { useEffect } from "react";
-import { useLoadContext } from "@/contexts/LoadContextProvider";
 import { useAuthContext } from "@/contexts/AuthContextProvider";
 import { API } from "@/constants/api";
 import { useCategoriesStore } from "@/store/categories/categoriesStore";
@@ -27,9 +26,8 @@ const formSchema = z.object({
 
 export default function CategoryForm({ setIsOpen, updateData, setUpdateData }) {
 	const { user } = useAuthContext();
-	const { categories: data, setCategories, updateCategory, addCategory } = useCategoriesStore();
+	const { categories: data, setCategories, updateCategory, addCategory, categoriesLoading, setCategoriesLoading } = useCategoriesStore();
 	const { fetchTasks } = useTaskHelpers();
-	const { loading, setLoading } = useLoadContext();
 	const showToast = useToast();
 	const form = useForm({
 		resolver: zodResolver(formSchema),
@@ -51,7 +49,7 @@ export default function CategoryForm({ setIsOpen, updateData, setUpdateData }) {
 
 	const handleSubmit = async (form) => {
 		form.organization_id = user.data.organization_id;
-		setLoading(true);
+		setCategoriesLoading(true);
 		try {
 			if (Object.keys(updateData).length === 0) {
 				const categoryResponse = await axiosClient.post(API().category(), form);
@@ -68,7 +66,7 @@ export default function CategoryForm({ setIsOpen, updateData, setUpdateData }) {
 		} finally {
 			setUpdateData({});
 			fetchTasks();
-			setLoading(false);
+			setCategoriesLoading(false);
 			setIsOpen(false);
 		}
 	};
@@ -105,8 +103,9 @@ export default function CategoryForm({ setIsOpen, updateData, setUpdateData }) {
 						);
 					}}
 				/>
-				<Button type="submit" disabled={loading}>
-					{loading && <Loader2 className="animate-spin mr-5 -ml-11 text-background" />} {Object.keys(updateData).length === 0 ? "Submit" : "Update"}
+				<Button type="submit" disabled={categoriesLoading}>
+					{categoriesLoading && <Loader2 className="animate-spin mr-5 -ml-11 text-background" />}{" "}
+					{Object.keys(updateData).length === 0 ? "Submit" : "Update"}
 				</Button>
 			</form>
 		</Form>

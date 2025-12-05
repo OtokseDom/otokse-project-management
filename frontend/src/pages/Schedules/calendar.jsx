@@ -4,7 +4,6 @@ import { addDays, addMonths, endOfMonth, endOfWeek, format, startOfMonth, startO
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 // Contexts
-import { useLoadContext } from "@/contexts/LoadContextProvider";
 import Week from "./week";
 import Month from "./month";
 import { useTasksStore } from "@/store/tasks/tasksStore";
@@ -15,7 +14,6 @@ import { useTaskStatusesStore } from "@/store/taskStatuses/taskStatusesStore";
 import { useTaskHelpers } from "@/utils/taskHelpers";
 
 export default function ScheduleCalendar() {
-	const { loading } = useLoadContext();
 	const [selectedView, setSelectedView] = useState("month"); // 'month' or 'week'
 
 	const [currentDate, setCurrentDate] = useState(new Date());
@@ -24,7 +22,7 @@ export default function ScheduleCalendar() {
 	const end_date = endOfWeek(endOfMonth(currentMonth));
 
 	// API Data
-	const { tasks, tasksLoaded, selectedUser, setSelectedUser } = useTasksStore();
+	const { tasks, tasksLoaded, selectedUser, setSelectedUser, tasksLoading } = useTasksStore();
 	const { users } = useUsersStore();
 	const { projects, projectsLoaded } = useProjectsStore();
 	const { categories } = useCategoriesStore();
@@ -183,10 +181,14 @@ export default function ScheduleCalendar() {
 						<div className="flex flex-row justify-between w-full">
 							{/* View toggle */}
 							<div className="flex justify-start gap-2">
-								<Button variant={`${selectedView === "month" ? "" : "outline"}`} onClick={() => setSelectedView("month")} disabled={loading}>
+								<Button
+									variant={`${selectedView === "month" ? "" : "outline"}`}
+									onClick={() => setSelectedView("month")}
+									disabled={tasksLoading}
+								>
 									Month View
 								</Button>
-								<Button variant={`${selectedView === "week" ? "" : "outline"}`} onClick={() => setSelectedView("week")} disabled={loading}>
+								<Button variant={`${selectedView === "week" ? "" : "outline"}`} onClick={() => setSelectedView("week")} disabled={tasksLoading}>
 									Week View
 								</Button>
 							</div>
@@ -215,15 +217,9 @@ export default function ScheduleCalendar() {
 			{/* Calendar/Week View */}
 			<div className="bg-background overflow-x-auto">
 				{selectedView === "month" ? (
-					<Month days={days} fetchData={fetchTasks} currentMonth={currentMonth} getTaskForDate={getTaskForDate} />
+					<Month days={days} currentMonth={currentMonth} getTaskForDate={getTaskForDate} />
 				) : (
-					<Week
-						fetchData={fetchTasks}
-						getWeekDays={getWeekDays}
-						getTimeSlots={getTimeSlots}
-						weekstart_date={weekstart_date}
-						isInTimeSlot={isInTimeSlot}
-					/>
+					<Week getWeekDays={getWeekDays} getTimeSlots={getTimeSlots} weekstart_date={weekstart_date} isInTimeSlot={isInTimeSlot} />
 				)}
 			</div>
 		</div>

@@ -2,7 +2,6 @@ import axiosClient from "@/axios.client";
 import React, { useEffect, useState } from "react";
 import { columnsProject } from "./columns";
 import { useToast } from "@/contexts/ToastContextProvider";
-import { useLoadContext } from "@/contexts/LoadContextProvider";
 import { DataTableProjects } from "./data-table";
 import { API } from "@/constants/api";
 import { useProjectsStore } from "@/store/projects/projectsStore";
@@ -12,8 +11,7 @@ import { useKanbanColumnsStore } from "@/store/kanbanColumns/kanbanColumnsStore"
 import { useDashboardStore } from "@/store/dashboard/dashboardStore";
 
 export default function Projects() {
-	const { setLoading } = useLoadContext();
-	const { projects, projectsLoaded, removeProject, removeSelectedProject } = useProjectsStore([]);
+	const { projects, projectsLoaded, removeProject, removeSelectedProject, setProjectsLoading } = useProjectsStore([]);
 	const { taskStatuses } = useTaskStatusesStore();
 	const { removeKanbanColumnByProject } = useKanbanColumnsStore();
 	const { removeProjectFilter } = useDashboardStore();
@@ -32,7 +30,7 @@ export default function Projects() {
 		if ((!projects || projects.length === 0) && !projectsLoaded) fetchProjects();
 	}, []);
 	const handleDelete = async (id) => {
-		setLoading(true);
+		setProjectsLoading(true);
 		try {
 			await axiosClient.delete(API().project(id));
 			removeProject(id);
@@ -45,7 +43,7 @@ export default function Projects() {
 			if (e.message !== "Request aborted") console.error("Error fetching data:", e.message);
 		} finally {
 			setDialogOpen(false);
-			setLoading(false);
+			setProjectsLoading(false);
 		}
 	};
 	return (

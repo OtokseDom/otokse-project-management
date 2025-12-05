@@ -10,14 +10,12 @@ import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import CategoryForm from "../form";
-import { useLoadContext } from "@/contexts/LoadContextProvider";
 import { useAuthContext } from "@/contexts/AuthContextProvider";
 import { useCategoriesStore } from "@/store/categories/categoriesStore";
 
 export function DataTableCategories({ columns, isOpen, setIsOpen, updateData, setUpdateData }) {
 	const { user } = useAuthContext();
-	const { categories: data } = useCategoriesStore();
-	const { loading } = useLoadContext();
+	const { categories: data, categoriesLoading } = useCategoriesStore();
 	const [sorting, setSorting] = useState([]);
 	const [columnFilters, setColumnFilters] = useState([]);
 	const [columnVisibility, setColumnVisibility] = useState([]);
@@ -46,16 +44,16 @@ export function DataTableCategories({ columns, isOpen, setIsOpen, updateData, se
 				}`}
 				aria-hidden="true"
 			/>
-			<div className="flex py-4">
+			<div className="flex flex-col md:flex-row py-4">
 				<Input
 					placeholder={"filter name..."}
 					value={table.getColumn("name")?.getFilterValue() || ""}
 					onChange={(category) => table.getColumn("name")?.setFilterValue(category.target.value)}
 					className="max-w-sm"
 				/>
-				<div className="flex gap-2 ml-auto">
+				<div className="w-full md:w-fit flex flex-row justify-between gap-2 ml-auto">
 					<Sheet open={isOpen} onOpenChange={setIsOpen} modal={false}>
-						{loading ||
+						{categoriesLoading ||
 							(user?.data?.role !== "Employee" && (
 								<SheetTrigger asChild>
 									<Button variant="">Add Category</Button>
@@ -115,7 +113,7 @@ export function DataTableCategories({ columns, isOpen, setIsOpen, updateData, se
 						))}
 					</TableHeader>
 					<TableBody>
-						{loading ? (
+						{categoriesLoading ? (
 							<TableRow>
 								<TableCell colSpan={columns.length} className="h-24">
 									<div className="flex items-center justify-center">

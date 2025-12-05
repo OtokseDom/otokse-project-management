@@ -3,11 +3,11 @@
 import { flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table";
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { useLoadContext } from "@/contexts/LoadContextProvider";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useDashboardStore } from "@/store/dashboard/dashboardStore";
 
 export function DataTable({ columns = [], data = [] }) {
-	const { loading } = useLoadContext();
+	const { dashboardreportsLoading } = useDashboardStore();
 	const table = useReactTable({
 		data,
 		columns,
@@ -31,7 +31,7 @@ export function DataTable({ columns = [], data = [] }) {
 					))}
 				</TableHeader>
 				<TableBody>
-					{loading ? (
+					{dashboardreportsLoading ? (
 						// Show skeleton while loading
 						<TableRow>
 							<TableCell colSpan={columns.length} className="h-24">

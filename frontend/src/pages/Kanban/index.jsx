@@ -1,5 +1,4 @@
 import React, { useEffect } from "react";
-import { useLoadContext } from "@/contexts/LoadContextProvider";
 import { useTasksStore } from "@/store/tasks/tasksStore";
 import { useTaskStatusesStore } from "@/store/taskStatuses/taskStatusesStore";
 import { useTaskHelpers } from "@/utils/taskHelpers";
@@ -10,8 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useUsersStore } from "@/store/users/usersStore";
 import { useCategoriesStore } from "@/store/categories/categoriesStore";
 export default function Kanban() {
-	const { loading, setLoading } = useLoadContext();
-	const { tasks, tasksLoaded } = useTasksStore();
+	const { tasks, tasksLoaded, tasksLoading } = useTasksStore();
 	const { taskStatuses } = useTaskStatusesStore();
 	const { users } = useUsersStore();
 	const { categories } = useCategoriesStore();
@@ -29,7 +27,7 @@ export default function Kanban() {
 	}, []);
 
 	return (
-		<div className="flex flex-col gap-2 mt-5 md:mt-0 w-screen md:w-full md:max-w-[calc(100vw-20rem)] h-[calc(100vh-4rem)]">
+		<div className="flex flex-col gap-2 mt-5 md:mt-0 w-screen md:w-full md:max-w-[calc(100vw-22rem)] h-[calc(100vh-4rem)]">
 			{/* Top section: project select */}
 			<div className="flex flex-row justify-between w-[250px] ml-2 md:ml-0">
 				<Select
@@ -59,7 +57,7 @@ export default function Kanban() {
 			{/* Kanban section: scrollable */}
 			<div className="w-full overflow-x-auto h-full">
 				<div className="min-w-full">
-					{loading ? (
+					{tasksLoading ? (
 						// <div className="flex flex-row space-x-3 w-max h-full">
 						<div className="flex flex-col md:flex-row space-y-2 md:space-x-2 w-full h-[calc(100vh-11rem)]">
 							{Array.from({ length: 4 }).map((_, i) => (

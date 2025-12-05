@@ -44,6 +44,8 @@ class TaskResource extends JsonResource
             'position' => $this->position,
             'created_at' => $this->created_at ? $this->created_at->format('Y-m-d H:i:s') : null,
             'updated_at' => $this->updated_at ? $this->updated_at->format('Y-m-d H:i:s') : null,
+            'discussions' => TaskDiscussionResource::collection($this->whenLoaded('discussions')),
+            'attachments' => TaskAttachmentResource::collection($this->whenLoaded('attachments')),
             'assignees' => $this->assignees && $this->assignees->count() > 0
                 ? $this->assignees->map(function ($user) {
                     return [

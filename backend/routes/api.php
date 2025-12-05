@@ -7,8 +7,12 @@ use App\Http\Controllers\Api\v1\KanbanColumnController;
 use App\Http\Controllers\Api\v1\OrganizationController;
 use App\Http\Controllers\Api\v1\ProjectController;
 use App\Http\Controllers\Api\v1\RelationCheckerController;
+use App\Http\Controllers\Api\v1\TaskAttachmentController;
 use App\Http\Controllers\Api\v1\TaskController;
+use App\Http\Controllers\Api\v1\TaskDiscussionController;
 use App\Http\Controllers\Api\v1\TaskHistoryController;
+use App\Http\Controllers\Api\v1\TaskImageController;
+use App\Http\Controllers\Api\v1\TaskPositionController;
 use App\Http\Controllers\Api\v1\TaskStatusController;
 use App\Http\Controllers\Api\v1\UserController;
 use App\Http\Controllers\Api\v1\UserReportController;
@@ -39,6 +43,7 @@ Route::prefix('v1')->group(function () {
         Route::apiResource('/category', CategoryController::class);
         Route::apiResource('/task', TaskController::class);
         Route::apiResource('/task-history', TaskHistoryController::class);
+        Route::apiResource('/task-discussion', TaskDiscussionController::class);
 
         /* --------------------------------- Reports -------------------------------- */
         Route::get('/user/{id}/reports', [UserReportController::class, 'userReports']);
@@ -47,11 +52,11 @@ Route::prefix('v1')->group(function () {
         /* ---------------------------------- OTHER --------------------------------- */
         Route::patch('/tasks/bulk-update', [TaskController::class, 'bulkUpdate']);
         Route::delete('/tasks/bulk-delete', [TaskController::class, 'bulkDelete']);
-        Route::post('/tasks/upload-image', [TaskController::class, 'uploadTaskImage']);
-        Route::get('/tasks/images/{org}/{filename}', [TaskController::class, 'getTaskImage']);
-        Route::delete('/tasks/delete-image', [TaskController::class, 'deleteTaskImage']);
+        Route::delete('/tasks/attachments/{id}', [TaskAttachmentController::class, 'destroy']);
         Route::patch('/kanban-column/{kanban_column}', [KanbanColumnController::class, 'update']);
         Route::patch('/tasks/{task}/move', [TaskController::class, 'move']);
+        Route::patch('/task-positions/update', [TaskPositionController::class, 'update']);
+        Route::get('/task-positions/{context}/{contextId?}', [TaskPositionController::class, 'getPositions']);
         Route::patch('/organization/{organization}/generate-code', [OrganizationController::class, 'generateCode']);
         Route::post('/relation-check', [RelationCheckerController::class, 'check']);
     });

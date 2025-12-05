@@ -102,17 +102,63 @@ export default function FilterForm({
 			form.reset({
 				from: from ?? undefined,
 				to: to ?? undefined,
-				// project_id: project_id ?? undefined,
 			});
 		}
 	}, [filters, form]);
+
+	const handleClearAllFilters = async () => {
+		// Close the modal
+		setIsOpen(false);
+
+		// Reset form fields
+		form.reset({
+			from: undefined,
+			to: undefined,
+			selected_projects: [],
+			selected_users: selectedUsers ? [] : undefined, // only reset if exists
+		});
+
+		// Reset MultiSelect state
+		setSelectedProjects([]);
+		if (setSelectedUsers) setSelectedUsers([]);
+
+		// Clear filter tags
+		const updatedFilters = {
+			values: {
+				"Date Range": null,
+
+				Projects: [],
+			},
+			display: {
+				"Date Range": null,
+				Members: selectedUsers ? [] : undefined, // only if users exist
+				Projects: [],
+			},
+		};
+		setFilters(updatedFilters);
+
+		// Fetch all unfiltered reports
+		setLoading(true);
+		try {
+			let reportsRes = "";
+			if (!userId) {
+				reportsRes = await axiosClient.get(API().dashboard("", "", "", ""));
+			} else {
+				reportsRes = await axiosClient.get(API().user_reports(userId, "", "", ""));
+			}
+			setReports(reportsRes.data.data);
+		} catch (e) {
+			if (e.message !== "Request aborted") console.error("Error fetching data:", e.message);
+		} finally {
+			setLoading(false);
+		}
+	};
 
 	const handleSubmit = async (form_filter) => {
 		setLoading(true);
 		try {
 			const from = form_filter?.from ? form_filter.from.toLocaleDateString("en-CA") : "";
 			const to = form_filter?.to ? form_filter.to.toLocaleDateString("en-CA") : "";
-			// const project = form_filter.project_id ? projects?.find((project) => project.id == form_filter.project_id) : "";
 			const selected_projects = form_filter?.selected_projects || []; // this only gets the IDs of selected projects
 			const selectedProjectObjects = projects?.filter((p) => selected_projects.includes(p.value)); // this maps the IDs to project objects
 			const selected_users = form_filter?.selected_users || []; // this only gets the IDs of selected users
@@ -146,7 +192,6 @@ export default function FilterForm({
 				});
 			}
 			setReports(filteredReports.data.data);
-			showToast("Success!", "Filtered report fetched.", 3000);
 		} catch (e) {
 			showToast("Failed!", e.response?.data?.message, 3000, "fail");
 			console.error("Error fetching data:", e);
@@ -188,38 +233,6 @@ export default function FilterForm({
 						)}
 					/>
 				</div>
-				{/* <FormField
-					control={form.control}
-					name="project_id"
-					render={({ field }) => {
-						return (
-							<FormItem>
-								<FormLabel>Project</FormLabel>
-								<Select onValueChange={(value) => field.onChange(Number(value))} value={field.value ? field.value.toString() : undefined}>
-									<FormControl>
-										<SelectTrigger>
-											<SelectValue placeholder="Select a project">
-												{field.value ? projects?.find((project) => project.id == field.value)?.title : "Select a project"}
-											</SelectValue>
-										</SelectTrigger>
-									</FormControl>
-									<SelectContent>
-										{Array.isArray(projects) && projects.length > 0 ? (
-											projects.map((project) => (
-												<SelectItem key={project.id} value={project.id.toString()}>
-													{project.title}
-												</SelectItem>
-											))
-										) : (
-											<></>
-										)}
-									</SelectContent>
-								</Select>
-								<FormMessage />
-							</FormItem>
-						);
-					}}
-				/> */}
 				<FormField
 					control={form.control}
 					name="selected_projects"
@@ -268,19 +281,29 @@ export default function FilterForm({
 						}}
 					/>
 				)}
-				<Button
-					type="submit"
-					disabled={
-						loading ||
-						((!form.watch("from") || !form.watch("to")) &&
-							(selectedUsers?.length === 0 || !selectedUsers) &&
-							(selectedProjects?.length === 0 || !selectedProjects))
-					}
-					className="w-full"
-					variant="default"
-				>
-					{loading && <Loader2 className="animate-spin mr-5 -ml-11 text-background" />} Apply Filter
-				</Button>
+				<div className="flex gap-2 justify-center items-center">
+					{(form.watch("from") ||
+						form.watch("to") ||
+						(selectedProjects && selectedProjects.length > 0) ||
+						(selectedUsers && selectedUsers.length > 0)) && (
+						<Button type="button" className="w-full" variant="ghost" onClick={handleClearAllFilters}>
+							Clear All Filters
+						</Button>
+					)}
+					<Button
+						type="submit"
+						disabled={
+							loading ||
+							((!form.watch("from") || !form.watch("to")) &&
+								(selectedUsers?.length === 0 || !selectedUsers) &&
+								(selectedProjects?.length === 0 || !selectedProjects))
+						}
+						className="w-full"
+						variant="default"
+					>
+						{loading && <Loader2 className="animate-spin mr-5 -ml-11 text-background" />} Apply Filter
+					</Button>
+				</div>
 			</form>
 		</Form>
 	);

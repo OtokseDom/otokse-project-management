@@ -3,38 +3,30 @@
 import { useEffect, useState } from "react";
 import { flexRender, getSortedRowModel, getFilteredRowModel, getCoreRowModel, getPaginationRowModel, useReactTable } from "@tanstack/react-table";
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, FileCheck, FileQuestion, FolderKanban, Trash2, UserCheck2 } from "lucide-react";
+import {
+	ChevronLeft,
+	ChevronRight,
+	FileCheck,
+	FileQuestion,
+	FolderKanban,
+	Trash2,
+	UserCheck2,
+	BellRing,
+	CalendarCheck,
+	CalendarClock,
+	CalendarCheck2,
+} from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useLoadContext } from "@/contexts/LoadContextProvider";
-import TaskForm from "../form";
-import History from "@/components/task/History";
-import Relations from "@/components/task/Relations";
-import Tabs from "@/components/task/Tabs";
 import { useTasksStore } from "@/store/tasks/tasksStore";
-import UpdateDialog from "./updateDialog";
-import DeleteDialog from "./deleteDialog";
-
-export function DataTableTasks({
-	columns,
-	data,
-	isOpen,
-	setIsOpen,
-	updateData,
-	setUpdateData,
-	fetchData,
-	showLess = true,
-	parentId,
-	setParentId,
-	projectId,
-	setProjectId,
-}) {
-	const { selectedTaskHistory, activeTab, setActiveTab } = useTasksStore();
-	const { loading, setLoading } = useLoadContext();
+import UpdateDialog from "../updateDialog";
+import DeleteDialog from "../deleteDialog";
+export function DataTableTasks({ columns, data, showLess = true }) {
+	const { tasksLoading } = useTasksStore();
 	const [sorting, setSorting] = useState([]);
 	const [columnFilters, setColumnFilters] = useState([]);
 	const [selectedColumn, setSelectedColumn] = useState(null);
@@ -78,13 +70,14 @@ export function DataTableTasks({
 			? {
 					// status: false,
 					id: false,
+					category: false,
 					"start date": false,
 					"end date": true,
 					"start time": false,
 					"end time": false,
 					"delay reason": false,
 					"performance rating": false,
-					"actual date": false,
+					"actual date": true,
 					"actual time": false,
 					remarks: false,
 					action: true,
@@ -125,7 +118,7 @@ export function DataTableTasks({
 				clearSelection={clearSelection} // Pass the callback
 			/>
 		);
-	} else if (bulkAction && bulkAction !== "delete") {
+	} else {
 		dialog = (
 			<UpdateDialog
 				open={!!bulkAction}
@@ -135,8 +128,12 @@ export function DataTableTasks({
 			/>
 		);
 	}
-
-	// 👇 toggle actions column automatically
+	// Keep "All" selection synced with data length
+	useEffect(() => {
+		const { pageSize } = table.getState().pagination;
+		if (pageSize === data.length - 1) table.setPageSize(data.length);
+	}, [data.length]);
+	// toggle actions column automatically
 	useEffect(() => {
 		const hasSelection = table.getSelectedRowModel().rows.length > 0;
 
@@ -147,71 +144,17 @@ export function DataTableTasks({
 	}, [table.getSelectedRowModel().rows.length]);
 	return (
 		<div className="w-full scrollbar-custom">
-			<div
-				className={`fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm z-40 transition-opacity duration-300 pointer-events-none ${
-					isOpen ? "opacity-100" : "opacity-0"
-				}`}
-				aria-hidden="true"
-			/>
-
 			<div className="flex flex-col md:flex-row justify-between py-4">
-				<div className="flex flex-row gap-4">
-					{/* Input field to enter filter value */}
+				<div className="flex flex-row gap-4 max-w-sm w-full">
 					<Input
-						type="text"
-						placeholder={selectedColumn ? `Filter by ${selectedColumn}` : "Select a column first"}
-						value={filterValue}
-						onChange={(e) => handleFilterChange(e.target.value)}
-						disabled={!selectedColumn} // Disable until a column is selected
-						className="max-w-sm"
+						placeholder={"filter title ..."}
+						value={table.getColumn("title")?.getFilterValue() || ""}
+						onChange={(event) => table.getColumn("title")?.setFilterValue(event.target.value)}
+						className="w-full"
 					/>
-					{/* Dropdown Menu for selecting column */}
-					<Select onValueChange={handleColumnChange}>
-						<SelectTrigger className="w-60 capitalize">
-							<SelectValue placeholder="Select Column" />
-						</SelectTrigger>
-						<SelectContent>
-							{table
-								.getAllColumns()
-								.filter((col) => col.getCanFilter())
-								.map((col) => (
-									<SelectItem key={col.id} value={col.id} className="capitalize">
-										{col.id}
-									</SelectItem>
-								))}
-						</SelectContent>
-					</Select>
 				</div>
 				<div className="flex flex-row justify-between gap-2">
 					<div className="flex gap-2">
-						<Sheet open={isOpen} onOpenChange={setIsOpen} modal={false}>
-							<SheetTrigger asChild>
-								<Button variant="">Add Task</Button>
-							</SheetTrigger>
-							<SheetContent side="right" className="overflow-y-auto w-full sm:w-[640px] p-2 md:p-6">
-								<SheetHeader>
-									<SheetTitle>
-										<Tabs loading={loading} updateData={updateData} activeTab={activeTab} setActiveTab={setActiveTab} parentId={parentId} />
-									</SheetTitle>
-									<SheetDescription className="sr-only">Navigate through the app using the options below.</SheetDescription>
-								</SheetHeader>
-								{activeTab == "history" ? (
-									<History selectedTaskHistory={selectedTaskHistory} />
-								) : activeTab == "relations" ? (
-									<Relations setUpdateData={setUpdateData} setParentId={setParentId} setProjectId={setProjectId} />
-								) : (
-									<TaskForm
-										parentId={parentId}
-										projectId={projectId}
-										isOpen={isOpen}
-										setIsOpen={setIsOpen}
-										updateData={updateData}
-										setUpdateData={setUpdateData}
-										fetchData={fetchData}
-									/>
-								)}
-							</SheetContent>
-						</Sheet>
 						<DropdownMenu>
 							<DropdownMenuTrigger asChild>
 								<Button variant="outline">Columns</Button>
@@ -260,29 +203,49 @@ export function DataTableTasks({
 					<Button size="sm" className="text-xs" onClick={() => setBulkAction("category")}>
 						<FileQuestion /> Update Category
 					</Button>
-					<Button size="sm" className="text-xs" variant="destructive" onClick={() => setBulkAction("delete")}>
-						<Trash2 className="text-destructive-foreground" /> Delete
+					<Button size="sm" className="text-xs" onClick={() => setBulkAction("priority")}>
+						<BellRing /> Update Priority
 					</Button>
+					<Button size="sm" className="text-xs" onClick={() => setBulkAction("start_date")}>
+						<CalendarCheck /> Update Start Date
+					</Button>
+					<Button size="sm" className="text-xs" onClick={() => setBulkAction("end_date")}>
+						<CalendarClock /> Update End Date
+					</Button>
+					<Button size="sm" className="text-xs" onClick={() => setBulkAction("actual_date")}>
+						<CalendarCheck2 /> Update Actual Date
+					</Button>
+					{/* <Button size="sm" className="text-xs" variant="destructive" onClick={() => setBulkAction("delete")}>
+						<Trash2 className="text-destructive-foreground" /> Delete
+					</Button> */}
 				</div>
 			)}
 			<div className="flex justify-between items-center w-full m-0">
 				<div className="flex items-center space-x-2">
 					<p className="text-sm font-medium">Show</p>
 					<Select
-						value={`${table.getState().pagination.pageSize}`}
+						value={table.getState().pagination.pageSize === data.length ? "all" : `${table.getState().pagination.pageSize}`}
 						onValueChange={(value) => {
-							table.setPageSize(Number(value));
+							if (value === "all") {
+								table.setPageSize(data.length);
+							} else {
+								table.setPageSize(Number(value));
+							}
 						}}
 					>
 						<SelectTrigger className="h-8 w-[90px]">
-							<SelectValue placeholder={table.getState().pagination.pageSize} />
+							{/* <SelectValue placeholder={table.getState().pagination.pageSize} /> */}
+							<SelectValue
+								placeholder={table.getState().pagination.pageSize === data.length ? "All" : `${table.getState().pagination.pageSize}`}
+							/>
 						</SelectTrigger>
 						<SelectContent side="top">
-							{Array.from(new Set([10, 20, 30, 40, 50, data.length])).map((pageSize) => (
+							{[10, 20, 30, 40, 50].map((pageSize) => (
 								<SelectItem key={pageSize} value={`${pageSize}`}>
-									{pageSize === data.length ? "All" : pageSize}
+									{pageSize}
 								</SelectItem>
 							))}
+							<SelectItem value="all">All</SelectItem>
 						</SelectContent>
 					</Select>
 
@@ -314,7 +277,7 @@ export function DataTableTasks({
 						))}
 					</TableHeader>
 					<TableBody>
-						{loading ? (
+						{tasksLoading ? (
 							<TableRow>
 								<TableCell colSpan={columns.length} className="h-24">
 									<div className="flex items-center justify-center">
@@ -328,16 +291,29 @@ export function DataTableTasks({
 							</TableRow>
 						) : table.getRowModel().rows.length ? (
 							// Show table data if available
-							table.getRowModel().rows.map((row) => (
-								<TableRow
-									key={row.id}
-									//  onClick={() => handleUpdate(row.original)} className="cursor-pointer"
-								>
-									{row.getVisibleCells().map((cell) => (
-										<TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
-									))}
-								</TableRow>
-							))
+							table.getRowModel().rows.map((row) => {
+								// Determine if row is a parent task (depth 0 with subtasks) or a leaf (no subtasks)
+								const hasSubtasks =
+									(Array.isArray(row.original?.children) && row.original.children.length > 0) || !!row.original?.has_children || false;
+								const isParent = row.original?.depth === 0;
+								const isLeaf = !hasSubtasks;
+
+								// Choose a slightly stronger background for emphasis
+								// Parent tasks get slightly stronger emphasis than leaves
+								const rowBgClass = isParent ? "bg-muted/10" : isLeaf ? "bg-muted/80" : "";
+
+								return (
+									<TableRow
+										key={row.id}
+										className={rowBgClass}
+										//  onClick={() => handleUpdate(row.original)} className="cursor-pointer"
+									>
+										{row.getVisibleCells().map((cell) => (
+											<TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
+										))}
+									</TableRow>
+								);
+							})
 						) : (
 							<TableRow>
 								<TableCell colSpan={columns.length} className="h-24 text-center">

@@ -1,21 +1,45 @@
-FROM richarvey/nginx-php-fpm:latest
+FROM php:8.2-fpm
 
-COPY . .
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    git \
+    curl \
+    libpng-dev \
+    libonig-dev \
+    libxml2-dev \
+    zip \
+    unzip \
+    nginx
 
-# Image config
-ENV SKIP_COMPOSER=1
-ENV WEBROOT=/var/www/html/public
-ENV PHP_ERRORS_STDERR=1
-ENV RUN_SCRIPTS=1
-ENV REAL_IP_HEADER=1
+# Clear cache
+RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Laravel config
-ENV APP_ENV=production
-ENV APP_DEBUG=false
-ENV LOG_CHANNEL=stderr
+# Install PHP extensions
+RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
 
+# Get latest Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Allow composer to run as root
-ENV COMPOSER_ALLOW_SUPERUSER=1
+# Set working directory
+WORKDIR /var/www
 
-CMD ["/start.sh"]
+# Copy existing application directory
+COPY . /var/www
+
+# Install dependencies
+RUN composer install --no-dev --optimize-autoloader
+
+# Copy nginx config
+COPY docker/nginx.conf /etc/nginx/sites-available/default
+
+# Set permissions
+RUN chown -R www-data:www-data /var/www \
+    && chmod -R 755 /var/www/storage
+
+EXPOSE 80
+
+# Start script
+COPY docker/start.sh /usr/local/bin/start.sh
+RUN chmod +x /usr/local/bin/start.sh
+
+CMD ["/usr/local/bin/start.sh"]

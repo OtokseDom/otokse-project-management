@@ -16,8 +16,15 @@ class Project extends Model
         'status_id',
         'title',
         'description',
-        'target_date',
-        'estimated_date',
+        // 'target_date',
+        // 'estimated_date',
+        'start_date',
+        'end_date',
+        'actual_date',
+        'days_estimate',
+        'days_taken',
+        'delay_days',
+        'delay_reason',
         'priority',
         'remarks'
     ];
@@ -25,6 +32,7 @@ class Project extends Model
     protected $casts = [
         'start_date' => 'date',
         'end_date' => 'date',
+        'actual_date' => 'date',
     ];
 
     // Relationship with Organization

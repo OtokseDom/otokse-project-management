@@ -9,15 +9,13 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useLoadContext } from "@/contexts/LoadContextProvider";
 import { useAuthContext } from "@/contexts/AuthContextProvider";
 import { useTaskStatusesStore } from "@/store/taskStatuses/taskStatusesStore";
 import TaskStatusForm from "../form";
 
 export function DataTable({ columns, isOpen, setIsOpen, updateData, setUpdateData }) {
 	const { user } = useAuthContext();
-	const { taskStatuses: data } = useTaskStatusesStore();
-	const { loading } = useLoadContext();
+	const { taskStatuses: data, taskStatusesLoading } = useTaskStatusesStore();
 	const [sorting, setSorting] = useState([]);
 	const [columnFilters, setColumnFilters] = useState([]);
 	const [columnVisibility, setColumnVisibility] = useState([]);
@@ -46,16 +44,16 @@ export function DataTable({ columns, isOpen, setIsOpen, updateData, setUpdateDat
 				}`}
 				aria-hidden="true"
 			/>
-			<div className="flex py-4">
+			<div className="flex flex-col md:flex-row py-4">
 				<Input
 					placeholder={"filter name..."}
 					value={table.getColumn("name")?.getFilterValue() || ""}
 					onChange={(taskStatus) => table.getColumn("name")?.setFilterValue(taskStatus.target.value)}
 					className="max-w-sm"
 				/>
-				<div className="flex gap-2 ml-auto">
+				<div className="w-full md:w-fit flex flex-row justify-between gap-2 ml-auto">
 					<Sheet open={isOpen} onOpenChange={setIsOpen} modal={false}>
-						{loading ||
+						{taskStatusesLoading ||
 							(user?.data?.role !== "Employee" && (
 								<SheetTrigger asChild>
 									<Button variant="">Add Task Status</Button>
@@ -115,7 +113,7 @@ export function DataTable({ columns, isOpen, setIsOpen, updateData, setUpdateDat
 						))}
 					</TableHeader>
 					<TableBody>
-						{loading ? (
+						{taskStatusesLoading ? (
 							<TableRow>
 								<TableCell colSpan={columns.length} className="h-24">
 									<div className="flex items-center justify-center">

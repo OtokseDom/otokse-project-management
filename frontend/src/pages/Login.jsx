@@ -91,23 +91,18 @@ export default function Login() {
 							theme === "dark" ? "bg-purple-900/30 border-purple-500/20" : "bg-purple-50/80 border-purple-200/50"
 						} backdrop-blur-sm rounded-lg p-4 mb-6 border`}
 					>
-						<div className={`${theme === "dark" ? "text-purple-200" : "text-purple-700"} text-sm text-center`}>
+						<div className={`${theme === "dark" ? "text-purple-200" : "text-purple-700"} text-center`}>
 							<p className="mb-1">Demo Credentials</p>
-							<div className="flex flex-row justify-between text-xxs">
-								<div className="text-center">
-									<h1 className="font-bold">Admin</h1>
-									<p className={`${theme === "dark" ? "text-purple-100" : "text-purple-800"} font-medium`}>admin@demo.com</p>
-									<p className={`${theme === "dark" ? "text-purple-100" : "text-purple-800"} font-medium`}>admin123</p>
-								</div>
+							<div className="flex flex-row justify-evenly text-xs">
 								<div className="text-center">
 									<h1 className="font-bold">Manager</h1>
-									<p className={`${theme === "dark" ? "text-purple-100" : "text-purple-800"} font-medium`}>manager@demo.com</p>
-									<p className={`${theme === "dark" ? "text-purple-100" : "text-purple-800"} font-medium`}>admin123</p>
+									<p className={`${theme === "dark" ? "text-purple-100" : "text-purple-800"}`}>manager@demo.com</p>
+									<p className={`${theme === "dark" ? "text-purple-100" : "text-purple-800"}`}>admin123</p>
 								</div>
 								<div className="text-center">
 									<h1 className="font-bold">Employee</h1>
-									<p className={`${theme === "dark" ? "text-purple-100" : "text-purple-800"} font-medium`}>employee@demo.com</p>
-									<p className={`${theme === "dark" ? "text-purple-100" : "text-purple-800"} font-medium`}>admin123</p>
+									<p className={`${theme === "dark" ? "text-purple-100" : "text-purple-800"}`}>employee@demo.com</p>
+									<p className={`${theme === "dark" ? "text-purple-100" : "text-purple-800"}`}>admin123</p>
 								</div>
 							</div>
 						</div>
@@ -133,7 +128,7 @@ export default function Login() {
 								ref={emailRef}
 								type="email"
 								placeholder="Email"
-								defaultValue="admin@demo.com"
+								defaultValue="manager@demo.com"
 								className={`w-full px-4 py-3 ${
 									theme === "dark"
 										? "bg-black/20 border-white/10 text-white placeholder-purple-300"
@@ -167,17 +162,19 @@ export default function Login() {
 					</form>
 
 					<div className="text-center mt-6">
-						<p className={`${theme === "dark" ? "text-purple-200" : "text-gray-600"}`}>
-							Don't have an account?{" "}
-							<Link
-								to="/signup"
-								className={`${
-									theme === "dark" ? "text-purple-300 hover:text-white" : "text-purple-600 hover:text-purple-700"
-								} font-medium transition-colors duration-300`}
-							>
-								Sign up here
-							</Link>
-						</p>
+						{!loading && (
+							<p className={`${theme === "dark" ? "text-purple-200" : "text-gray-600"}`}>
+								Don't have an account?{" "}
+								<Link
+									to="/signup"
+									className={`${
+										theme === "dark" ? "text-purple-300 hover:text-white" : "text-purple-600 hover:text-purple-700"
+									} font-medium transition-colors duration-300`}
+								>
+									Sign up here
+								</Link>
+							</p>
+						)}
 					</div>
 				</div>
 				<div className="mt-10 text-muted-foreground text-center">© 2025 Dominic Escoto. All rights reserved.</div>

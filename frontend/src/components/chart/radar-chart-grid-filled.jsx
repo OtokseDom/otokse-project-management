@@ -4,32 +4,35 @@ import { PolarAngleAxis, PolarGrid, Radar, RadarChart } from "recharts";
 
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { useLoadContext } from "@/contexts/LoadContextProvider";
 import { Skeleton } from "../ui/skeleton";
+import { useDashboardStore } from "@/store/dashboard/dashboardStore";
+import { useUserStore } from "@/store/user/userStore";
 
 const chartConfig = {
 	value: {
 		label: "AVG Rating",
-		color: "hsl(var(--chart-1))",
+		// color: "hsl(var(--chart-1))",
+		color: "hsl(270 70% 50%)", // Purple
 	},
 };
 
 export function RadarChartGridFilled({ report }) {
-	const { loading, setLoading } = useLoadContext();
+	const { dashboardReportsLoading } = useDashboardStore();
+	const { userReportsLoading } = useUserStore();
 	return (
-		<Card className="flex flex-col relative h-full justify-between">
+		<Card className="flex flex-col relative h-full rounded-2xl justify-between">
 			<CardHeader className="items-center text-center pb-4">
-				<CardTitle>AVG Rating Per Category</CardTitle>
+				<CardTitle className="text-lg">AVG Rating Per Category</CardTitle>
 				<CardDescription>Showing all categories</CardDescription>
 			</CardHeader>
 			<CardContent className="pb-0">
 				<ChartContainer config={chartConfig} className="mx-auto aspect-square max-h-[250px]">
-					{loading ? (
+					{dashboardReportsLoading || userReportsLoading ? (
 						<div className="flex items-center justify-center h-full w-full p-8">
 							<Skeleton className=" w-full h-full rounded-full" />
 						</div>
 					) : report?.task_count == 0 ? (
-						<div className="flex items-center justify-center fw-full h-full text-3xl text-gray-500">No Tasks Yet</div>
+						<div className="flex items-center justify-center fw-full h-full text-lg text-gray-500">No Tasks Yet</div>
 					) : (
 						<RadarChart data={report?.ratings?.length > 0 ? report?.ratings : []} outerRadius={90} width={300} height={300}>
 							<ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
@@ -41,7 +44,7 @@ export function RadarChartGridFilled({ report }) {
 				</ChartContainer>
 			</CardContent>
 			<CardFooter className="flex-col gap-2 text-sm">
-				{loading ? (
+				{dashboardReportsLoading || userReportsLoading ? (
 					<div className="flex flex-col gap-2 items-center justify-center h-full w-full p-8">
 						<Skeleton className=" w-full h-4" />
 						<Skeleton className=" w-full h-4" />

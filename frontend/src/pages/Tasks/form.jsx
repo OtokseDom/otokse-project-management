@@ -3,13 +3,13 @@ import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import axiosClient from "@/axios.client";
 import { useToast } from "@/contexts/ToastContextProvider";
 import { useEffect, useRef, useState } from "react";
-import { useLoadContext } from "@/contexts/LoadContextProvider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { format, parseISO } from "date-fns";
 import { AlarmClock, CalculatorIcon, CalendarDays, Loader2, Sparkles } from "lucide-react";
@@ -25,6 +25,8 @@ import { MultiSelect } from "@/components/ui/multi-select";
 import { useTaskHelpers } from "@/utils/taskHelpers";
 import { useUserStore } from "@/store/user/userStore";
 import RichTextEditor from "@/components/ui/RichTextEditor";
+import ImageUpload from "@/components/ui/image-upload";
+import TaskAttachments from "@/components/task/Attachment";
 
 const formSchema = z.object({
 	parent_id: z.number().optional(),
@@ -37,9 +39,9 @@ const formSchema = z.object({
 	}),
 	description: z.string().optional(),
 	// expected_output: z.string().optional(),
-	start_date: z.date().optional(),
-	end_date: z.date().optional(),
-	actual_date: z.date().optional(),
+	start_date: z.date().nullable(),
+	end_date: z.date().nullable(),
+	actual_date: z.date().nullable(),
 	days_estimate: z.coerce.number().optional(),
 	days_taken: z.coerce.number().optional(),
 	delay_days: z.coerce.number().optional(),
@@ -53,23 +55,24 @@ const formSchema = z.object({
 	performance_rating: z.coerce.number().min(0).max(10).optional(),
 	remarks: z.string().optional(),
 	priority: z.string().optional(),
-	calendar_add: z.boolean().optional(),
 });
-export default function TaskForm({ parentId, projectId, isOpen, setIsOpen, updateData, setUpdateData, fetchData }) {
-	const { fetchReports, fetchUserReports } = useTaskHelpers();
-	const { tasks, relations, setRelations, addRelation, selectedUser, setActiveTab, options } = useTasksStore();
+export default function TaskForm({ parentId, projectId, isOpen, setIsOpen, updateData, setUpdateData }) {
+	const { fetchTasks, fetchReports, fetchUserReports } = useTaskHelpers();
+	const { tasks, relations, setRelations, addRelation, selectedUser, setActiveTab, options, tasksLoading, setTasksLoading } = useTasksStore();
 	const { taskStatuses } = useTaskStatusesStore();
 	const { users } = useUsersStore();
 	const { user } = useUserStore();
 	const { projects } = useProjectsStore();
 	const { categories } = useCategoriesStore();
-	const { loading, setLoading } = useLoadContext();
 	const { user: user_auth } = useAuthContext();
 	const showToast = useToast();
-	const [showMore, setShowMore] = useState(false);
+	const [showMore, setShowMore] = useState(true);
 	const parentTasks = () => {
 		return tasks.filter((task) => task.parent_id == null && task.id !== updateData?.id) || [];
 	};
+	// const [taskImages, setTaskImages] = useState([]);
+	const [attachments, setAttachments] = useState([]);
+	const [existingAttachments, setExistingAttachments] = useState([]);
 
 	// State for time_estimate and delay hour/minute fields
 	const [timeEstimateHour, setTimeEstimateHour] = useState("");
@@ -106,11 +109,17 @@ export default function TaskForm({ parentId, projectId, isOpen, setIsOpen, updat
 			parent_id: undefined,
 			project_id: undefined,
 			category: undefined,
-			expected_output: "",
-			start_date: undefined,
-			end_date: undefined,
+			priority: "",
+			// expected_output: "",
+			start_date: null,
+			end_date: null,
+			actual_date: null,
+			days_estimate: "",
+			days_taken: "",
+			delay_days: "",
 			start_time: "",
 			end_time: "",
+			actual_time: "",
 			time_estimate: "",
 			time_taken: "",
 			delay: "",
@@ -165,9 +174,9 @@ export default function TaskForm({ parentId, projectId, isOpen, setIsOpen, updat
 				project_id: project_id || projectId || undefined,
 				category_id: category_id || undefined,
 				// expected_output: expected_output || "",
-				start_date: typeof start_date === "string" ? parseISO(start_date) : start_date || undefined,
-				end_date: typeof end_date === "string" ? parseISO(end_date) : end_date || undefined,
-				actual_date: typeof actual_date === "string" ? parseISO(actual_date) : actual_date || undefined,
+				start_date: typeof start_date === "string" ? parseISO(start_date) : start_date || null,
+				end_date: typeof end_date === "string" ? parseISO(end_date) : end_date || null,
+				actual_date: typeof actual_date === "string" ? parseISO(actual_date) : actual_date || null,
 				days_estimate: days_estimate || "",
 				days_taken: days_taken || "",
 				delay_days: delay_days || "",
@@ -207,11 +216,17 @@ export default function TaskForm({ parentId, projectId, isOpen, setIsOpen, updat
 				setDelayHour("");
 				setDelayMinute("");
 			}
+			// Load attachments for existing tasks
+			if (updateData.attachments && Array.isArray(updateData.attachments)) {
+				setExistingAttachments(updateData.attachments);
+			} else {
+				setExistingAttachments([]); // Reset for new tasks
+			}
 		}
 	}, [updateData, form, projects, users, categories]);
 
 	const handleSubmit = async (formData) => {
-		setLoading(true);
+		setTasksLoading(true);
 		try {
 			// Parse numeric fields
 			const formatTime = (time) => {
@@ -242,17 +257,46 @@ export default function TaskForm({ parentId, projectId, isOpen, setIsOpen, updat
 				delay: delayDecimal !== undefined ? Number(delayDecimal.toFixed(2)) : undefined,
 				performance_rating: formData.performance_rating ? parseInt(formData.performance_rating, 10) : null,
 			};
-			if (Object.keys(updateData).length === 0) {
+
+			// Convert to FormData before sending
+			const formDataToSend = new FormData();
+			for (const [key, value] of Object.entries(parsedForm)) {
+				if (key === "attachments" && Array.isArray(value)) {
+					value.forEach((file) => formDataToSend.append("attachments[]", file));
+				} else if (value !== null && value !== undefined) {
+					formDataToSend.append(key, value);
+				} else {
+					formDataToSend.append(key, "");
+				}
+			}
+			// Append assignees array (important: Laravel needs it as assignees[])
+			if (selectedUsers && selectedUsers.length > 0) {
+				selectedUsers.forEach((userId) => {
+					formDataToSend.append("assignees[]", userId);
+				});
+			}
+
+			// ✅ Append attachment files
+			if (attachments.length > 0) {
+				attachments.forEach((file) => {
+					formDataToSend.append("attachments[]", file);
+				});
+			}
+			if (Object.keys(updateData).length === 0 || updateData?.calendar_add || updateData?.kanban_add) {
 				// ADD
 
 				// Calculate new position
 				const tasksInColumn = tasks.filter((t) => t.project_id === parsedForm.project_id && t.status_id === parsedForm.status_id);
 				const maxPosition = tasksInColumn.length ? Math.max(...tasksInColumn.map((t) => t.position || 0)) : 0;
-				parsedForm.position = maxPosition + 1;
+				// parsedForm.position = maxPosition + 1;
+				formDataToSend.append("position", maxPosition + 1);
 
-				const taskResponse = await axiosClient.post(API().task(), parsedForm);
-				// cannot update stores, need to update parent task
-				fetchData();
+				// const taskResponse = await axiosClient.post(API().task(), parsedForm);
+				const taskResponse = await axiosClient.post(API().task(), formDataToSend, {
+					headers: { "Content-Type": "multipart/form-data" },
+				});
+
+				fetchTasks();
 				showToast("Success!", "Task added.", 3000);
 				// if add subtask, don't close sheet
 				if (!parentId) setIsOpen(false);
@@ -272,34 +316,6 @@ export default function TaskForm({ parentId, projectId, isOpen, setIsOpen, updat
 						});
 					}
 				}
-			} else if (updateData?.calendar_add) {
-				// ADD but in calendar
-
-				// Calculate new position
-				const tasksInColumn = tasks.filter((t) => t.project_id === parsedForm.project_id && t.status_id === parsedForm.status_id);
-				const maxPosition = tasksInColumn.length ? Math.max(...tasksInColumn.map((t) => t.position || 0)) : 0;
-				parsedForm.position = maxPosition + 1;
-
-				await axiosClient.post(API().task(), parsedForm);
-				// cannot update stores, need to update parent task
-				fetchData();
-				showToast("Success!", "Task added to calendar.", 3000);
-				setIsOpen(false);
-				// setTaskAdded(true);
-			} else if (updateData?.kanban_add) {
-				// ADD but in kanban
-
-				// Calculate new position
-				const tasksInColumn = tasks.filter((t) => t.project_id === parsedForm.project_id && t.status_id === parsedForm.status_id);
-				const maxPosition = tasksInColumn.length ? Math.max(...tasksInColumn.map((t) => t.position || 0)) : 0;
-				parsedForm.position = maxPosition + 1;
-
-				await axiosClient.post(API().task(), parsedForm);
-				// cannot update stores, need to update parent task
-				fetchData();
-				showToast("Success!", "Task added to kanban.", 3000);
-				setIsOpen(false);
-				// setTaskAdded(true);
 			} else {
 				// UPDATE
 
@@ -316,15 +332,19 @@ export default function TaskForm({ parentId, projectId, isOpen, setIsOpen, updat
 
 					const maxPosition = tasksInNewColumn.length ? Math.max(...tasksInNewColumn.map((t) => t.position || 0)) : 0;
 
-					parsedForm.position = maxPosition + 1;
+					// parsedForm.position = maxPosition + 1;
+					formDataToSend.append("position", maxPosition + 1);
 				} else {
 					// Keep current position if column didn't change
-					parsedForm.position = updateData.position;
+					// parsedForm.position = updateData.position;
+					formDataToSend.append("position", updateData.position);
 				}
-
-				await axiosClient.put(API().task(updateData?.id), parsedForm);
+				// await axiosClient.put(API().task(updateData?.id), parsedForm);
+				await axiosClient.post(API().task(updateData.id) + "?_method=PUT", formDataToSend, {
+					headers: { "Content-Type": "multipart/form-data" },
+				});
 				// cannot update stores, need to update parent task
-				fetchData();
+				fetchTasks();
 				showToast("Success!", "Task updated.", 3000);
 				setIsOpen(false);
 				setUpdateData({});
@@ -342,8 +362,9 @@ export default function TaskForm({ parentId, projectId, isOpen, setIsOpen, updat
 				});
 			}
 		} finally {
-			setLoading(false);
+			setTasksLoading(false);
 			fetchReports();
+			setAttachments([]);
 			if (user?.id && Array.isArray(formData.assignees) && formData.assignees.includes(user.id)) {
 				fetchUserReports(user.id);
 			}
@@ -444,7 +465,6 @@ export default function TaskForm({ parentId, projectId, isOpen, setIsOpen, updat
 				case "delay": {
 					const est = Number(values.time_estimate);
 					const taken = Number(values.time_taken);
-					console.log(est, taken);
 					if (est && taken) {
 						setAutoCalculateErrors((prev) => ({ ...prev, time_delay: "" }));
 						let delay = taken - est;
@@ -491,6 +511,54 @@ export default function TaskForm({ parentId, projectId, isOpen, setIsOpen, updat
 				// onSubmit={form.handleSubmit(handleSubmit)}
 				className="flex flex-col gap-4 w-full"
 			>
+				<FormField
+					control={form.control}
+					name="title"
+					render={({ field }) => {
+						return (
+							<FormItem>
+								<FormLabel>
+									Title <span className="text-red-500">*</span>
+								</FormLabel>
+								<FormControl>
+									<Input disabled={!isEditable} placeholder="Title" {...field} />
+								</FormControl>
+								<FormMessage />
+							</FormItem>
+						);
+					}}
+				/>
+				<FormField
+					control={form.control}
+					name="description"
+					render={({ field }) => (
+						<FormItem>
+							<FormLabel>Description</FormLabel>
+							<FormControl>
+								{/* <RichTextEditor value={field.value || ""} onChange={field.onChange} /> */}
+								<RichTextEditor
+									value={field.value || ""}
+									onChange={field.onChange}
+									// onImageDrop={handleImageDropFromEditor}
+								/>
+							</FormControl>
+							<FormMessage />
+						</FormItem>
+					)}
+				/>
+				<Input
+					type="file"
+					multiple
+					onChange={(e) => setAttachments(Array.from(e.target.files))}
+					className="cursor-pointer bg-secondary text-foreground"
+				/>
+				{/* Display existing attachments from database */}
+				<TaskAttachments
+					existingAttachments={existingAttachments}
+					setExistingAttachments={setExistingAttachments}
+					attachments={attachments}
+					setAttachments={setAttachments}
+				/>
 				<FormField
 					control={form.control}
 					name="status_id"
@@ -559,23 +627,6 @@ export default function TaskForm({ parentId, projectId, isOpen, setIsOpen, updat
 										)}
 									</SelectContent>
 								</Select>
-								<FormMessage />
-							</FormItem>
-						);
-					}}
-				/>
-				<FormField
-					control={form.control}
-					name="title"
-					render={({ field }) => {
-						return (
-							<FormItem>
-								<FormLabel>
-									Title <span className="text-red-500">*</span>
-								</FormLabel>
-								<FormControl>
-									<Input disabled={!isEditable} placeholder="Title" {...field} />
-								</FormControl>
 								<FormMessage />
 							</FormItem>
 						);
@@ -721,39 +772,6 @@ export default function TaskForm({ parentId, projectId, isOpen, setIsOpen, updat
 						);
 					}}
 				/>
-				<FormField
-					control={form.control}
-					name="description"
-					render={({ field }) => (
-						<FormItem>
-							<FormLabel>Description</FormLabel>
-							<FormControl>
-								<RichTextEditor
-									value={field.value || ""}
-									onChange={field.onChange}
-									orgName={user_auth?.data?.organization_name}
-									skipImageCleanup={!isOpen}
-								/>
-							</FormControl>
-							<FormMessage />
-						</FormItem>
-					)}
-				/>
-				{/* <FormField
-					control={form.control}
-					name="description"
-					render={({ field }) => {
-						return (
-							<FormItem>
-								<FormLabel>Description</FormLabel>
-								<FormControl>
-									<Textarea disabled={!isEditable} placeholder="Description" {...field} />
-								</FormControl>
-								<FormMessage />
-							</FormItem>
-						);
-					}}
-				/> */}
 				{showMore || updateData.calendar_add ? (
 					<>
 						<div className="flex flex-col gap-4 bg-secondary p-4 rounded-lg">
@@ -800,7 +818,7 @@ export default function TaskForm({ parentId, projectId, isOpen, setIsOpen, updat
 										return (
 											<FormItem className="w-full">
 												<FormLabel>
-													<div className="flex flex-row justify-between">
+													<div title="Auto calculate days estimate" className="flex flex-row justify-between">
 														<span>Days Estimate</span>
 														<Sparkles
 															size={16}
@@ -848,7 +866,7 @@ export default function TaskForm({ parentId, projectId, isOpen, setIsOpen, updat
 										return (
 											<FormItem className="w-full">
 												<FormLabel>
-													<div className="flex flex-row justify-between">
+													<div title="Auto calculate days taken" className="flex flex-row justify-between">
 														<span>Days Taken</span>
 														<Sparkles
 															size={16}
@@ -879,7 +897,7 @@ export default function TaskForm({ parentId, projectId, isOpen, setIsOpen, updat
 										return (
 											<FormItem className="w-full">
 												<FormLabel>
-													<div className="flex flex-row justify-between">
+													<div title="Auto calculate days delayed" className="flex flex-row justify-between">
 														<span>Days Delayed</span>
 														<Sparkles
 															size={16}
@@ -963,7 +981,7 @@ export default function TaskForm({ parentId, projectId, isOpen, setIsOpen, updat
 									render={({ field }) => (
 										<FormItem className="w-full">
 											<FormLabel>
-												<div className="flex flex-row justify-between">
+												<div title="Auto calculate time estimate" className="flex flex-row justify-between">
 													<span>Time Estimate</span>
 													<Sparkles
 														size={16}
@@ -1051,7 +1069,7 @@ export default function TaskForm({ parentId, projectId, isOpen, setIsOpen, updat
 									render={({ field }) => (
 										<FormItem className="w-full">
 											<FormLabel>
-												<div className="flex flex-row justify-between">
+												<div title="Auto calculate time taken" className="flex flex-row justify-between">
 													<span>Time Taken</span>
 													<Sparkles
 														size={16}
@@ -1107,7 +1125,7 @@ export default function TaskForm({ parentId, projectId, isOpen, setIsOpen, updat
 								/>
 								<FormItem className="w-full">
 									<FormLabel>
-										<div className="flex flex-row justify-between">
+										<div title="Auto calculate time delay" className="flex flex-row justify-between">
 											<span>Time Delay</span>
 											<Sparkles
 												size={16}
@@ -1181,15 +1199,15 @@ export default function TaskForm({ parentId, projectId, isOpen, setIsOpen, updat
 									render={({ field }) => {
 										return (
 											<FormItem>
-												<FormLabel>Rating &#40;1-10&#41;</FormLabel>
+												<FormLabel>Rating &#40;1-5&#41;</FormLabel>
 												<FormControl>
 													<Input
 														disabled={!isEditable}
 														type="number"
 														min={0}
-														max={10}
+														max={5}
 														step="any"
-														placeholder="Rating &#40;1-10&#41;"
+														placeholder="Rating &#40;1-5&#41;"
 														{...field}
 													/>
 												</FormControl>
@@ -1234,8 +1252,8 @@ export default function TaskForm({ parentId, projectId, isOpen, setIsOpen, updat
 				</div>
 				{isEditable ? (
 					<div className="sticky bottom-0 backdrop-blur-sm bg-background/30 backdrop-saturate-150 p-4 mt-auto">
-						<Button type="submit" disabled={loading} className="w-full">
-							{loading && <Loader2 className="animate-spin mr-5 -ml-11 text-background" />}{" "}
+						<Button type="submit" disabled={tasksLoading} className="w-full">
+							{tasksLoading && <Loader2 className="animate-spin mr-5 -ml-11 text-background" />}{" "}
 							{Object.keys(updateData).length === 0 || updateData?.calendar_add || updateData?.kanban_add ? "Submit" : "Update"}
 						</Button>
 					</div>

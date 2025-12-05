@@ -67,8 +67,9 @@ class UpdateTaskRequest extends FormRequest
             'delay' => 'nullable|numeric|min:0',
             'delay_days' => 'nullable|numeric|min:0',
             'delay_reason' => 'nullable|string',
-            'performance_rating' => 'nullable|integer|min:0|max:10',
+            'performance_rating' => 'nullable|integer|min:0|max:5',
             'remarks' => 'nullable|string',
+            'attachments.*' => 'nullable|file|max:5120', // each attachment max 5MB
             'priority' => [
                 'nullable',
                 Rule::in(['Low', 'Medium', 'High', 'Urgent', 'Critical']),
@@ -98,7 +99,7 @@ class UpdateTaskRequest extends FormRequest
             'end_date.after_or_equal' => 'End date must be after or equal to start date.',
             'end_time.after' => 'The end time must be after the start time.',
             'performance_rating.min' => 'Performance rating must be at least 0.',
-            'performance_rating.max' => 'Performance rating may not be greater than 10.',
+            'performance_rating.max' => 'Performance rating may not be greater than 5.',
             'time_estimate' => 'Time estimate must be greater than 0',
             'time_taken' => 'Actual time must be greater than 0',
             'delay' => 'Delay time must be greater than 0 or set to null',

@@ -3,14 +3,20 @@ import {
 	ArrowUpDown,
 	Copy,
 	CornerDownRight,
+	Edit,
+	Eye,
 	FileCheck,
-	FileQuestion,
 	FileQuestionIcon,
 	FolderKanbanIcon,
+	MessageSquareMore,
+	Paperclip,
 	Text,
 	Trash2Icon,
 	UserCheck2,
-	View,
+	BellRing,
+	CalendarCheck,
+	CalendarClock,
+	CalendarCheck2,
 } from "lucide-react";
 import { MoreHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -21,11 +27,13 @@ import { useTasksStore } from "@/store/tasks/tasksStore";
 import { useMemo, useState } from "react";
 import { useAuthContext } from "@/contexts/AuthContextProvider";
 import { Checkbox } from "@/components/ui/checkbox";
-import UpdateDialog from "./updateDialog";
-import DeleteDialog from "./deleteDialog";
+import UpdateDialog from "../updateDialog";
+import DeleteDialog from "../deleteDialog";
+import { useTaskDiscussionsStore } from "@/store/taskDiscussions/taskDiscussionsStore";
 
 export const columnsTask = ({ dialogOpen, setDialogOpen, setIsOpen, setUpdateData }) => {
 	const { tasks, taskHistory, setSelectedTaskHistory, setRelations } = useTasksStore();
+	const { taskDiscussions } = useTaskDiscussionsStore();
 	const [selectedTasks, setSelectedTasks] = useState([]);
 	const [bulkAction, setBulkAction] = useState(null);
 
@@ -89,14 +97,20 @@ export const columnsTask = ({ dialogOpen, setDialogOpen, setIsOpen, setUpdateDat
 					);
 				},
 				cell: ({ row }) => {
-					const { title, description, depth } = row.original;
+					const { id, title, description, attachments, depth } = row.original;
 					return (
 						<div className="flex flex-row min-w-52 gap-2" style={{ paddingLeft: depth * 20 }}>
-							<span className="text-primary">{depth == 1 ? <CornerDownRight size={18} /> : ""}</span>
+							<span className="text-primary">{depth == 1 ? <CornerDownRight size={20} /> : ""}</span>
 							<div>
-								{title}
+								{depth != 1 ? <span className="font-extrabold">{title}</span> : title}
 								<br />
-								{description && <Text className="text-sm text-gray-500" size={14} />}
+								<span className="flex gap-2">
+									{description && <Text className="text-sm text-gray-500" size={14} />}
+									{attachments && attachments.length > 0 && <Paperclip className="text-sm text-gray-500" size={14} />}
+									{taskDiscussions?.filter((d) => d.task_id === id).length > 0 && (
+										<MessageSquareMore className="text-sm text-gray-500" size={14} />
+									)}
+								</span>
 								{/* <span className="text-sm text-gray-500">{description}</span> */}
 							</div>
 						</div>
@@ -252,42 +266,52 @@ export const columnsTask = ({ dialogOpen, setDialogOpen, setIsOpen, setUpdateDat
 			{
 				id: "actual date",
 				accessorKey: "actual_date",
-				header: ({ column }) => {
-					return (
-						<button className="flex" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
-							Actual Date <ArrowUpDown className="ml-2 h-4 w-4" />
-						</button>
-					);
-				},
-				// Keep raw value for sorting
+				header: ({ column }) => (
+					<button className="flex items-center" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
+						Actual Date <ArrowUpDown className="ml-2 h-4 w-4" />
+					</button>
+				),
+				// keep raw value for sorting
 				accessorFn: (row) => row.actual_date,
-				// Use cell renderer to format for display
+				// display formatted
 				cell: ({ row }) => {
 					const { actual_date, days_estimate, days_taken, delay_days } = row.original;
+
+					const hasEstimate = days_estimate !== null && days_estimate !== undefined && days_estimate !== 0;
+					const hasTaken = days_taken !== null && days_taken !== undefined && days_taken !== 0;
+					const hasDelay = delay_days !== null && delay_days !== undefined && delay_days !== 0;
+
 					return (
 						<div>
+							{/* Date */}
 							{actual_date ? format(new Date(actual_date), "MMM-dd yyyy") : "-"}
 							<br />
-							{days_estimate && (
+
+							{/* Estimate */}
+							{hasEstimate && (
 								<>
 									<span className="text-xs text-muted-foreground">
-										<span className="font-semibold">Estimate:</span> {days_estimate} days
+										<span className="font-semibold">Estimate:</span> {days_estimate}
 									</span>
 									<br />
 								</>
 							)}
-							{days_taken && (
+
+							{/* Taken */}
+							{hasTaken && (
 								<>
 									<span className="text-xs text-muted-foreground">
-										<span className="font-semibold">Taken:</span> {days_taken} days
+										<span className="font-semibold">Taken:</span> {days_taken}
 									</span>
 									<br />
 								</>
 							)}
-							{delay_days && (
+
+							{/* Delay */}
+							{hasDelay && (
 								<>
 									<span className="text-xs text-muted-foreground">
-										<span className="font-semibold">Delay:</span> {delay_days} days
+										<span className="font-semibold">Delay:</span> {delay_days}
 									</span>
 									<br />
 								</>
@@ -415,114 +439,169 @@ export const columnsTask = ({ dialogOpen, setDialogOpen, setIsOpen, setUpdateDat
 					const task = row.original;
 					const selectedCount = table.getSelectedRowModel().rows.length;
 					return (
-						<DropdownMenu modal={false}>
-							<DropdownMenuTrigger asChild>
-								<Button variant="ghost" className="h-8 w-8 p-0" onClick={(e) => e.stopPropagation()}>
-									<span className="sr-only">Open menu</span>
-									<MoreHorizontal className="h-4 w-4" />
-								</Button>
-							</DropdownMenuTrigger>
-							<DropdownMenuContent align="end">
-								<DropdownMenuItem
-									className="cursor-pointer"
-									onClick={(e) => {
-										e.stopPropagation();
-										handleUpdate(task);
-									}}
-								>
-									<View /> View and Update Task
-								</DropdownMenuItem>
-								{table.getFilteredSelectedRowModel().rows.length === 0 && (
-									<>
-										<DropdownMenuItem
-											className="cursor-pointer"
-											onClick={(e) => {
-												e.stopPropagation();
-												const clonedTask = {
-													...task,
-													id: undefined,
-													title: task.title + " (Clone)",
-													calendar_add: true,
-												};
-												setUpdateData(clonedTask);
-												setIsOpen(true);
-											}}
-										>
-											<Copy /> Clone Task
-										</DropdownMenuItem>
-										<DropdownMenuItem
-											className="cursor-pointer"
-											onClick={(e) => {
-												e.stopPropagation();
-												let selected = table.getSelectedRowModel().rows.map((r) => r.original);
-												if (selected.length === 0) selected = [row.original];
+						<div className="flex justify-center items-center">
+							<Button
+								variant="ghost"
+								title="Update task"
+								className="h-8 w-8 p-0 cursor-pointer pointer-events-auto"
+								onClick={(e) => {
+									e.stopPropagation();
+									handleUpdate(task);
+								}}
+							>
+								<Edit size={16} />
+							</Button>
+							<Button
+								variant="ghost"
+								title="Clone task"
+								className="h-8 w-8 p-0 cursor-pointer pointer-events-auto"
+								onClick={(e) => {
+									e.stopPropagation();
+									const clonedTask = {
+										...task,
+										id: undefined,
+										title: task.title + " (Clone)",
+										calendar_add: true,
+									};
+									setUpdateData(clonedTask);
+									setIsOpen(true);
+								}}
+							>
+								<Copy size={16} />
+							</Button>
+							<DropdownMenu modal={false}>
+								<DropdownMenuTrigger asChild>
+									<Button variant="ghost" className="h-8 w-8 p-0" onClick={(e) => e.stopPropagation()}>
+										<span className="sr-only">Open menu</span>
+										<MoreHorizontal className="h-4 w-4" />
+									</Button>
+								</DropdownMenuTrigger>
+								<DropdownMenuContent align="end">
+									{table.getFilteredSelectedRowModel().rows.length === 0 && (
+										<>
+											<DropdownMenuItem
+												className="cursor-pointer"
+												onClick={(e) => {
+													e.stopPropagation();
+													let selected = table.getSelectedRowModel().rows.map((r) => r.original);
+													if (selected.length === 0) selected = [row.original];
 
-												setSelectedTasks(selected);
-												setBulkAction("status");
-											}}
-										>
-											<FileCheck /> Update Status
-										</DropdownMenuItem>
+													setSelectedTasks(selected);
+													setBulkAction("status");
+												}}
+											>
+												<FileCheck /> Update Status
+											</DropdownMenuItem>
 
-										<DropdownMenuItem
-											className="cursor-pointer"
-											onClick={(e) => {
-												e.stopPropagation();
-												let selected = table.getSelectedRowModel().rows.map((r) => r.original);
-												if (selected.length === 0) selected = [row.original];
+											<DropdownMenuItem
+												className="cursor-pointer"
+												onClick={(e) => {
+													e.stopPropagation();
+													let selected = table.getSelectedRowModel().rows.map((r) => r.original);
+													if (selected.length === 0) selected = [row.original];
 
-												setSelectedTasks(selected);
-												setBulkAction("assignees");
-											}}
-										>
-											<UserCheck2 /> Update Assignees
-										</DropdownMenuItem>
+													setSelectedTasks(selected);
+													setBulkAction("assignees");
+												}}
+											>
+												<UserCheck2 /> Update Assignees
+											</DropdownMenuItem>
 
-										<DropdownMenuItem
-											className="cursor-pointer"
-											onClick={(e) => {
-												e.stopPropagation();
-												let selected = table.getSelectedRowModel().rows.map((r) => r.original);
-												if (selected.length === 0) selected = [row.original];
+											<DropdownMenuItem
+												className="cursor-pointer"
+												onClick={(e) => {
+													e.stopPropagation();
+													let selected = table.getSelectedRowModel().rows.map((r) => r.original);
+													if (selected.length === 0) selected = [row.original];
 
-												setSelectedTasks(selected);
-												setBulkAction("project");
-											}}
-										>
-											<FolderKanbanIcon /> Update Project
-										</DropdownMenuItem>
+													setSelectedTasks(selected);
+													setBulkAction("project");
+												}}
+											>
+												<FolderKanbanIcon /> Update Project
+											</DropdownMenuItem>
 
-										<DropdownMenuItem
-											className="cursor-pointer"
-											onClick={(e) => {
-												e.stopPropagation();
-												let selected = table.getSelectedRowModel().rows.map((r) => r.original);
-												if (selected.length === 0) selected = [row.original];
+											<DropdownMenuItem
+												className="cursor-pointer"
+												onClick={(e) => {
+													e.stopPropagation();
+													let selected = table.getSelectedRowModel().rows.map((r) => r.original);
+													if (selected.length === 0) selected = [row.original];
 
-												setSelectedTasks(selected);
-												setBulkAction("category");
-											}}
-										>
-											<FileQuestionIcon /> Update Category
-										</DropdownMenuItem>
-									</>
-								)}
-								<DropdownMenuItem
-									className="w-full text-left cursor-pointer"
-									onClick={(e) => {
-										e.stopPropagation();
-										const selectedRows = table.getSelectedRowModel().rows.map((r) => r.original);
-										if (selectedRows.length > 0) {
-											openDialog(selectedRows);
-										} else {
-											openDialog([task]);
-										}
-									}}
-								>
-									<Trash2Icon className="text-destructive" /> Delete Task
-								</DropdownMenuItem>
-							</DropdownMenuContent>
-						</DropdownMenu>
+													setSelectedTasks(selected);
+													setBulkAction("category");
+												}}
+											>
+												<FileQuestionIcon /> Update Category
+											</DropdownMenuItem>
+											<DropdownMenuItem
+												className="cursor-pointer"
+												onClick={(e) => {
+													e.stopPropagation();
+													let selected = table.getSelectedRowModel().rows.map((r) => r.original);
+													if (selected.length === 0) selected = [row.original];
+													setSelectedTasks(selected);
+													setBulkAction("priority");
+												}}
+											>
+												<BellRing /> Update Priority
+											</DropdownMenuItem>
+											<DropdownMenuItem
+												className="cursor-pointer"
+												onClick={(e) => {
+													e.stopPropagation();
+													let selected = table.getSelectedRowModel().rows.map((r) => r.original);
+													if (selected.length === 0) selected = [row.original];
+													setSelectedTasks(selected);
+													setBulkAction("start_date");
+												}}
+											>
+												<CalendarCheck /> Update Start Date
+											</DropdownMenuItem>
+											<DropdownMenuItem
+												className="cursor-pointer"
+												onClick={(e) => {
+													e.stopPropagation();
+													let selected = table.getSelectedRowModel().rows.map((r) => r.original);
+													if (selected.length === 0) selected = [row.original];
+													setSelectedTasks(selected);
+													setBulkAction("end_date");
+												}}
+											>
+												<CalendarClock /> Update End Date
+											</DropdownMenuItem>
+											<DropdownMenuItem
+												className="cursor-pointer"
+												onClick={(e) => {
+													e.stopPropagation();
+													let selected = table.getSelectedRowModel().rows.map((r) => r.original);
+													if (selected.length === 0) selected = [row.original];
+													setSelectedTasks(selected);
+													setBulkAction("actual_date");
+												}}
+											>
+												<CalendarCheck2 /> Update Actual Date
+											</DropdownMenuItem>
+										</>
+									)}
+									<hr />
+									<DropdownMenuItem
+										className="w-full text-left cursor-pointer"
+										onClick={(e) => {
+											e.stopPropagation();
+											const selectedRows = table.getSelectedRowModel().rows.map((r) => r.original);
+											if (selectedRows.length > 0) {
+												openDialog(selectedRows);
+											} else {
+												openDialog([task]);
+											}
+										}}
+									>
+										<Trash2Icon className="text-destructive" /> Delete Task
+									</DropdownMenuItem>
+								</DropdownMenuContent>
+							</DropdownMenu>
+						</div>
 					);
 				},
 			},

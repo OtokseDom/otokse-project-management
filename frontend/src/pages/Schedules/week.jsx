@@ -1,46 +1,24 @@
 "use client";
-import { useLoadContext } from "@/contexts/LoadContextProvider";
 import { format } from "date-fns";
-import { Loader2 } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import TaskForm from "../Tasks/form";
 import { Skeleton } from "@/components/ui/skeleton";
 import History from "@/components/task/History";
-import { flattenTasks, statusColors } from "@/utils/taskHelpers";
+import { statusColors } from "@/utils/taskHelpers";
 import Relations from "@/components/task/Relations";
 import Tabs from "@/components/task/Tabs";
 import { useTasksStore } from "@/store/tasks/tasksStore";
+import { TaskDiscussions } from "@/components/task/Discussion";
 
-export default function Week({
-	// data,
-	// projects,
-	// users,
-	// categories,
-	fetchData,
-	getWeekDays,
-	getTimeSlots,
-	weekstart_date: weekStartDate,
-	isInTimeSlot,
-	// selectedUser,
-	// taskHistory,
-}) {
-	const { tasks, taskHistory, selectedTaskHistory, setSelectedTaskHistory, setRelations, activeTab, setActiveTab, selectedUser } = useTasksStore();
-
-	const { loading, setLoading } = useLoadContext();
+export default function Week({ getWeekDays, getTimeSlots, weekstart_date: weekStartDate, isInTimeSlot }) {
+	const { tasks, taskHistory, selectedTaskHistory, setSelectedTaskHistory, setRelations, activeTab, setActiveTab, selectedUser, tasksLoading } =
+		useTasksStore();
 	const weekDays = getWeekDays(weekStartDate);
 	const timeSlots = getTimeSlots();
 	const [openDialogIndex, setOpenDialogIndex] = useState(null);
 	const [updateData, setUpdateData] = useState({});
-	const [taskAdded, setTaskAdded] = useState(false);
 	const [parentId, setParentId] = useState(null); //for adding subtasks from relations tab
-
-	useEffect(() => {
-		if (taskAdded) {
-			fetchData();
-			setTaskAdded(false);
-		}
-	}, [taskAdded]);
 
 	useEffect(() => {
 		if (!openDialogIndex) {
@@ -48,14 +26,29 @@ export default function Week({
 			setActiveTab("update");
 			setParentId(null);
 		}
+		if (openDialogIndex !== null && !updateData.id) {
+			const day = weekDays[openDialogIndex];
+			setUpdateData({
+				calendar_add: true,
+				assignee: selectedUser.id !== "undefined" ? selectedUser : null,
+				assignee_id: selectedUser.id !== "undefined" ? selectedUser.id : null,
+				start_date: format(day, "yyyy-MM-dd"),
+				end_date: format(day, "yyyy-MM-dd"),
+			});
+		}
 	}, [openDialogIndex]);
 	return (
 		<div className="overflow-x-auto">
 			<div
-				className={`fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm z-40 transition-opacity duration-300 pointer-events-none ${
-					openDialogIndex ? "opacity-100" : "opacity-0"
+				className={`fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm z-40 transition-opacity duration-300 ${
+					openDialogIndex !== null ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
 				}`}
 				aria-hidden="true"
+				onClick={(e) => {
+					e.stopPropagation();
+					e.preventDefault();
+					setOpenDialogIndex(null);
+				}}
 			/>
 			<div className="min-w-max grid grid-cols-8 gap-1">
 				{/* Time column */}
@@ -81,20 +74,13 @@ export default function Week({
 
 					return (
 						<Sheet key={index} open={isDialogOpen} onOpenChange={(open) => setOpenDialogIndex(open ? index : null)} modal={false}>
-							<SheetTrigger
-								asChild
-								onClick={() => {
-									setUpdateData({
-										calendar_add: true,
-										assignee: selectedUser.id !== "undefined" ? selectedUser : null,
-										assignee_id: selectedUser.id !== "undefined" ? selectedUser.id : null,
-										start_date: format(day, "yyyy-MM-dd"),
-										end_date: format(day, "yyyy-MM-dd"),
-									});
-									setOpenDialogIndex(index);
-								}}
-							>
-								<div key={index} className="col-span-1 min-w-32 text-left cursor-pointer">
+							<SheetTrigger asChild>
+								<div
+									className="col-span-1 min-w-32 text-left cursor-pointer"
+									onClick={() => {
+										setOpenDialogIndex(index);
+									}}
+								>
 									<div className={`h-12 p-2 text-center font-medium ${isToday ? "text-blue-600" : ""}`}>
 										<div>{["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][day.getDay()]}</div>
 										<div className="text-sm">{day.getDate()}</div>
@@ -112,7 +98,7 @@ export default function Week({
                                                 ${index === 6 ? "border-r" : ""}
                                             `}
 											>
-												{loading ? (
+												{tasksLoading ? (
 													<div className="flex flex-col w-full">
 														<div className="flex flex-row items-center gap-2">
 															<Skeleton index={timeIndex * 0.5} className="h-3 mt-1 w-1/3 bg-sidebar-border" />
@@ -141,10 +127,10 @@ export default function Week({
 													const duration = endHour - startHour + (endMin - startMin) / 60;
 													return (
 														<div
+															title={task.title}
 															key={task.id}
-															onClick={(e) => {
+															onClick={() => {
 																//set update data when a task is clicked
-																e.stopPropagation();
 																setUpdateData(task);
 																setOpenDialogIndex(index);
 																const filteredHistory = taskHistory.filter((th) => th.task_id === task.id);
@@ -179,10 +165,16 @@ export default function Week({
 									})}
 								</div>
 							</SheetTrigger>
-							<SheetContent side="right" className="overflow-y-auto w-[400px] sm:w-[540px]">
+							<SheetContent side="right" className="overflow-y-auto w-full sm:w-[640px]">
 								<SheetHeader>
 									<SheetTitle>
-										<Tabs loading={loading} updateData={updateData} activeTab={activeTab} setActiveTab={setActiveTab} parentId={parentId} />
+										<Tabs
+											loading={tasksLoading}
+											updateData={updateData}
+											activeTab={activeTab}
+											setActiveTab={setActiveTab}
+											parentId={parentId}
+										/>
 									</SheetTitle>
 									<SheetDescription className="sr-only">Navigate through the app using the options below.</SheetDescription>
 								</SheetHeader>
@@ -190,14 +182,14 @@ export default function Week({
 									<History selectedTaskHistory={selectedTaskHistory} />
 								) : activeTab == "relations" ? (
 									<Relations setUpdateData={setUpdateData} setParentId={setParentId} />
+								) : activeTab == "discussions" ? (
+									<TaskDiscussions taskId={updateData?.id} />
 								) : (
 									<TaskForm
 										isOpen={isDialogOpen}
 										setIsOpen={(open) => setOpenDialogIndex(open ? index : null)}
 										updateData={updateData}
 										setUpdateData={setUpdateData}
-										fetchData={fetchData}
-										setTaskAdded={setTaskAdded}
 										parentId={parentId}
 									/>
 								)}

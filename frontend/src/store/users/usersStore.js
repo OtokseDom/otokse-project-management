@@ -7,5 +7,7 @@ export const useUsersStore = () => {
 		addUser: useAppStore((state) => state.addUser),
 		updateUser: useAppStore((state) => state.updateUser),
 		removeUser: useAppStore((state) => state.removeUser),
+		usersLoading: useAppStore((state) => state.usersLoading),
+		setUsersLoading: useAppStore((state) => state.setUsersLoading),
 	};
 };

@@ -1,26 +1,22 @@
 "use client";
-import { ArrowUpDown } from "lucide-react";
-import { MoreHorizontal } from "lucide-react";
+import { ArrowUpDown, Edit, Trash2Icon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useEffect, useMemo, useState } from "react";
 import { useAuthContext } from "@/contexts/AuthContextProvider";
-import { useLoadContext } from "@/contexts/LoadContextProvider";
 import { useToast } from "@/contexts/ToastContextProvider";
 import axiosClient from "@/axios.client";
 import { API } from "@/constants/api";
 import { useCategoriesStore } from "@/store/categories/categoriesStore";
 export const columnsCategory = ({ setIsOpen, setUpdateData, dialogOpen, setDialogOpen }) => {
-	const { loading, setLoading } = useLoadContext();
-	const { categories, removeCategory } = useCategoriesStore();
+	const { categories, removeCategory, categoriesLoading, setCategoriesLoading } = useCategoriesStore();
 	const showToast = useToast();
 	const { user } = useAuthContext(); // Get authenticated user details
 	const [selectedCategoryId, setSelectedCategoryId] = useState(null);
 	const [hasRelation, setHasRelation] = useState(false);
 
 	const openDialog = async (category = {}) => {
-		setLoading(true);
+		setCategoriesLoading(true);
 		setDialogOpen(true);
 		setSelectedCategoryId(category.id);
 		try {
@@ -30,7 +26,7 @@ export const columnsCategory = ({ setIsOpen, setUpdateData, dialogOpen, setDialo
 			showToast("Failed!", e.response?.data?.message, 3000, "fail");
 			if (e.message !== "Request aborted") console.error("Error fetching data:", e.message);
 		} finally {
-			setLoading(false);
+			setCategoriesLoading(false);
 		}
 	};
 	useEffect(() => {
@@ -41,7 +37,7 @@ export const columnsCategory = ({ setIsOpen, setUpdateData, dialogOpen, setDialo
 		setUpdateData(category);
 	};
 	const handleDelete = async (id) => {
-		setLoading(true);
+		setCategoriesLoading(true);
 		try {
 			await axiosClient.delete(API().category(id));
 			removeCategory(id);
@@ -53,7 +49,7 @@ export const columnsCategory = ({ setIsOpen, setUpdateData, dialogOpen, setDialo
 		} finally {
 			// Always stop loading when done
 			setDialogOpen(false);
-			setLoading(false);
+			setCategoriesLoading(false);
 		}
 	};
 	const baseColumns = useMemo(
@@ -90,28 +86,30 @@ export const columnsCategory = ({ setIsOpen, setUpdateData, dialogOpen, setDialo
 			cell: ({ row }) => {
 				const category = row.original;
 				return (
-					<DropdownMenu modal={false}>
-						<DropdownMenuTrigger asChild>
-							<Button variant="ghost" className="h-8 w-8 p-0" onClick={(e) => e.stopPropagation()}>
-								<span className="sr-only">Open menu</span>
-								<MoreHorizontal className="h-4 w-4" />
-							</Button>
-						</DropdownMenuTrigger>
-						<DropdownMenuContent align="end">
-							<DropdownMenuItem className="cursor-pointer" onClick={() => handleUpdateCategory(category)}>
-								Update Category
-							</DropdownMenuItem>
-							<DropdownMenuItem
-								className="cursor-pointer"
-								onClick={(e) => {
-									e.stopPropagation();
-									openDialog(category);
-								}}
-							>
-								Delete Category
-							</DropdownMenuItem>
-						</DropdownMenuContent>
-					</DropdownMenu>
+					<div className="flex justify-center items-center">
+						<Button
+							variant="ghost"
+							title="Update task"
+							className="h-8 w-8 p-0 cursor-pointer pointer-events-auto"
+							onClick={(e) => {
+								e.stopPropagation();
+								handleUpdateCategory(category);
+							}}
+						>
+							<Edit size={16} />
+						</Button>
+						<Button
+							variant="ghost"
+							title="Delete task"
+							className="h-8 w-8 p-0 cursor-pointer pointer-events-auto"
+							onClick={(e) => {
+								e.stopPropagation();
+								openDialog(category);
+							}}
+						>
+							<Trash2Icon className="text-destructive" />
+						</Button>
+					</div>
 				);
 			},
 		});
@@ -139,7 +137,7 @@ export const columnsCategory = ({ setIsOpen, setUpdateData, dialogOpen, setDialo
 					</DialogClose>
 					{!hasRelation && (
 						<Button
-							disabled={loading}
+							disabled={categoriesLoading}
 							onClick={() => {
 								handleDelete(selectedCategoryId);
 								setDialogOpen(false);

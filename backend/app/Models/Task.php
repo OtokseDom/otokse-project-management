@@ -8,6 +8,7 @@ use App\Services\TaskHistoryService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class Task extends Model
 {
@@ -59,6 +60,17 @@ class Task extends Model
             ->withTimestamps();
     }
 
+    // Relationship with Task Attachments
+    public function attachments()
+    {
+        return $this->hasMany(TaskAttachment::class);
+    }
+
+    public function discussions()
+    {
+        return $this->hasMany(TaskDiscussion::class);
+    }
+
     // Relationship with Project
     public function project()
     {
@@ -107,6 +119,8 @@ class Task extends Model
             // 'assignee:id,name,email,role,position',
             'assignees:id,name,email,role,position',
             'category',
+            'discussions',
+            'attachments',
             'project:id,title',
             'parent:id,title',
             'children' => function ($query) {
@@ -116,7 +130,9 @@ class Task extends Model
                         // 'assignee:id,name,email,role,position',
                         'assignees:id,name,email,role,position',
                         'project:id,title',
-                        'category'
+                        'category',
+                        'discussions',
+                        'attachments'
                     ]);
             },
         ])
@@ -126,7 +142,7 @@ class Task extends Model
 
     public function storeTask($request, $userData)
     {
-        if ($request->organization_id !== $userData->organization_id) {
+        if (intval($request->organization_id) !== $userData->organization_id) {
             return "not found";
         }
 
@@ -136,12 +152,17 @@ class Task extends Model
         if ($request->has('assignees')) {
             $task->assignees()->attach($request->input('assignees'));
         }
+        if ($request->hasFile('attachments')) {
+            $task->addAttachments($request->file('attachments'), $userData->organization_id);
+        }
 
         $task->load([
             'status:id,name,color',
             'assignees:id,name,email,role,position',
             // 'assignee:id,name,email',
             'category',
+            'discussions',
+            'attachments',
             'project:id,title',
             'parent:id,title',
             'children' => function ($query) {
@@ -151,7 +172,9 @@ class Task extends Model
                         'assignees:id,name,email,role,position',
                         // 'assignee:id,name,email,role,position',
                         'project:id,title',
-                        'category'
+                        'category',
+                        'discussions',
+                        'attachments'
                     ]);
             },
         ]);
@@ -179,6 +202,8 @@ class Task extends Model
             'assignees:id,name,email,role,position',
             'status:id,name,color',
             'category',
+            'discussions',
+            'attachments',
             'project:id,title',
             'parent:id,title',
             'children' => function ($query) {
@@ -188,7 +213,9 @@ class Task extends Model
                         'assignees:id,name,email,role,position',
                         // 'assignee:id,name,email,role,position',
                         'project:id,title',
-                        'category'
+                        'category',
+                        'discussions',
+                        'attachments'
                     ]);
             },
         ])
@@ -202,7 +229,7 @@ class Task extends Model
 
     public function updateTask($request, $task, $userData)
     {
-        if ($task->organization_id !== $userData->organization_id || $request->organization_id !== $userData->organization_id) {
+        if ($task->organization_id !== $userData->organization_id || intval($request->organization_id) !== $userData->organization_id) {
             return null;
         }
 
@@ -235,6 +262,10 @@ class Task extends Model
                         $t->decrement('position');
                     });
             }
+            if ($original['project_id'] !== $validated['project_id']) {
+                // If task project was changed, remove old task position entry
+                TaskPosition::where('task_id', $task->id)->where('context', 'project')->delete();
+            }
 
             // Finally update task to its new project/status/position
             $task->update($validated);
@@ -242,6 +273,10 @@ class Task extends Model
             // Sync assignees if provided
             if (isset($validated['assignees'])) {
                 $task->assignees()->sync($validated['assignees']);
+            }
+            // Update attachment record
+            if (isset($validated['attachments'])) {
+                $task->addAttachments($validated['attachments'], $userData->organization_id);
             }
 
             // Build task history changes
@@ -303,6 +338,8 @@ class Task extends Model
             'assignees:id,name,email,role,position',
             'status:id,name,color',
             'category',
+            'discussions',
+            'attachments',
             'project:id,title',
             'parent:id,title',
             'children' => function ($query) {
@@ -310,7 +347,9 @@ class Task extends Model
                     'status:id,name,color',
                     'assignees:id,name,email,role,position',
                     'project:id,title',
-                    'category'
+                    'category',
+                    'discussions',
+                    'attachments'
                 ]);
             },
         ]);
@@ -342,11 +381,41 @@ class Task extends Model
                 $groups[$t->project_id][$t->status_id][] = $t->position;
             }
 
-            // 4️⃣ Delete all tasks in one query
+            // 4️⃣ Delete all attachments on disk
+            foreach ($allTasks as $task) {
+                foreach ($task->attachments as $attachment) {
+                    if (Storage::disk('public')->exists($attachment->file_path)) {
+                        Storage::disk('public')->delete($attachment->file_path);
+                    }
+                }
+            }
+
+            // 🧩 4.1️⃣ Delete all discussions & attachments for these tasks
+            foreach ($allTasks as $task) {
+                foreach ($task->discussions as $discussion) {
+                    // Delete attachments (file + db)
+                    foreach ($discussion->attachments as $attachment) {
+                        if (Storage::disk('public')->exists($attachment->file_path)) {
+                            Storage::disk('public')->delete($attachment->file_path);
+                        }
+                    }
+
+                    // Delete replies' attachments too (if you have threaded discussions)
+                    foreach ($discussion->replies as $reply) {
+                        foreach ($reply->attachments as $attachment) {
+                            if (Storage::disk('public')->exists($attachment->file_path)) {
+                                Storage::disk('public')->delete($attachment->file_path);
+                            }
+                        }
+                    }
+                }
+            }
+
+            // 5️⃣ Delete all tasks in one query
             $idsToDelete = $allTasks->pluck('id')->toArray();
             self::whereIn('id', $idsToDelete)->delete();
 
-            // 5️⃣ Shift remaining tasks per column
+            // 6️⃣ Shift remaining tasks per column
             foreach ($groups as $projectId => $statuses) {
                 foreach ($statuses as $statusId => $positions) {
                     $minPosition = min($positions);
@@ -474,6 +543,8 @@ class Task extends Model
                 // 'assignee:id,name,email,role,position',
                 'assignees:id,name,email,role,position',
                 'category',
+                'discussions',
+                'attachments',
                 'project:id,title',
                 'parent:id,title',
                 'children' => function ($query) {
@@ -483,7 +554,9 @@ class Task extends Model
                             // 'assignee:id,name,email,role,position',
                             'assignees:id,name,email,role,position',
                             'project:id,title',
-                            'category'
+                            'category',
+                            'discussions',
+                            'attachments'
                         ]);
                 },
             ])
@@ -582,6 +655,40 @@ class Task extends Model
                         $task->category_id = $value;
                         $task->save();
                         break;
+                    case 'priority':
+                        if ($task->priority != $value) {
+                            $changes['priority'] = ['from' => $task->priority, 'to' => $value];
+                            $task->priority = $value;
+                            $task->save();
+                        }
+                        break;
+                    case 'start_date':
+                        $orig = isset($original['start_date']) ? date('Y-m-d', strtotime($original['start_date'])) : null;
+                        $val = $value ? date('Y-m-d', strtotime($value)) : null;
+                        if ($orig !== $val) {
+                            $changes['start_date'] = ['from' => $orig, 'to' => $val];
+                            $task->start_date = $value;
+                            $task->save();
+                        }
+                        break;
+                    case 'end_date':
+                        $orig = isset($original['end_date']) ? date('Y-m-d', strtotime($original['end_date'])) : null;
+                        $val = $value ? date('Y-m-d', strtotime($value)) : null;
+                        if ($orig !== $val) {
+                            $changes['end_date'] = ['from' => $orig, 'to' => $val];
+                            $task->end_date = $value;
+                            $task->save();
+                        }
+                        break;
+                    case 'actual_date':
+                        $orig = isset($original['actual_date']) ? date('Y-m-d', strtotime($original['actual_date'])) : null;
+                        $val = $value ? date('Y-m-d', strtotime($value)) : null;
+                        if ($orig !== $val) {
+                            $changes['actual_date'] = ['from' => $orig, 'to' => $val];
+                            $task->actual_date = $value;
+                            $task->save();
+                        }
+                        break;
                 }
 
                 // Record history if there are changes
@@ -606,6 +713,8 @@ class Task extends Model
                 'project:id,title',
                 'parent:id,title',
                 'children',
+                'discussions',
+                'attachments'
             ])->get();
     }
 
@@ -614,28 +723,58 @@ class Task extends Model
         $tasks = self::whereIn('id', $ids)->where('organization_id', $organization_id)->get();
 
         return DB::transaction(function () use ($tasks, $deleteSubtasks, $organization_id) {
-            $allIdsToDelete = [];
+            $allTasksToDelete = collect();
+
             foreach ($tasks as $task) {
-                $idsToDelete = [$task->id];
+                $tasksToDelete = collect([$task]);
                 if ($deleteSubtasks) {
-                    $childIds = self::where('parent_id', $task->id)->pluck('id')->toArray();
-                    $idsToDelete = array_merge($idsToDelete, $childIds);
+                    $childTasks = self::where('parent_id', $task->id)->get();
+                    $tasksToDelete = $tasksToDelete->concat($childTasks);
                 }
-                $allIdsToDelete = array_merge($allIdsToDelete, $idsToDelete);
+                $allTasksToDelete = $allTasksToDelete->concat($tasksToDelete);
             }
-            $allIdsToDelete = array_unique($allIdsToDelete);
 
-            // Group by project/status for position shifting
-            $grouped = self::whereIn('id', $allIdsToDelete)
-                ->get()
-                ->groupBy(function ($t) {
-                    return $t->project_id . '-' . $t->status_id;
-                });
+            $allTasksToDelete = $allTasksToDelete->unique('id');
 
-            // Delete all
-            self::whereIn('id', $allIdsToDelete)->delete();
+            // Delete all attachments on disk
+            foreach ($allTasksToDelete as $task) {
+                foreach ($task->attachments as $attachment) {
+                    if (Storage::disk('public')->exists($attachment->file_path)) {
+                        Storage::disk('public')->delete($attachment->file_path);
+                    }
+                }
+            }
+
+            // Delete all task discussion attachments from disk (DB will cascade)
+            foreach ($allTasksToDelete as $task) {
+                foreach ($task->discussions as $discussion) {
+                    // Discussion attachments
+                    foreach ($discussion->attachments as $attachment) {
+                        if (Storage::disk('public')->exists($attachment->file_path)) {
+                            Storage::disk('public')->delete($attachment->file_path);
+                        }
+                    }
+
+                    // Reply attachments (if threaded)
+                    foreach ($discussion->replies as $reply) {
+                        foreach ($reply->attachments as $attachment) {
+                            if (Storage::disk('public')->exists($attachment->file_path)) {
+                                Storage::disk('public')->delete($attachment->file_path);
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Delete all tasks (DB cascade handles task_attachments records)
+            $idsToDelete = $allTasksToDelete->pluck('id')->toArray();
+            self::whereIn('id', $idsToDelete)->delete();
 
             // Shift positions
+            $grouped = $allTasksToDelete->groupBy(function ($t) {
+                return $t->project_id . '-' . $t->status_id;
+            });
+
             foreach ($grouped as $group) {
                 $projectId = $group->first()->project_id;
                 $statusId = $group->first()->status_id;
@@ -654,5 +793,24 @@ class Task extends Model
 
             return true;
         });
+    }
+
+    // Add attachments helper
+    public function addAttachments(array $files, $organization_id)
+    {
+        if (!$organization_id) {
+            return apiResponse(null, 'Organization not found', false, 404);
+        }
+
+        foreach ($files as $file) {
+            $path = $file->store("task_attachments/{$organization_id}", 'public');
+
+            $this->attachments()->create([
+                'file_path'     => $path,
+                'original_name' => $file->getClientOriginalName(),
+                'file_type'     => $file->getClientMimeType(),
+                'file_size'     => $file->getSize(),
+            ]);
+        }
     }
 }

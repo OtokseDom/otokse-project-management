@@ -5,25 +5,36 @@ import { CartesianGrid, LabelList, Line, LineChart, XAxis } from "recharts";
 
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { useLoadContext } from "@/contexts/LoadContextProvider";
 import { Skeleton } from "../ui/skeleton";
+import { useDashboardStore } from "@/store/dashboard/dashboardStore";
+import { useUserStore } from "@/store/user/userStore";
 
 export const description = "A line chart with a label";
 const chartConfig = {
 	rating: {
 		label: "Rating",
-		color: "hsl(var(--chart-1))",
+		color: "hsl(270 70% 50%)", // Purple
 	},
 };
 
-export function ChartLineLabel({ report, variant }) {
-	const { loading, setLoading } = useLoadContext();
+// accept optional title and metricLabel props
+export function ChartLineLabel({ report, variant, title = null, metricLabel = null }) {
+	const { dashboardReportsLoading } = useDashboardStore();
+	const { userReportsLoading } = useUserStore();
+
+	// determine total count (supports reports with task_count or data_count)
+	const totalCount = report ? report.task_count ?? report.data_count ?? 0 : 0;
+
+	// default title/metric when not provided
+	const resolvedTitle = title ?? (metricLabel ? `${metricLabel} Trend` : "Performance Trends");
+	const resolvedMetricLabel = metricLabel ?? "Performance Rating";
+
 	return (
-		<Card className={`flex flex-col relative h-full justify-between ${variant == "dashboard" ? "bg-primary-foreground rounded-md" : ""}`}>
-			<CardHeader>
-				<CardTitle>Performance Trends</CardTitle>
+		<Card className={`flex flex-col relative h-full justify-between rounded-2xl`}>
+			<CardHeader className="text-center">
+				<CardTitle className="text-lg">{resolvedTitle}</CardTitle>
 				<CardDescription>
-					Performance Rating for{" "}
+					{resolvedMetricLabel} for{" "}
 					{report?.filters?.from && report?.filters?.to
 						? `${new Date(report.filters.from).toLocaleDateString("en-CA", { month: "short", day: "numeric", year: "numeric" })} - ${new Date(
 								report.filters.to
@@ -33,15 +44,15 @@ export function ChartLineLabel({ report, variant }) {
 			</CardHeader>
 			<CardContent>
 				<ChartContainer config={chartConfig} className="aspect-auto h-[250px] w-full">
-					{loading ? (
+					{dashboardReportsLoading || userReportsLoading ? (
 						<div className="flex flex-col gap-2 items-center justify-center h-full w-full p-8">
 							<Skeleton className=" w-full h-10 rounded-full" />
 							<Skeleton className=" w-full h-10 rounded-full" />
 							<Skeleton className=" w-full h-10 rounded-full" />
 							<Skeleton className=" w-full h-10 rounded-full" />
 						</div>
-					) : report?.task_count == 0 ? (
-						<div className="flex items-center justify-center fw-full h-full text-3xl text-gray-500">No Tasks Yet</div>
+					) : totalCount == 0 ? (
+						<div className="flex items-center justify-center fw-full h-full text-lg text-gray-500">No Tasks Yet</div>
 					) : (
 						<LineChart
 							accessibilityLayer
@@ -74,12 +85,12 @@ export function ChartLineLabel({ report, variant }) {
 				</ChartContainer>
 			</CardContent>
 			<CardFooter className="flex-col items-start gap-2 text-sm">
-				{loading ? (
+				{dashboardReportsLoading || userReportsLoading ? (
 					<div className="flex flex-col gap-2 items-center justify-center h-full w-full">
 						<Skeleton className=" w-full h-4 rounded-full" />
 						<Skeleton className=" w-full h-4 rounded-full" />
 					</div>
-				) : report?.task_count == 0 ? (
+				) : totalCount == 0 ? (
 					""
 				) : (
 					<>

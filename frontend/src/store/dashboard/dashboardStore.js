@@ -7,6 +7,8 @@ export const useDashboardStore = () => {
 		projectFilter: useAppStore((state) => state.projectFilter),
 		selectedUsers: useAppStore((state) => state.selectedUsers),
 		selectedProjects: useAppStore((state) => state.selectedProjects),
+		dashboardReportsLoading: useAppStore((state) => state.dashboardReportsLoading),
+		setDashboardReportsLoading: useAppStore((state) => state.setDashboardReportsLoading),
 		filters: useAppStore((state) => state.filters),
 		setReports: useAppStore((state) => state.setReports),
 		setUserFilter: useAppStore((state) => state.setUserFilter),

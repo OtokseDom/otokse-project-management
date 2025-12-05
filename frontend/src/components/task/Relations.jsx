@@ -1,4 +1,4 @@
-import { statusColors } from "@/utils/taskHelpers";
+import { statusColors, getSubtaskProgress } from "@/utils/taskHelpers";
 import { Inspect } from "lucide-react";
 import { Button } from "../ui/button";
 import { Progress } from "../ui/progress";
@@ -8,19 +8,14 @@ import { useTaskStatusesStore } from "@/store/taskStatuses/taskStatusesStore";
 export default function Relations({ setUpdateData, setParentId, setProjectId }) {
 	const { relations, setActiveTab, taskHistory, setSelectedTaskHistory } = useTasksStore();
 	const { taskStatuses } = useTaskStatusesStore();
-	const subTasksCount = relations?.children?.length ?? 0;
-	const completedCount = relations?.children?.filter((child) => child.status === "Completed").length ?? 0;
 	const findStatus = (status_id) => {
 		const name = taskStatuses.find((status) => status.id === status_id)?.name || "Unknown";
 		const color = taskStatuses.find((status) => status.id === status_id)?.color || "gray";
 		return { name, color };
 	};
-	const getSubtaskProgress = () => {
-		return completedCount + "/" + subTasksCount + " subtasks completed";
-	};
-	const getSubtaskProgressPercentage = () => {
-		return Math.round((completedCount / subTasksCount) * 100, 2);
-	};
+	// use shared helper instead of local duplicated logic
+	const { text: subtaskProgressText, value: subtaskProgressValue, subTasksCount } = getSubtaskProgress(relations, taskStatuses);
+
 	return (
 		<>
 			{Array.isArray(relations.children) && relations.children.length > 0 ? (
@@ -49,8 +44,8 @@ export default function Relations({ setUpdateData, setParentId, setProjectId }) 
 							</Button>
 						</div>
 						<div className="mb-4">
-							<span className="text-muted-foreground">{getSubtaskProgress()}</span>
-							<Progress value={getSubtaskProgressPercentage()} className="h-3" />
+							<span className="text-muted-foreground">{subtaskProgressText}</span>
+							<Progress value={subtaskProgressValue} className="h-3" />
 						</div>
 					</div>
 					<div className="flex flex-col bg-sidebar-accent">

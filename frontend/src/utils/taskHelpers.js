@@ -1,42 +1,57 @@
 // src/utils/taskHelpers.js
 import axiosClient from "@/axios.client";
 import { API } from "@/constants/api";
-import { useLoadContext } from "@/contexts/LoadContextProvider";
 import { useCategoriesStore } from "@/store/categories/categoriesStore";
 import { useDashboardStore } from "@/store/dashboard/dashboardStore";
 import { useKanbanColumnsStore } from "@/store/kanbanColumns/kanbanColumnsStore";
 import { useProjectsStore } from "@/store/projects/projectsStore";
+import { useTaskDiscussionsStore } from "@/store/taskDiscussions/taskDiscussionsStore";
 import { useTasksStore } from "@/store/tasks/tasksStore";
 import { useTaskStatusesStore } from "@/store/taskStatuses/taskStatusesStore";
 import { useUserStore } from "@/store/user/userStore";
 import { useUsersStore } from "@/store/users/usersStore";
+import { useEffect, useState } from "react";
 
 export const useTaskHelpers = () => {
-	const { setLoading } = useLoadContext();
-	const { projectFilter, setProjectFilter, userFilter, setUserFilter, setReports } = useDashboardStore();
-	const { setTasks, setTaskHistory, setOptions, setSelectedUser } = useTasksStore();
-	const { projects, setProjects, setSelectedProject } = useProjectsStore();
-	const { users, setUsers } = useUsersStore();
-	const { setCategories } = useCategoriesStore();
-	const { setTaskStatuses } = useTaskStatusesStore();
-	const { profileProjectFilter, setProfileProjectFilter, setUserReports } = useUserStore();
+	const { projectFilter, setProjectFilter, userFilter, setUserFilter, setReports, setDashboardReportsLoading } = useDashboardStore();
+	const { setTasks, setTaskHistory, setOptions, setSelectedUser, setTasksLoading } = useTasksStore();
+	const { setTaskDiscussions, setTaskDiscussionsLoading } = useTaskDiscussionsStore();
+	const { setProjects, setSelectedProject, setProjectsLoading } = useProjectsStore();
+	const { setUsersLoading, setUsers } = useUsersStore();
+	const { setCategories, setCategoriesLoading } = useCategoriesStore();
+	const { setTaskStatuses, setTaskStatusesLoading } = useTaskStatusesStore();
+	const { profileProjectFilter, setProfileProjectFilter, setUserReports, setUserReportsLoading } = useUserStore();
 	const { setKanbanColumns } = useKanbanColumnsStore();
 
 	const fetchTasks = async () => {
-		setLoading(true);
+		setTasksLoading(true);
 		try {
+			// const res_discussion = await axiosClient.get(API().task_discussion());
 			const res = await axiosClient.get(API().task());
 			setTasks(res?.data?.data?.tasks);
 			setTaskHistory(res?.data?.data?.task_history);
+			// setTaskDiscussions(res_discussion?.data?.data);
 		} catch (e) {
 			if (e.message !== "Request aborted") console.error("Error fetching data:", e.message);
 		} finally {
-			setLoading(false);
+			setTasksLoading(false);
+		}
+	};
+
+	const fetchTaskDiscussions = async () => {
+		setTaskDiscussionsLoading(true);
+		try {
+			const res = await axiosClient.get(API().task_discussion());
+			setTaskDiscussions(res?.data?.data);
+		} catch (e) {
+			if (e.message !== "Request aborted") console.error("Error fetching data:", e.message);
+		} finally {
+			setTaskDiscussionsLoading(false);
 		}
 	};
 
 	const fetchProjects = async () => {
-		setLoading(true);
+		setProjectsLoading(true);
 		try {
 			const res = await axiosClient.get(API().project());
 			setProjects(res?.data?.data?.projects);
@@ -52,12 +67,12 @@ export const useTaskHelpers = () => {
 		} catch (e) {
 			if (e.message !== "Request aborted") console.error("Error fetching data:", e.message);
 		} finally {
-			setLoading(false);
+			setProjectsLoading(false);
 		}
 	};
 
 	const fetchUsers = async () => {
-		setLoading(true);
+		setUsersLoading(true);
 		try {
 			const res = await axiosClient.get(API().user());
 			setUsers(res?.data?.data);
@@ -72,61 +87,61 @@ export const useTaskHelpers = () => {
 		} catch (e) {
 			if (e.message !== "Request aborted") console.error("Error fetching data:", e.message);
 		} finally {
-			setLoading(false);
+			setUsersLoading(false);
 		}
 	};
 
 	const fetchCategories = async () => {
-		setLoading(true);
+		setCategoriesLoading(true);
 		try {
 			const res = await axiosClient.get(API().category());
 			setCategories(res?.data?.data);
 		} catch (e) {
 			if (e.message !== "Request aborted") console.error("Error fetching data:", e.message);
 		} finally {
-			setLoading(false);
+			setCategoriesLoading(false);
 		}
 	};
 
 	const fetchTaskStatuses = async () => {
-		setLoading(true);
+		setTaskStatusesLoading(true);
 		try {
 			const res = await axiosClient.get(API().task_status());
 			setTaskStatuses(res?.data?.data);
 		} catch (e) {
 			if (e.message !== "Request aborted") console.error("Error fetching data:", e.message);
 		} finally {
-			setLoading(false);
+			setTaskStatusesLoading(false);
 		}
 	};
 
 	const fetchReports = async () => {
-		setLoading(true);
+		setDashboardReportsLoading(true);
 		try {
 			const reportsRes = await axiosClient.get(API().dashboard());
 			setReports(reportsRes.data.data);
-			setLoading(false);
 		} catch (e) {
 			if (e.message !== "Request aborted") console.error("Error fetching data:", e.message);
 		} finally {
-			setLoading(false);
+			setDashboardReportsLoading(false);
 		}
 	};
 
 	const fetchUserReports = async (id) => {
-		setLoading(true);
+		setUserReportsLoading(true);
 		try {
 			const reportsRes = await axiosClient.get(API().user_reports(id));
 			setUserReports(reportsRes?.data?.data);
 		} catch (e) {
 			if (e.message !== "Request aborted") console.error("Error fetching data:", e.message);
 		} finally {
-			setLoading(false);
+			setUserReportsLoading(false);
 		}
 	};
 
 	return {
 		fetchTasks,
+		fetchTaskDiscussions,
 		fetchProjects,
 		fetchUsers,
 		fetchCategories,
@@ -180,3 +195,69 @@ export const priorityColors = {
 	Urgent: "bg-orange-100 border border-orange-800 border-2 text-foreground bg-opacity-20",
 	Critical: "bg-red-100 border border-red-800 border-2 text-foreground bg-opacity-20",
 };
+
+// New helper: compute subtask progress for a given task and taskStatuses array
+export function getSubtaskProgress(task = {}) {
+	const { taskStatuses } = useTaskStatusesStore();
+	const children = Array.isArray(task?.children) ? task.children : [];
+	const subTasksCount = children.length;
+	const completedCount = children.filter((child) => {
+		const status = taskStatuses.find((s) => s.id === child.status_id);
+		const name = status?.name ?? "Unknown";
+		return name === "Completed";
+	}).length;
+	const value = subTasksCount > 0 ? (completedCount / subTasksCount) * 100 : 0;
+	const text = `${completedCount}/${subTasksCount} subtasks completed (${value.toFixed(2)}%)`;
+	return { value, text };
+}
+
+export function getProjectProgress() {
+	const { tasks } = useTasksStore();
+	const { taskStatuses } = useTaskStatusesStore();
+	const { selectedProject } = useProjectsStore();
+	let projectTasks = [];
+	// If project tasks is empty, all projects selected
+	if (selectedProject) {
+		projectTasks = tasks.filter((task) => task.project_id === selectedProject.id && task.parent_id === null);
+	} else {
+		projectTasks = tasks;
+	}
+	const tasksCount = projectTasks.length;
+	const completedCount = projectTasks.filter((task) => {
+		const status = taskStatuses.find((s) => s.id === task.status_id);
+		const name = status?.name ?? "Unknown";
+		return name === "Completed";
+	}).length;
+	const value = tasksCount > 0 ? (completedCount / tasksCount) * 100 : 0;
+	const text = `${completedCount}/${tasksCount} (${value.toFixed(2)}%) tasks completed for ${selectedProject ? "selected project" : "all projects"}`;
+	return { value, text };
+}
+
+export function getProfileProjectProgress(id) {
+	const { profileSelectedProjects } = useUserStore();
+	const { tasks } = useTasksStore();
+	const { taskStatuses } = useTaskStatusesStore();
+	const [filteredUserTasks, setFilteredUserTasks] = useState([]);
+	let projectTasks = [];
+
+	// Filter tasks assigned to this user
+	useEffect(() => {
+		const filteredUserTasks = tasks.filter((task) => Array.isArray(task.assignees) && task.assignees.some((user) => user.id === parseInt(id)));
+		setFilteredUserTasks(filteredUserTasks);
+	}, [tasks, id]);
+	// If project tasks is empty, all projects selected
+	if (profileSelectedProjects) {
+		projectTasks = filteredUserTasks.filter((task) => task.project_id === profileSelectedProjects.id && task.parent_id === null);
+	} else {
+		projectTasks = filteredUserTasks;
+	}
+	const tasksCount = projectTasks.length;
+	const completedCount = projectTasks.filter((task) => {
+		const status = taskStatuses.find((s) => s.id === task.status_id);
+		const name = status?.name ?? "Unknown";
+		return name === "Completed";
+	}).length;
+	const value = tasksCount > 0 ? (completedCount / tasksCount) * 100 : 0;
+	const text = `${completedCount}/${tasksCount} (${value.toFixed(2)}%) tasks completed for ${profileSelectedProjects ? "selected project" : "all projects"}`;
+	return { value, text };
+}

@@ -18,19 +18,6 @@ export default function Categories() {
 		document.title = "Task Management | Categories";
 		if (!categories || categories.length === 0) fetchCategories();
 	}, []);
-	// const fetchData = async () => {
-	// 	setLoading(true);
-	// 	try {
-	// 		// Make both API calls concurrently using Promise.all
-	// 		const categoryResponse = await axiosClient.get(API().category());
-	// 		setCategories(categoryResponse.data.data);
-	// 	} catch (e) {
-	// 		if (e.message !== "Request aborted") console.error("Error fetching data:", e.message);
-	// 	} finally {
-	// 		// Always stop loading when done
-	// 		setLoading(false);
-	// 	}
-	// };
 
 	return (
 		<div className="w-screen md:w-full bg-card text-card-foreground border border-border rounded-2xl container p-4 md:p-10 shadow-md">

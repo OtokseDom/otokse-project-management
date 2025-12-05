@@ -11,9 +11,6 @@ import { useKanbanColumnsStore } from "@/store/kanbanColumns/kanbanColumnsStore"
 import { API } from "@/constants/api";
 import axiosClient from "@/axios.client";
 
-// TODO: mobile responsiveness
-// TODO: open details on click
-// TODO: Add task on selected status
 // TODO: Status menu - sorting options
 export default function KanbanBoard() {
 	const { tasks, taskHistory, updateTaskPosition, addTaskHistory, mergeTaskPositions } = useTasksStore();
@@ -37,7 +34,7 @@ export default function KanbanBoard() {
 					color: status.color,
 					position: col.position,
 					items: tasks
-						.filter((task) => task.status_id === status.id && task.project_id === selectedProject.id)
+						.filter((task) => task.status_id === status.id && task.project_id === selectedProject.id && task.children === null) // only top-level tasks
 						.sort((a, b) => a.position - b.position) // <-- order by position
 						.map((task) => ({
 							...task, // include all original task fields
