@@ -26,6 +26,8 @@ class UpdateTaskPositionRequest extends FormRequest
             'context' => 'required|string|in:project,all_projects,kanban_status',
             'context_id' => 'nullable|integer',
             'position' => 'required|integer|min:1',
+            'task_ids' => 'nullable|array',
+            'task_ids.*' => 'integer|exists:tasks,id',
         ];
     }
 }

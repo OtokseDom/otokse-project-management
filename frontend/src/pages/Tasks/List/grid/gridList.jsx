@@ -90,12 +90,16 @@ export default function GridList({ tasks, setIsOpen, setUpdateData, setParentId,
 		updateTaskPositionLocal(context, contextId, affectedPositions);
 
 		try {
+			// Get all task IDs in current context
+			const allTaskIds = sortedTasks.map((t) => t.id);
+
 			// Call backend to persist position
 			const response = await axiosClient.patch(API().task_positions_update(), {
 				task_id: activeTask.id,
 				context: context,
 				context_id: contextId || null,
 				position: newPosition,
+				task_ids: allTaskIds,
 			});
 
 			// Backend returns all affected positions, merge them

@@ -40,10 +40,54 @@ class TaskPosition extends Model
     }
 
     /**
+     * Ensure all tasks in a context have positions (create if missing)
+     */
+    public function ensureAllTasksHavePositions($context, $contextId, $organizationId, $allTaskIds)
+    {
+        // Get existing positions
+        $existingPositions = self::where('context', $context)
+            ->where('context_id', $contextId)
+            ->where('organization_id', $organizationId)
+            ->pluck('task_id')
+            ->toArray();
+
+        // Find tasks without positions
+        $missingTaskIds = array_diff($allTaskIds, $existingPositions);
+
+        if (empty($missingTaskIds)) {
+            return;
+        }
+
+        // Get max position
+        $maxPosition = self::where('context', $context)
+            ->where('context_id', $contextId)
+            ->where('organization_id', $organizationId)
+            ->max('position') ?? 0;
+
+        // Create positions for missing tasks in order they appear
+        $position = $maxPosition;
+        foreach ($missingTaskIds as $taskId) {
+            $position++;
+            self::create([
+                'task_id' => $taskId,
+                'context' => $context,
+                'context_id' => $contextId,
+                'position' => $position,
+                'organization_id' => $organizationId,
+            ]);
+        }
+    }
+
+    /**
      * Update task position within a context and return all affected tasks
      */
-    public function updateTaskPosition($taskId, $context, $contextId = null, $newPosition, $organizationId)
+    public function updateTaskPosition($taskId, $context, $contextId = null, $newPosition, $organizationId, $allTaskIds = [])
     {
+        // Step 0: Ensure all tasks have positions
+        if (!empty($allTaskIds)) {
+            $this->ensureAllTasksHavePositions($context, $contextId, $organizationId, $allTaskIds);
+        }
+
         $currentPosition = self::where('task_id', $taskId)
             ->where('context', $context)
             ->where('context_id', $contextId)
@@ -61,13 +105,13 @@ class TaskPosition extends Model
 
         return DB::transaction(function () use ($taskId, $context, $contextId, $newPosition, $organizationId, $currentPosition, $oldPosition) {
 
-            // Step 0: Temporarily move task out of range
+            // Step 1: Temporarily move task out of range
             $tempPosition = -1 * time();
             if ($currentPosition) {
                 $currentPosition->update(['position' => $tempPosition]);
             }
 
-            // Fetch all tasks in this context (ordered by position)
+            // Step 2: Fetch all tasks in this context (ordered by position)
             $allPositions = self::where('context', $context)
                 ->where('context_id', $contextId)
                 ->where('organization_id', $organizationId)
@@ -76,15 +120,14 @@ class TaskPosition extends Model
                 ->get();
 
             $affectedTasks = collect();
+            $actualNewPosition = $newPosition;
 
             if ($oldPosition === null) {
                 // New position entry - add at end
                 $lastPosition = $allPositions->max('position') ?? 0;
                 $actualNewPosition = $lastPosition + 1;
             } else {
-                // Reorder affected tasks
-                $actualNewPosition = $newPosition;
-
+                // Reorder affected tasks based on movement direction
                 if ($newPosition < $oldPosition) {
                     // Moving up: tasks between newPos and oldPos shift down
                     foreach ($allPositions as $pos) {
@@ -104,7 +147,7 @@ class TaskPosition extends Model
                 }
             }
 
-            // Create or update primary task position
+            // Step 3: Create or update primary task position
             $primary = self::updateOrCreate(
                 [
                     'task_id' => $taskId,
@@ -134,42 +177,5 @@ class TaskPosition extends Model
             ->where('organization_id', $organizationId)
             ->orderBy('position', 'ASC')
             ->get();
-    }
-
-    /**
-     * Assign initial positions to unpositioned tasks in a context
-     */
-    public function assignInitialPositions($context, $contextId, $organizationId, $taskIds)
-    {
-        // Get max position for this context
-        $maxPosition = self::where('context', $context)
-            ->where('context_id', $contextId)
-            ->where('organization_id', $organizationId)
-            ->max('position') ?? 0;
-
-        $unpositionedTasks = collect();
-        $position = $maxPosition;
-
-        // For each task that doesn't have a position, create one
-        foreach ($taskIds as $taskId) {
-            $exists = self::where('task_id', $taskId)
-                ->where('context', $context)
-                ->where('context_id', $contextId)
-                ->exists();
-
-            if (!$exists) {
-                $position++;
-                $taskPos = self::create([
-                    'task_id' => $taskId,
-                    'context' => $context,
-                    'context_id' => $contextId,
-                    'position' => $position,
-                    'organization_id' => $organizationId,
-                ]);
-                $unpositionedTasks->push($taskPos);
-            }
-        }
-
-        return $unpositionedTasks;
     }
 }
