@@ -74,13 +74,12 @@ export default function ScheduleCalendar() {
 	const getTaskForDate = (date, tasks) => {
 		const formattedDate = format(date, "yyyy-MM-dd");
 		return tasks.filter((task) => {
-			const start = format(new Date(task.start_date), "yyyy-MM-dd");
-			const end = format(new Date(task.end_date), "yyyy-MM-dd");
+			const start = task.start_date ? format(new Date(task.start_date), "yyyy-MM-dd") : null;
+			const end = task.end_date ? format(new Date(task.end_date), "yyyy-MM-dd") : null;
 			return (
 				Array.isArray(task.assignees) &&
 				task.assignees.some((assignee) => assignee.id === selectedUser?.id) &&
-				start <= formattedDate &&
-				end >= formattedDate
+				((start <= formattedDate && end >= formattedDate) || (start === formattedDate && !end) || (!start && end === formattedDate))
 			);
 		});
 	};
