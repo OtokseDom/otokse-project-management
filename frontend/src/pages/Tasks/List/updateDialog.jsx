@@ -141,7 +141,7 @@ export default function UpdateDialog({ open, onClose, action, selectedTasks = []
 			<DialogContent>
 				<DialogHeader>
 					<DialogTitle>
-						Bulk Update{" "}
+						Update{" "}
 						{action &&
 							action
 								.split("_")
