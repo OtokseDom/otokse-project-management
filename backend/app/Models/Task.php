@@ -148,6 +148,11 @@ class Task extends Model
 
         $task = $this->create($request->validated());
 
+        $this->addNewTaskToAllContexts(
+            $task->id,
+            $userData->organization_id
+        );
+
         // attach multiple assignees if provided
         if ($request->has('assignees')) {
             $task->assignees()->attach($request->input('assignees'));
@@ -812,5 +817,51 @@ class Task extends Model
                 'file_size'     => $file->getSize(),
             ]);
         }
+    }
+
+    // Insert task position on creation
+    public function addNewTaskToAllContexts($taskId, $organizationId, $contexts = null)
+    {
+        return DB::transaction(function () use ($taskId, $organizationId, $contexts) {
+            $task_position = new TaskPosition();
+            // If specific contexts provided, use them
+            if (is_array($contexts) && count($contexts) > 0) {
+                $pairs = $contexts;
+            } else {
+                // Derive distinct context / context_id pairs already present for this organization
+                $pairs = $task_position->where('organization_id', $organizationId)
+                    ->select('context', 'context_id')
+                    ->distinct()
+                    ->get()
+                    ->map(function ($r) {
+                        return ['context' => $r->context, 'context_id' => $r->context_id];
+                    })
+                    ->toArray();
+            }
+
+            // If nothing to insert into, do nothing (caller can pass contexts explicitly)
+            if (empty($pairs)) {
+                return true;
+            }
+
+            foreach ($pairs as $p) {
+                $maxPosition = $task_position->where('context', $p['context'])
+                    ->where('context_id', $p['context_id'])
+                    ->where('organization_id', $organizationId)
+                    ->max('position') ?? 0;
+
+                $position = $maxPosition + 1;
+
+                $task_position->create([
+                    'task_id' => $taskId,
+                    'context' => $p['context'],
+                    'context_id' => $p['context_id'],
+                    'position' => $position,
+                    'organization_id' => $organizationId,
+                ]);
+            }
+
+            return true;
+        });
     }
 }
