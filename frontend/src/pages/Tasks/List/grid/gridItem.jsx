@@ -346,17 +346,7 @@ export default function TaskGridItem({
 					{task.children.map((sub) => (
 						<div key={sub.id} className="flex items-center justify-between border-b border-accent gap-2 bg-accent/50 px-3 py-2">
 							<div className="flex flex-col gap-2 min-w-0">
-								<div className={`flex gap-1 items-start text-sm font-medium`}>
-									<span
-										title={sub.status?.name || "No status"}
-										className={`mt-0.5 p-1.5 rounded-full hover:cursor-pointer ${statusColors?.[sub.status?.color?.toLowerCase()]}`}
-										onClick={() => {
-											setBulkAction("status");
-											setSelectedTasks([sub]);
-										}}
-									></span>
-									{sub.title}
-								</div>
+								<div className={`flex gap-1 items-start text-sm font-medium`}>{sub.title}</div>
 								<div className="flex flex-wrap text-xs text-muted-foreground gap-4">
 									<div
 										onClick={() => {
@@ -408,31 +398,73 @@ export default function TaskGridItem({
 									)}
 								</div>
 							</div>
-							<div className="flex flex-col md:flex-row items-center gap-2">
-								<button
-									onClick={() => openEdit(sub)}
-									className="flex gap-2 items-center px-2 py-1 text-xs rounded bg-accent/10 hover:bg-accent/20"
-								>
-									<Edit size={12} />
-									<span className="hidden sm:inline">Edit</span>
-								</button>
-								<button
-									onClick={() => handleClone(sub)}
-									className="flex gap-2 items-center px-2 py-1 text-xs rounded bg-muted/6 hover:bg-muted/8"
-								>
-									<Copy size={12} />
-									<span className="hidden sm:inline">Clone</span>
-								</button>
-								<button
-									onClick={() => {
-										setBulkAction("delete");
-										setSelectedTasks([sub]);
-									}}
-									className="flex gap-2 items-center px-2 py-1 text-xs rounded bg-destructive/10 hover:bg-destructive/20"
-								>
-									<Trash2 size={12} className="text-destructive" />
-									<span className="hidden sm:inline">Delete</span>
-								</button>
+							<div className="flex flex-col gap-2">
+								<div className="flex flex-col md:flex-row items-center justify-end gap-2">
+									{sub.status && (
+										<span
+											title={sub.status?.name || "No status"}
+											className={`min-w-fit px-1 rounded-md text-xs hover:cursor-pointer ${
+												statusColors?.[sub.status?.color?.toLowerCase()]
+											}`}
+											onClick={() => {
+												setBulkAction("status");
+												setSelectedTasks([sub]);
+											}}
+										>
+											{sub.status?.name}
+										</span>
+									)}
+									{sub.priority && (
+										<span
+											title={sub.priority || "No priority"}
+											className={`min-w-fit px-1 rounded-md text-xs hover:cursor-pointer ${priorityColors?.[sub.priority]}`}
+											onClick={() => {
+												setBulkAction("priority");
+												setSelectedTasks([sub]);
+											}}
+										>
+											{sub.priority}
+										</span>
+									)}
+									{sub.category && (
+										<span
+											title={sub.category?.name || "No priority"}
+											className={`min-w-fit px-1 rounded-md text-xs hover:cursor-pointer bg-background/50 border-2 border-foreground/50 text-foreground`}
+											onClick={() => {
+												setBulkAction("category");
+												setSelectedTasks([sub]);
+											}}
+										>
+											{sub.category?.name}
+										</span>
+									)}
+								</div>
+								<div className="flex flex-col md:flex-row items-center gap-2">
+									<button
+										onClick={() => openEdit(sub)}
+										className="flex gap-2 items-center px-2 py-1 text-xs rounded bg-accent/10 hover:bg-accent/20"
+									>
+										<Edit size={12} />
+										<span className="hidden sm:inline">Edit</span>
+									</button>
+									<button
+										onClick={() => handleClone(sub)}
+										className="flex gap-2 items-center px-2 py-1 text-xs rounded bg-muted/6 hover:bg-muted/8"
+									>
+										<Copy size={12} />
+										<span className="hidden sm:inline">Clone</span>
+									</button>
+									<button
+										onClick={() => {
+											setBulkAction("delete");
+											setSelectedTasks([sub]);
+										}}
+										className="flex gap-2 items-center px-2 py-1 text-xs rounded bg-destructive/10 hover:bg-destructive/20"
+									>
+										<Trash2 size={12} className="text-destructive" />
+										<span className="hidden sm:inline">Delete</span>
+									</button>
+								</div>
 							</div>
 						</div>
 					))}
