@@ -18,6 +18,8 @@ import {
 	Circle,
 	GoalIcon,
 	GripVertical,
+	Paperclip,
+	MessageSquareMore,
 } from "lucide-react";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
@@ -26,6 +28,7 @@ import { useTasksStore } from "@/store/tasks/tasksStore";
 import DeleteDialog from "../deleteDialog";
 import { Progress } from "@/components/ui/progress";
 import { getSubtaskProgress, priorityColors, statusColors } from "@/utils/taskHelpers";
+import { useTaskDiscussionsStore } from "@/store/taskDiscussions/taskDiscussionsStore";
 
 export default function TaskGridItem({
 	task,
@@ -37,6 +40,7 @@ export default function TaskGridItem({
 	setDeleteDialogOpen,
 }) {
 	const { tasks, taskHistory, setSelectedTaskHistory, setRelations } = useTasksStore();
+	const { taskDiscussions } = useTaskDiscussionsStore();
 	const [open, setOpen] = useState(false);
 	const [bulkAction, setBulkAction] = useState(null);
 	const [selectedTasks, setSelectedTasks] = useState(null);
@@ -175,43 +179,57 @@ export default function TaskGridItem({
 						dangerouslySetInnerHTML={{ __html: task.description }}
 					/>
 				</div>
-				<div className="flex flex-row order-1 md:order-2 justify-end gap-2">
-					{/* status pill uses statusColors mapping */}
-					{task.status?.name ? (
-						<span
-							onClick={() => {
-								setBulkAction("status");
-								setSelectedTasks([task]);
-							}}
-							className={`text-xs min-w-fit px-2 py-1 rounded-md font-medium hover:cursor-pointer ${statusClass}`}
-						>
-							{task.status.name}
-						</span>
-					) : (
-						""
-					)}
-					{priority && (
-						<span
-							onClick={() => {
-								setBulkAction("priority");
-								setSelectedTasks([task]);
-							}}
-							className={`text-xs min-w-fit px-2 py-1 rounded-md font-medium hover:cursor-pointer ${priorityClass}`}
-						>
-							{priority}
-						</span>
-					)}
-					{category && (
-						<span
-							onClick={() => {
-								setBulkAction("category");
-								setSelectedTasks([task]);
-							}}
-							className="px-2 py-1 min-w-fit rounded-md bg-background/50 border-2 border-foreground/50 text-foreground text-xs gap-2 cursor-pointer"
-						>
-							{category}
-						</span>
-					)}
+				<div className="flex flex-col order-1 md:order-2 justify-end gap-1">
+					<div className="flex flex-row justify-end gap-2">
+						{/* status pill uses statusColors mapping */}
+						{task.status?.name ? (
+							<span
+								onClick={() => {
+									setBulkAction("status");
+									setSelectedTasks([task]);
+								}}
+								className={`text-xs min-w-fit px-2 py-1 rounded-md font-medium hover:cursor-pointer ${statusClass}`}
+							>
+								{task.status.name}
+							</span>
+						) : (
+							""
+						)}
+						{priority && (
+							<span
+								onClick={() => {
+									setBulkAction("priority");
+									setSelectedTasks([task]);
+								}}
+								className={`text-xs min-w-fit px-2 py-1 rounded-md font-medium hover:cursor-pointer ${priorityClass}`}
+							>
+								{priority}
+							</span>
+						)}
+						{category && (
+							<span
+								onClick={() => {
+									setBulkAction("category");
+									setSelectedTasks([task]);
+								}}
+								className="px-2 py-1 min-w-fit rounded-md bg-background/50 border-2 border-foreground/50 text-foreground text-xs gap-2 cursor-pointer"
+							>
+								{category}
+							</span>
+						)}
+					</div>
+					<div className="flex justify-end gap-2">
+						{task.attachments && task.attachments.length > 0 && (
+							<span title="Attachments">
+								<Paperclip className="text-sm text-gray-500" size={16} />
+							</span>
+						)}
+						{taskDiscussions?.filter((d) => d.task_id === task.id).length > 0 && (
+							<span title="Task Discussions">
+								<MessageSquareMore className="text-sm text-gray-500" size={16} />
+							</span>
+						)}
+					</div>
 				</div>
 			</div>
 			<hr className="mt-2" />
@@ -298,7 +316,6 @@ export default function TaskGridItem({
 					) : (
 						<span className="text-xs text-muted-foreground mt-2">No subtasks</span>
 					)}
-
 					<div className="flex items-center gap-2">
 						<Button variant="ghost" size="sm" onClick={() => openEdit(task)} title="Edit">
 							<Edit size={12} />
