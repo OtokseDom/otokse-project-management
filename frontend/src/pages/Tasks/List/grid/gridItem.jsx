@@ -413,6 +413,16 @@ export default function TaskGridItem({
 											<Target size={16} /> Actual: <span className="font-bold">{formatDateSafe(sub.actual_date)}</span>
 										</div>
 									)}
+									{sub.attachments && sub.attachments.length > 0 && (
+										<span title="Attachments">
+											<Paperclip className="text-sm text-gray-500" size={16} />
+										</span>
+									)}
+									{taskDiscussions?.filter((d) => d.task_id === sub.id).length > 0 && (
+										<span title="Task Discussions">
+											<MessageSquareMore className="text-sm text-gray-500" size={16} />
+										</span>
+									)}
 								</div>
 							</div>
 							<div className="flex flex-col gap-2">
