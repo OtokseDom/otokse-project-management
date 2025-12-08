@@ -852,13 +852,17 @@ class Task extends Model
 
                 $position = $maxPosition + 1;
 
-                $task_position->create([
-                    'task_id' => $taskId,
-                    'context' => $p['context'],
-                    'context_id' => $p['context_id'],
-                    'position' => $position,
-                    'organization_id' => $organizationId,
-                ]);
+                $task_position->updateOrCreate(
+                    [
+                        'task_id' => $taskId,
+                        'context' => $p['context'],
+                        'context_id' => $p['context_id'],
+                        'organization_id' => $organizationId,
+                    ],
+                    [
+                        'position' => $position,   // updated if exists
+                    ]
+                );
             }
 
             return true;
