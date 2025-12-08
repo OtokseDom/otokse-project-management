@@ -115,7 +115,7 @@ export default function UserProfile() {
 		if (!categories || categories.length === 0) fetchCategories();
 		if ((!tasks || tasks.length === 0) && !tasksLoaded) fetchTasks();
 		if ((!projects || projects.length === 0) && !projectsLoaded) fetchProjects();
-		setProfileSelectedProjects(null);
+		setProfileSelectedProjects([]);
 	}, []);
 
 	// Fetch user details and reports when ID changes
