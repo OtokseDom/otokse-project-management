@@ -429,7 +429,7 @@ class ReportService
                     });
                 });
             // Only apply filters for dashboard variant (to match previous logic)
-            $query = $this->applyFilters($query, ($variant !== 'dashboard' ? $id : null), ($variant === 'dashboard' ? $filter : null));
+            $query = $this->applyFilters($query, ($variant !== 'dashboard' ? $id : null), $filter);
             $chart_data[$index]['tasks'] = $query->count();
             $chart_data[$index]['fill'] = 'var(--color-' . str($status->name)->slug('_') . ')';
             // turns "In Progress" → "in_progress"
