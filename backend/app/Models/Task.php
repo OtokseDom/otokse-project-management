@@ -848,6 +848,7 @@ class Task extends Model
                 $maxPosition = $task_position->where('context', $p['context'])
                     ->where('context_id', $p['context_id'])
                     ->where('organization_id', $organizationId)
+                    ->lockforUpdate()
                     ->max('position') ?? 0;
 
                 $position = $maxPosition + 1;

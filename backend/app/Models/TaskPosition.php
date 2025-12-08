@@ -62,6 +62,7 @@ class TaskPosition extends Model
         $maxPosition = self::where('context', $context)
             ->where('context_id', $contextId)
             ->where('organization_id', $organizationId)
+            ->lockForUpdate()
             ->max('position') ?? 0;
 
         // Create positions for missing tasks in order they appear
