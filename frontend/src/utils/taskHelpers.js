@@ -197,8 +197,8 @@ export const priorityColors = {
 };
 
 // New helper: compute subtask progress for a given task and taskStatuses array
-export function getSubtaskProgress(task = {}) {
-	const { taskStatuses } = useTaskStatusesStore();
+export function getSubtaskProgress(task = {}, taskStatuses = []) {
+	// const { taskStatuses } = useTaskStatusesStore();
 	const children = Array.isArray(task?.children) ? task.children : [];
 	const subTasksCount = children.length;
 	const completedCount = children.filter((child) => {
@@ -215,49 +215,80 @@ export function getProjectProgress() {
 	const { tasks } = useTasksStore();
 	const { taskStatuses } = useTaskStatusesStore();
 	const { selectedProject } = useProjectsStore();
+
 	let projectTasks = [];
-	// If project tasks is empty, all projects selected
+	// If a project is selected, only include its top-level tasks; otherwise include top-level tasks across all projects
 	if (selectedProject) {
 		projectTasks = tasks.filter((task) => task.project_id === selectedProject.id && task.parent_id === null);
 	} else {
-		projectTasks = tasks;
+		projectTasks = (tasks || []).filter((task) => task.parent_id === null);
 	}
+
 	const tasksCount = projectTasks.length;
-	const completedCount = projectTasks.filter((task) => {
+	if (tasksCount === 0) {
+		const text = `0/0 (0.00%) tasks completed for ${selectedProject ? "selected project" : "all projects"}`;
+		return { value: 0, text };
+	}
+
+	// Sum contributions: completed parent = 100, otherwise use subtask percent (0-100)
+	let totalPoints = 0;
+	let completedCount = 0;
+	for (const task of projectTasks) {
 		const status = taskStatuses.find((s) => s.id === task.status_id);
 		const name = status?.name ?? "Unknown";
-		return name === "Completed";
-	}).length;
-	const value = tasksCount > 0 ? (completedCount / tasksCount) * 100 : 0;
-	const text = `${completedCount}/${tasksCount} (${value.toFixed(2)}%) tasks completed for ${selectedProject ? "selected project" : "all projects"}`;
-	return { value, text };
+		if (name === "Completed") {
+			totalPoints += 100;
+			completedCount++;
+		} else {
+			// Use subtask progress; if no children this yields 0
+			const { value: subPercent } = getSubtaskProgress(task, taskStatuses);
+			totalPoints += subPercent;
+		}
+	}
+
+	const avgPercent = tasksCount > 0 ? totalPoints / tasksCount : 0;
+	const text = `${completedCount}/${tasksCount} (${avgPercent.toFixed(2)}%) tasks completed for ${selectedProject ? "selected project" : "all projects"}`;
+	return { value: avgPercent, text };
 }
 
-export function getProfileProjectProgress(id) {
-	const { profileSelectedProjects } = useUserStore();
+export function getProfileProjectProgress(id, selectedProject) {
 	const { tasks } = useTasksStore();
 	const { taskStatuses } = useTaskStatusesStore();
-	const [filteredUserTasks, setFilteredUserTasks] = useState([]);
+	// Filter tasks assigned to this user and that are top-level (no parent)
+	const filteredUserTasks = (tasks || []).filter(
+		(task) => Array.isArray(task.assignees) && task.assignees.some((user) => user.id === parseInt(id)) && task.parent_id === null
+	);
 	let projectTasks = [];
-
-	// Filter tasks assigned to this user
-	useEffect(() => {
-		const filteredUserTasks = tasks.filter((task) => Array.isArray(task.assignees) && task.assignees.some((user) => user.id === parseInt(id)));
-		setFilteredUserTasks(filteredUserTasks);
-	}, [tasks, id]);
-	// If project tasks is empty, all projects selected
-	if (profileSelectedProjects) {
-		projectTasks = filteredUserTasks.filter((task) => task.project_id === profileSelectedProjects.id && task.parent_id === null);
+	// If a project is selected, only include its tasks; otherwise include all user tasks
+	if (selectedProject) {
+		projectTasks = filteredUserTasks.filter((task) => task.project_id === selectedProject.id);
 	} else {
 		projectTasks = filteredUserTasks;
 	}
+
 	const tasksCount = projectTasks.length;
-	const completedCount = projectTasks.filter((task) => {
+	if (tasksCount === 0) {
+		const text = `0/0 (0.00%) tasks completed for ${selectedProject ? "selected project" : "all projects"}`;
+		return { value: 0, text };
+	}
+
+	// Sum contributions: completed parent = 100, otherwise use subtask percent (0-100)
+	let totalPoints = 0;
+	let completedCount = 0;
+	for (const task of projectTasks) {
 		const status = taskStatuses.find((s) => s.id === task.status_id);
 		const name = status?.name ?? "Unknown";
-		return name === "Completed";
-	}).length;
-	const value = tasksCount > 0 ? (completedCount / tasksCount) * 100 : 0;
-	const text = `${completedCount}/${tasksCount} (${value.toFixed(2)}%) tasks completed for ${profileSelectedProjects ? "selected project" : "all projects"}`;
-	return { value, text };
+		if (name === "Completed") {
+			totalPoints += 100;
+			completedCount++;
+		} else {
+			// Use subtask progress; if no children this yields 0
+			const { value: subPercent } = getSubtaskProgress(task, taskStatuses);
+			totalPoints += subPercent;
+		}
+	}
+
+	const avgPercent = tasksCount > 0 ? totalPoints / tasksCount : 0;
+	const text = `${completedCount}/${tasksCount} (${avgPercent.toFixed(2)}%) tasks completed for ${selectedProject ? "selected project" : "all projects"}`;
+	return { value: avgPercent, text };
 }

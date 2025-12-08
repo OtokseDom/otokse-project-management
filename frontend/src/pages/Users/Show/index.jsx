@@ -75,6 +75,7 @@ export default function UserProfile() {
 	const [tableData, setTableData] = useState([]);
 	const [view, setView] = useState(() => "grid");
 	const [filteredUserTasks, setFilteredUserTasks] = useState([]);
+	// For task list project filter
 	const [selectedProject, setSelectedProject] = useState();
 
 	// Filter tasks assigned to this user
@@ -84,7 +85,7 @@ export default function UserProfile() {
 		setTableData(flattenTasks(filteredUserTasks));
 	}, [tasks, id]);
 	// Apply project filter to user tasks
-	const { text: taskProgressText, value: taskProgressValue } = getProfileProjectProgress(id);
+	const { text: taskProgressText, value: taskProgressValue } = getProfileProjectProgress(id, selectedProject);
 
 	useEffect(() => {
 		if (selectedProject) {
@@ -114,7 +115,7 @@ export default function UserProfile() {
 		if (!categories || categories.length === 0) fetchCategories();
 		if ((!tasks || tasks.length === 0) && !tasksLoaded) fetchTasks();
 		if ((!projects || projects.length === 0) && !projectsLoaded) fetchProjects();
-		setSelectedProject(null);
+		setProfileSelectedProjects(null);
 	}, []);
 
 	// Fetch user details and reports when ID changes

@@ -29,6 +29,7 @@ import DeleteDialog from "../deleteDialog";
 import { Progress } from "@/components/ui/progress";
 import { getSubtaskProgress, priorityColors, statusColors } from "@/utils/taskHelpers";
 import { useTaskDiscussionsStore } from "@/store/taskDiscussions/taskDiscussionsStore";
+import { useTaskStatusesStore } from "@/store/taskStatuses/taskStatusesStore";
 
 export default function TaskGridItem({
 	task,
@@ -40,6 +41,7 @@ export default function TaskGridItem({
 	setDeleteDialogOpen,
 }) {
 	const { tasks, taskHistory, setSelectedTaskHistory, setRelations } = useTasksStore();
+	const { taskStatuses } = useTaskStatusesStore();
 	const { taskDiscussions } = useTaskDiscussionsStore();
 	const [open, setOpen] = useState(false);
 	const [bulkAction, setBulkAction] = useState(null);
@@ -144,7 +146,7 @@ export default function TaskGridItem({
 	};
 
 	// compute subtask progress for this task
-	const { text: subtaskProgressText, value: subtaskProgressValue } = getSubtaskProgress(task);
+	const { text: subtaskProgressText, value: subtaskProgressValue } = getSubtaskProgress(task, taskStatuses);
 
 	return (
 		<div
