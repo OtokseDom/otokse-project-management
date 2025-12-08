@@ -25,7 +25,9 @@ import { useLoadContext } from "@/contexts/LoadContextProvider";
 import { useTasksStore } from "@/store/tasks/tasksStore";
 import UpdateDialog from "../updateDialog";
 import DeleteDialog from "../deleteDialog";
+import { useAuthContext } from "@/contexts/AuthContextProvider";
 export function DataTableTasks({ columns, data, showLess = true }) {
+	const { user: user_auth } = useAuthContext();
 	const { tasksLoading } = useTasksStore();
 	const [sorting, setSorting] = useState([]);
 	const [columnFilters, setColumnFilters] = useState([]);
@@ -215,9 +217,13 @@ export function DataTableTasks({ columns, data, showLess = true }) {
 					<Button size="sm" className="text-xs" onClick={() => setBulkAction("actual_date")}>
 						<CalendarCheck2 /> Update Actual Date
 					</Button>
-					{/* <Button size="sm" className="text-xs" variant="destructive" onClick={() => setBulkAction("delete")}>
-						<Trash2 className="text-destructive-foreground" /> Delete
-					</Button> */}
+					{user_auth?.data?.role === "Admin" || user_auth?.data?.role === "Superadmin" ? (
+						<Button size="sm" className="text-xs" variant="destructive" onClick={() => setBulkAction("delete")}>
+							<Trash2 className="text-destructive-foreground" /> Delete
+						</Button>
+					) : (
+						""
+					)}
 				</div>
 			)}
 			<div className="flex justify-between items-center w-full m-0">
