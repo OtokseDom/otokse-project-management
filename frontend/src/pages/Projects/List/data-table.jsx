@@ -4,13 +4,11 @@ import { useState } from "react";
 import { flexRender, getSortedRowModel, getFilteredRowModel, getCoreRowModel, getPaginationRowModel, useReactTable } from "@tanstack/react-table";
 // import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import ProjectForm from "../form";
 import { useProjectsStore } from "@/store/projects/projectsStore";
 
 // Convert the DataTable component to JavaScript
@@ -42,12 +40,6 @@ export function DataTableProjects({ columns, isOpen, setIsOpen, updateData, setU
 
 	return (
 		<div className="w-full scrollbar-custom">
-			<div
-				className={`fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm z-40 transition-opacity duration-300 pointer-events-none ${
-					isOpen ? "opacity-100" : "opacity-0"
-				}`}
-				aria-hidden="true"
-			/>
 			<div className="flex flex-col md:flex-row py-4">
 				<Input
 					placeholder={"filter project title..."}
@@ -56,20 +48,6 @@ export function DataTableProjects({ columns, isOpen, setIsOpen, updateData, setU
 					className="max-w-sm"
 				/>
 				<div className="w-full md:w-fit flex flex-row justify-between gap-2 ml-auto">
-					<Sheet open={isOpen} onOpenChange={setIsOpen} modal={false}>
-						{!projectsLoading && (
-							<SheetTrigger asChild>
-								<Button variant="">Add Project</Button>
-							</SheetTrigger>
-						)}
-						<SheetContent side="right" className="overflow-y-auto w-[400px] sm:w-[540px]">
-							<SheetHeader>
-								<SheetTitle>{updateData?.id ? "Update Project" : "Add Project"}</SheetTitle>
-								<SheetDescription className="sr-only">Navigate through the app using the options below.</SheetDescription>
-							</SheetHeader>
-							<ProjectForm setIsOpen={setIsOpen} updateData={updateData} setUpdateData={setUpdateData} />
-						</SheetContent>
-					</Sheet>
 					<DropdownMenu>
 						<DropdownMenuTrigger asChild>
 							<Button variant="outline">Columns</Button>
