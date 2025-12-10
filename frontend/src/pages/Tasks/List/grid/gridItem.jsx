@@ -363,72 +363,11 @@ export default function TaskGridItem({
 				<div className="w-full rounded mt-3 ">
 					<hr />
 					{task.children.map((sub) => (
-						<div key={sub.id} className="flex items-center justify-between border-b border-accent gap-2 bg-accent/50 px-3 py-2">
-							<div className="flex flex-col gap-2 min-w-0">
-								<div className={`flex gap-1 items-start text-sm font-medium`}>{sub.title}</div>
-								<div className="flex flex-wrap text-xs text-muted-foreground gap-4">
-									<div
-										onClick={() => {
-											setBulkAction("assignees");
-											setSelectedTasks([sub]);
-										}}
-										className="flex gap-2 text-xs text-muted-foreground hover:cursor-pointer font-bold"
-									>
-										<User size={16} />
-										{sub.assignees &&
-											Array.isArray(sub.assignees) &&
-											sub.assignees
-												.map((a) => a.name)
-												.slice(0, 3)
-												.join(", ")}
-									</div>
-									{formatDateSafe(sub.start_date) && (
-										<div
-											onClick={() => {
-												setBulkAction("start_date");
-												setSelectedTasks([sub]);
-											}}
-											className="hidden md:flex gap-1 hover:cursor-pointer"
-										>
-											<CalendarDaysIcon size={16} /> Start: <span className="font-bold">{formatDateSafe(sub.start_date)}</span>
-										</div>
-									)}
-									{formatDateSafe(sub.end_date) && (
-										<div
-											onClick={() => {
-												setBulkAction("end_date");
-												setSelectedTasks([sub]);
-											}}
-											className="hidden md:flex gap-1 hover:cursor-pointer"
-										>
-											<CalendarDaysIcon size={16} /> End: <span className="font-bold">{formatDateSafe(sub.end_date)}</span>
-										</div>
-									)}
-									{formatDateSafe(sub.actual_date) && (
-										<div
-											onClick={() => {
-												setBulkAction("actual_date");
-												setSelectedTasks([sub]);
-											}}
-											className="hidden md:flex gap-1 hover:cursor-pointer"
-										>
-											<Target size={16} /> Actual: <span className="font-bold">{formatDateSafe(sub.actual_date)}</span>
-										</div>
-									)}
-									{sub.attachments && sub.attachments.length > 0 && (
-										<span title="Attachments">
-											<Paperclip className="text-sm text-gray-500" size={16} />
-										</span>
-									)}
-									{taskDiscussions?.filter((d) => d.task_id === sub.id).length > 0 && (
-										<span title="Task Discussions">
-											<MessageSquareMore className="text-sm text-gray-500" size={16} />
-										</span>
-									)}
-								</div>
-							</div>
-							<div className="flex flex-col gap-2">
-								<div className="flex flex-col md:flex-row items-center justify-end gap-2">
+						<div key={sub.id} className="flex flex-col w-full border-b border-accent gap-4 bg-accent/50 px-3 py-2">
+							<div className="flex flex-col md:flex-row justify-between items-start gap-2 min-w-0">
+								<div className={`order-2 md:order-1 flex gap-1 items-start text-sm font-medium`}>{sub.title}</div>
+								{/* Tags */}
+								<div className="order-1 md:order-2 flex flex-row items-center justify-end gap-2">
 									{sub.status && (
 										<span
 											title={sub.status?.name || "No status"}
@@ -468,19 +407,83 @@ export default function TaskGridItem({
 										</span>
 									)}
 								</div>
-								<div className="flex flex-col md:flex-row items-center gap-2">
+							</div>
+							<div className="flex flex-col md:flex-row justify-between items-start gap-2">
+								{/* Assignees & Dates */}
+								<div className="flex flex-wrap text-xs text-muted-foreground gap-4">
+									<div
+										onClick={() => {
+											setBulkAction("assignees");
+											setSelectedTasks([sub]);
+										}}
+										className="flex gap-2 text-xs text-muted-foreground hover:cursor-pointer font-bold"
+									>
+										<User size={16} />
+										{sub.assignees &&
+											Array.isArray(sub.assignees) &&
+											sub.assignees
+												.map((a) => a.name)
+												.slice(0, 3)
+												.join(", ")}
+									</div>
+									{formatDateSafe(sub.start_date) && (
+										<div
+											onClick={() => {
+												setBulkAction("start_date");
+												setSelectedTasks([sub]);
+											}}
+											className="flex gap-1 hover:cursor-pointer min-w-fit"
+										>
+											<CalendarDaysIcon size={16} /> Start: <span className="font-bold">{formatDateSafe(sub.start_date)}</span>
+										</div>
+									)}
+									{formatDateSafe(sub.end_date) && (
+										<div
+											onClick={() => {
+												setBulkAction("end_date");
+												setSelectedTasks([sub]);
+											}}
+											className="flex gap-1 hover:cursor-pointer min-w-fit"
+										>
+											<CalendarDaysIcon size={16} /> End: <span className="font-bold">{formatDateSafe(sub.end_date)}</span>
+										</div>
+									)}
+									{formatDateSafe(sub.actual_date) && (
+										<div
+											onClick={() => {
+												setBulkAction("actual_date");
+												setSelectedTasks([sub]);
+											}}
+											className="flex gap-1 hover:cursor-pointer min-w-fit"
+										>
+											<Target size={16} /> Actual: <span className="font-bold">{formatDateSafe(sub.actual_date)}</span>
+										</div>
+									)}
+									{sub.attachments && sub.attachments.length > 0 && (
+										<span title="Attachments">
+											<Paperclip className="text-sm text-gray-500" size={16} />
+										</span>
+									)}
+									{taskDiscussions?.filter((d) => d.task_id === sub.id).length > 0 && (
+										<span title="Task Discussions">
+											<MessageSquareMore className="text-sm text-gray-500" size={16} />
+										</span>
+									)}
+								</div>
+								{/* Actions */}
+								<div className="flex flex-row items-center justify-end w-full md:w-fit gap-2">
 									<button
 										onClick={() => openEdit(sub)}
 										className="flex gap-2 items-center px-2 py-1 text-xs rounded bg-accent/10 hover:bg-accent/20"
 									>
-										<Edit size={12} />
+										<Edit size={16} />
 										<span className="hidden sm:inline">Edit</span>
 									</button>
 									<button
 										onClick={() => handleClone(sub)}
 										className="flex gap-2 items-center px-2 py-1 text-xs rounded bg-muted/6 hover:bg-muted/8"
 									>
-										<Copy size={12} />
+										<Copy size={16} />
 										<span className="hidden sm:inline">Clone</span>
 									</button>
 									<button
@@ -490,7 +493,7 @@ export default function TaskGridItem({
 										}}
 										className="flex gap-2 items-center px-2 py-1 text-xs rounded bg-destructive/10 hover:bg-destructive/20"
 									>
-										<Trash2 size={12} className="text-destructive" />
+										<Trash2 size={16} className="text-destructive" />
 										<span className="hidden sm:inline">Delete</span>
 									</button>
 								</div>
