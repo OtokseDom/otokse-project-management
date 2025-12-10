@@ -12,7 +12,7 @@ import { useToast } from "@/contexts/ToastContextProvider";
 import { useEffect, useRef, useState } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { format, parseISO } from "date-fns";
-import { AlarmClock, CalculatorIcon, CalendarDays, Loader2, Sparkles } from "lucide-react";
+import { AlarmClock, CalculatorIcon, CalendarDays, Info, Loader2, Sparkles } from "lucide-react";
 import DateInput from "@/components/form/DateInput";
 import { useAuthContext } from "@/contexts/AuthContextProvider";
 import { API } from "@/constants/api";
@@ -1199,7 +1199,12 @@ export default function TaskForm({ parentId, projectId, isOpen, setIsOpen, updat
 									render={({ field }) => {
 										return (
 											<FormItem>
-												<FormLabel>Rating &#40;1-5&#41;</FormLabel>
+												<FormLabel className="flex flex-row items-start gap-2">
+													Rating &#40;1-5&#41;
+													<span title="1-Very Poor; 2-Below Expectation; 3-Meets Expectations; 4-Above Expectations; 5-Outstanding ">
+														<Info size={16} className="text-muted-foreground" />
+													</span>
+												</FormLabel>
 												<FormControl>
 													<Input
 														disabled={!isEditable}
