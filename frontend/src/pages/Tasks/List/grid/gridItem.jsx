@@ -190,7 +190,7 @@ export default function TaskGridItem({
 									setBulkAction("status");
 									setSelectedTasks([task]);
 								}}
-								className={`text-xs min-w-fit px-2 py-1 rounded-md font-medium hover:cursor-pointer ${statusClass}`}
+								className={`text-xs min-w-fit px-2 py-1 rounded-full font-medium hover:cursor-pointer ${statusClass}`}
 							>
 								{task.status.name}
 							</span>
@@ -203,7 +203,7 @@ export default function TaskGridItem({
 									setBulkAction("priority");
 									setSelectedTasks([task]);
 								}}
-								className={`text-xs min-w-fit px-2 py-1 rounded-md font-medium hover:cursor-pointer ${priorityClass}`}
+								className={`text-xs min-w-fit px-2 py-1 rounded-full font-medium hover:cursor-pointer ${priorityClass}`}
 							>
 								{priority}
 							</span>
@@ -214,7 +214,7 @@ export default function TaskGridItem({
 									setBulkAction("category");
 									setSelectedTasks([task]);
 								}}
-								className="px-2 py-1 min-w-fit rounded-md bg-background/50 border-2 border-foreground/50 text-foreground text-xs gap-2 cursor-pointer"
+								className="px-2 py-1 min-w-fit rounded-full bg-background/50 border-2 border-foreground/50 text-foreground text-xs gap-2 cursor-pointer"
 							>
 								{category}
 							</span>
@@ -371,7 +371,7 @@ export default function TaskGridItem({
 									{sub.status && (
 										<span
 											title={sub.status?.name || "No status"}
-											className={`min-w-fit px-1 rounded-md text-xs hover:cursor-pointer ${
+											className={`min-w-fit px-2 rounded-full text-xs hover:cursor-pointer ${
 												statusColors?.[sub.status?.color?.toLowerCase()]
 											}`}
 											onClick={() => {
@@ -385,7 +385,7 @@ export default function TaskGridItem({
 									{sub.priority && (
 										<span
 											title={sub.priority || "No priority"}
-											className={`min-w-fit px-1 rounded-md text-xs hover:cursor-pointer ${priorityColors?.[sub.priority]}`}
+											className={`min-w-fit px-2 rounded-full text-xs hover:cursor-pointer ${priorityColors?.[sub.priority]}`}
 											onClick={() => {
 												setBulkAction("priority");
 												setSelectedTasks([sub]);
@@ -397,7 +397,7 @@ export default function TaskGridItem({
 									{sub.category && (
 										<span
 											title={sub.category?.name || "No priority"}
-											className={`min-w-fit px-1 rounded-md text-xs hover:cursor-pointer bg-background/50 border-2 border-foreground/50 text-foreground`}
+											className={`min-w-fit px-2 rounded-full text-xs hover:cursor-pointer bg-background/50 border-2 border-foreground/50 text-foreground`}
 											onClick={() => {
 												setBulkAction("category");
 												setSelectedTasks([sub]);
