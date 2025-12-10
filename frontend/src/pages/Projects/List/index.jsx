@@ -7,8 +7,6 @@ import { API } from "@/constants/api";
 import { useProjectsStore } from "@/store/projects/projectsStore";
 import { useTaskStatusesStore } from "@/store/taskStatuses/taskStatusesStore";
 import { useTaskHelpers } from "@/utils/taskHelpers";
-import { useKanbanColumnsStore } from "@/store/kanbanColumns/kanbanColumnsStore";
-import { useDashboardStore } from "@/store/dashboard/dashboardStore";
 import GridList from "./grid/gridList";
 import { Button } from "@/components/ui/button";
 import { Plus, Rows3, Table } from "lucide-react";
@@ -16,10 +14,8 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTr
 import ProjectForm from "../form";
 
 export default function Projects() {
-	const { projects, projectsLoaded, projectsLoading, removeProject, removeSelectedProject, setProjectsLoading } = useProjectsStore([]);
+	const { projects, projectsLoaded, projectsLoading, setProjectsLoading } = useProjectsStore([]);
 	const { taskStatuses } = useTaskStatusesStore();
-	const { removeKanbanColumnByProject } = useKanbanColumnsStore();
-	const { removeProjectFilter } = useDashboardStore();
 	const { fetchProjects, fetchTaskStatuses } = useTaskHelpers();
 
 	const [view, setView] = useState(() => "grid");
@@ -27,6 +23,9 @@ export default function Projects() {
 	const [isOpen, setIsOpen] = useState(false);
 	const [updateData, setUpdateData] = useState({});
 	const [dialogOpen, setDialogOpen] = useState(false);
+	const [selectedProjectId, setSelectedProjectId] = useState(null);
+	const [hasRelation, setHasRelation] = useState(false);
+
 	useEffect(() => {
 		if (!isOpen) setUpdateData({});
 	}, [isOpen]);
@@ -35,23 +34,27 @@ export default function Projects() {
 		if (!taskStatuses || taskStatuses.length === 0) fetchTaskStatuses();
 		if ((!projects || projects.length === 0) && !projectsLoaded) fetchProjects();
 	}, []);
-	const handleDelete = async (id) => {
+
+	const checkHasRelation = async (project = {}) => {
 		setProjectsLoading(true);
+		setTimeout(() => {
+			setDialogOpen(true);
+		}, 100);
+		setSelectedProjectId(project.id);
 		try {
-			await axiosClient.delete(API().project(id));
-			removeProject(id);
-			removeKanbanColumnByProject(id);
-			removeProjectFilter(id);
-			removeSelectedProject();
-			showToast("Success!", "Project deleted.", 3000);
+			const hasRelationResponse = await axiosClient.post(API().relation_check("project", project.id));
+			setHasRelation(hasRelationResponse?.data?.data?.exists);
 		} catch (e) {
 			showToast("Failed!", e.response?.data?.message, 3000, "fail");
 			if (e.message !== "Request aborted") console.error("Error fetching data:", e.message);
 		} finally {
-			setDialogOpen(false);
 			setProjectsLoading(false);
 		}
 	};
+	useEffect(() => {
+		if (!dialogOpen) setHasRelation(false);
+	}, [dialogOpen]);
+
 	return (
 		<div className="w-screen md:w-full bg-card text-card-foreground border border-border rounded-2xl container p-4 md:p-10 shadow-md">
 			<div
@@ -96,7 +99,15 @@ export default function Projects() {
 			</Sheet>
 			{/* Updated table to fix dialog per column issue */}
 			{(() => {
-				const { columnsProject: projectColumns, dialog } = columnsProject({ handleDelete, setIsOpen, setUpdateData, dialogOpen, setDialogOpen });
+				const { columnsProject: projectColumns, dialog } = columnsProject({
+					setIsOpen,
+					setUpdateData,
+					dialogOpen,
+					setDialogOpen,
+					checkHasRelation,
+					hasRelation,
+					selectedProjectId,
+				});
 				return (
 					<>
 						{view === "list" ? (
@@ -116,10 +127,10 @@ export default function Projects() {
 									projects={projects}
 									setIsOpen={setIsOpen}
 									setUpdateData={setUpdateData}
-									// setParentId={setParentId}
-									// // setProjectId={setProjectId}
+									checkHasRelation={checkHasRelation}
 									dialogOpen={dialogOpen}
 									setDialogOpen={setDialogOpen}
+									hasRelation={hasRelation}
 									// context={context}
 									// contextId={contextId}
 								/>
