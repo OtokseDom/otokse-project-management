@@ -9,7 +9,7 @@ import axiosClient from "@/axios.client";
 import ProjectGridItem from "./gridItem";
 import { useProjectsStore } from "@/store/projects/projectsStore";
 
-export default function GridList({ projects, setIsOpen, setUpdateData, setDialogOpen, dialogOpen }) {
+export default function GridList({ projects, setIsOpen, setUpdateData, checkHasRelation, setDialogOpen, dialogOpen, hasRelation }) {
 	// const { tasksLoading, setTaskPositions, updateTaskPositionLocal, getSortedTasks, positionsLoaded, setPositionsLoaded } = useTasksStore();
 	const { projectsLoading } = useProjectsStore();
 
@@ -167,10 +167,10 @@ export default function GridList({ projects, setIsOpen, setUpdateData, setDialog
 						project={project}
 						setIsOpen={setIsOpen}
 						setUpdateData={setUpdateData}
-						// setParentId={setParentId}
-						// setProjectId={setProjectId}
-						// deleteDialogOpen={deleteDialogOpen}
-						// setDeleteDialogOpen={setDeleteDialogOpen}
+						checkHasRelation={checkHasRelation}
+						dialogOpen={dialogOpen}
+						setDialogOpen={setDialogOpen}
+						hasRelation={hasRelation}
 					/>
 				))}
 			</div>

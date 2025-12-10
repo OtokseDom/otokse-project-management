@@ -32,15 +32,7 @@ import { useTaskStatusesStore } from "@/store/taskStatuses/taskStatusesStore";
 import { useProjectsStore } from "@/store/projects/projectsStore";
 import { Link } from "react-router-dom";
 
-export default function ProjectGridItem({
-	project,
-	setIsOpen = () => {},
-	setUpdateData = () => {},
-	// setParentId = () => {},
-	// setProjectId = () => {},
-	// deleteDialogOpen = false,
-	// setDeleteDialogOpen,
-}) {
+export default function ProjectGridItem({ project, setIsOpen = () => {}, setUpdateData = () => {}, checkHasRelation = () => {} }) {
 	const { tasks, taskHistory, setSelectedTaskHistory, setRelations } = useTasksStore();
 	const { projects, setSelectedProject } = useProjectsStore();
 	const { taskStatuses } = useTaskStatusesStore();
@@ -266,7 +258,14 @@ export default function ProjectGridItem({
 								<span className="hidden sm:inline text-xs">View Tasks</span>
 							</Button>
 						</Link>
-						<Button variant="ghost" size="sm" title="Delete">
+						<Button
+							variant="ghost"
+							size="sm"
+							title="Delete"
+							onClick={() => {
+								checkHasRelation(project);
+							}}
+						>
 							<Trash2 size={12} className="text-destructive" />
 							<span className="hidden sm:inline text-xs">Delete</span>
 						</Button>
