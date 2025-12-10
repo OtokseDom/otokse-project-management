@@ -9,7 +9,7 @@ import { useTaskStatusesStore } from "@/store/taskStatuses/taskStatusesStore";
 import { useTaskHelpers } from "@/utils/taskHelpers";
 import { useKanbanColumnsStore } from "@/store/kanbanColumns/kanbanColumnsStore";
 import { useDashboardStore } from "@/store/dashboard/dashboardStore";
-import GridList from "../grid/gridList";
+import GridList from "./grid/gridList";
 import { Button } from "@/components/ui/button";
 import { Plus, Rows3, Table } from "lucide-react";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -118,8 +118,8 @@ export default function Projects() {
 									setUpdateData={setUpdateData}
 									// setParentId={setParentId}
 									// // setProjectId={setProjectId}
-									// deleteDialogOpen={deleteDialogOpen}
-									// setDeleteDialogOpen={setDeleteDialogOpen}
+									dialogOpen={dialogOpen}
+									setDialogOpen={setDialogOpen}
 									// context={context}
 									// contextId={contextId}
 								/>

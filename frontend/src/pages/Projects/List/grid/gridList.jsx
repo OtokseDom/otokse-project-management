@@ -9,7 +9,7 @@ import axiosClient from "@/axios.client";
 import ProjectGridItem from "./gridItem";
 import { useProjectsStore } from "@/store/projects/projectsStore";
 
-export default function GridList({ projects, setIsOpen, setUpdateData }) {
+export default function GridList({ projects, setIsOpen, setUpdateData, setDialogOpen, dialogOpen }) {
 	// const { tasksLoading, setTaskPositions, updateTaskPositionLocal, getSortedTasks, positionsLoaded, setPositionsLoaded } = useTasksStore();
 	const { projectsLoading } = useProjectsStore();
 
