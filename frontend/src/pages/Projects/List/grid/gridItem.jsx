@@ -179,7 +179,7 @@ export default function ProjectGridItem({ project, setIsOpen = () => {}, setUpda
 									setBulkAction("status");
 									setSelectedProjects([project]);
 								}}
-								className={`text-xs min-w-fit px-2 py-1 rounded-md font-medium hover:cursor-pointer ${statusClass}`}
+								className={`text-xs min-w-fit px-2 py-1 rounded-full font-medium hover:cursor-pointer ${statusClass}`}
 							>
 								{project.status.name}
 							</span>
@@ -192,7 +192,7 @@ export default function ProjectGridItem({ project, setIsOpen = () => {}, setUpda
 									setBulkAction("priority");
 									setSelectedProjects([project]);
 								}}
-								className={`text-xs min-w-fit px-2 py-1 rounded-md font-medium hover:cursor-pointer ${priorityClass}`}
+								className={`text-xs min-w-fit px-2 py-1 rounded-full font-medium hover:cursor-pointer ${priorityClass}`}
 							>
 								{priority}
 							</span>
