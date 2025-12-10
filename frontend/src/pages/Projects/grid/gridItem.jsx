@@ -20,6 +20,7 @@ import {
 	GripVertical,
 	Paperclip,
 	MessageSquareMore,
+	ListTodo,
 } from "lucide-react";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
@@ -29,6 +30,7 @@ import { getSubtaskProgress, priorityColors, statusColors } from "@/utils/taskHe
 import { useTaskDiscussionsStore } from "@/store/taskDiscussions/taskDiscussionsStore";
 import { useTaskStatusesStore } from "@/store/taskStatuses/taskStatusesStore";
 import { useProjectsStore } from "@/store/projects/projectsStore";
+import { Link } from "react-router-dom";
 
 export default function ProjectGridItem({
 	project,
@@ -40,7 +42,7 @@ export default function ProjectGridItem({
 	// setDeleteDialogOpen,
 }) {
 	const { tasks, taskHistory, setSelectedTaskHistory, setRelations } = useTasksStore();
-	const { projects } = useProjectsStore();
+	const { projects, setSelectedProject } = useProjectsStore();
 	const { taskStatuses } = useTaskStatusesStore();
 	const [open, setOpen] = useState(false);
 	const [selectedProjects, setSelectedProjects] = useState(null);
@@ -252,6 +254,18 @@ export default function ProjectGridItem({
 							<Edit size={12} />
 							<span className="hidden sm:inline text-xs">Edit</span>
 						</Button>
+						<Link
+							to="/tasks"
+							onClick={(e) => {
+								e.stopPropagation();
+								setSelectedProject(project);
+							}}
+						>
+							<Button variant="ghost" title="View tasks">
+								<ListTodo />
+								<span className="hidden sm:inline text-xs">View Tasks</span>
+							</Button>
+						</Link>
 						<Button variant="ghost" size="sm" title="Delete">
 							<Trash2 size={12} className="text-destructive" />
 							<span className="hidden sm:inline text-xs">Delete</span>
