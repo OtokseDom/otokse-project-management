@@ -275,30 +275,33 @@ export const columnsProject = ({ handleDelete, setIsOpen, setUpdateData, dialogO
 					cell: ({ row }) => {
 						const project = row.original;
 						return (
-							<div className="flex items-center justify-center gap-2">
+							<div className="flex justify-center items-center">
 								<Button
-									size="icon"
 									variant="ghost"
+									title="Update task"
+									className="h-8 w-8 p-0 cursor-pointer pointer-events-auto"
 									onClick={(e) => {
 										e.stopPropagation();
 										handleUpdateProject(project);
 									}}
 								>
-									<Edit />
+									<Edit size={16} />
+								</Button>
+								<Button variant="ghost" title="View tasks" className="h-8 w-8 p-0 cursor-pointer pointer-events-auto">
+									<Link
+										to="/tasks"
+										onClick={(e) => {
+											e.stopPropagation();
+											setSelectedProject(project);
+										}}
+									>
+										<ListTodo size={20} />
+									</Link>
 								</Button>
 								<Button
-									size="icon"
 									variant="ghost"
-									onClick={(e) => {
-										e.stopPropagation();
-										setSelectedProject(project);
-									}}
-								>
-									<ListTodo />
-								</Button>
-								<Button
-									size="icon"
-									variant="ghost"
+									title="Delete task"
+									className="h-8 w-8 p-0 cursor-pointer pointer-events-auto"
 									onClick={(e) => {
 										e.stopPropagation();
 										openDialog(project);
