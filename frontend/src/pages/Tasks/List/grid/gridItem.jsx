@@ -163,7 +163,7 @@ export default function TaskGridItem({
 				<GripVertical size={16} />
 			</div>
 			<div className="flex flex-col md:flex-row items-start justify-between gap-2">
-				<div className="min-w-0 flex flex-col order-2 md:order-1 gap-2">
+				<div className="min-w-0 max-w-full flex flex-col order-2 md:order-1 gap-2">
 					<div className="flex gap-2">
 						<GoalIcon size={32} className="inline-block mt-2 text-primary/50" />
 						<div className="flex flex-col gap-0">
@@ -174,7 +174,7 @@ export default function TaskGridItem({
 					</div>
 
 					<div
-						className="text-xs text-muted-foreground prose prose-sm max-w-none
+						className="text-xs text-muted-foreground prose prose-sm max-w-none overflow-auto
 												 			[&_ul]:list-disc [&_ul]:pl-6
 															[&_ol]:list-decimal [&_ol]:pl-6
 															[&_li]:my-1"
