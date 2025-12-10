@@ -204,7 +204,7 @@ export default function ProjectGridItem({ project, setIsOpen = () => {}, setUpda
 			{/* Details row */}
 			<div className="flex flex-col mt-3 gap-2 items-start">
 				{/* left column: metadata */}
-				<div className="flex w-full justify-between items-center space-y-2">
+				<div className="flex flex-col md:flex-row w-full justify-between items-center">
 					{/* dates */}
 					<div className="flex flex-wrap text-xs text-muted-foreground gap-4">
 						{startString && (
@@ -241,7 +241,8 @@ export default function ProjectGridItem({ project, setIsOpen = () => {}, setUpda
 							</div>
 						)}
 					</div>
-					<div className="flex items-center gap-2">
+					{/* Actions */}
+					<div className="flex w-full md:w-fit justify-end gap-2">
 						<Button variant="ghost" size="sm" title="Edit" onClick={() => handleUpdateProject(project)}>
 							<Edit size={12} />
 							<span className="hidden sm:inline text-xs">Edit</span>
