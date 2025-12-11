@@ -20,6 +20,7 @@ import {
 	GripVertical,
 	Paperclip,
 	MessageSquareMore,
+	Text,
 } from "lucide-react";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
@@ -418,6 +419,21 @@ export default function TaskGridItem({
 										}}
 										className="flex gap-2 text-xs text-muted-foreground hover:cursor-pointer font-bold"
 									>
+										{sub.description != "" && (
+											<span title="Description">
+												<Text className="text-sm text-gray-500" size={16} />
+											</span>
+										)}
+										{sub.attachments && sub.attachments.length > 0 && (
+											<span title="Attachments">
+												<Paperclip className="text-sm text-gray-500" size={16} />
+											</span>
+										)}
+										{taskDiscussions?.filter((d) => d.task_id === sub.id).length > 0 && (
+											<span title="Task Discussions">
+												<MessageSquareMore className="text-sm text-gray-500" size={16} />
+											</span>
+										)}
 										<User size={16} />
 										{sub.assignees &&
 											Array.isArray(sub.assignees) &&
@@ -458,16 +474,6 @@ export default function TaskGridItem({
 										>
 											<Target size={16} /> Actual: <span className="font-bold">{formatDateSafe(sub.actual_date)}</span>
 										</div>
-									)}
-									{sub.attachments && sub.attachments.length > 0 && (
-										<span title="Attachments">
-											<Paperclip className="text-sm text-gray-500" size={16} />
-										</span>
-									)}
-									{taskDiscussions?.filter((d) => d.task_id === sub.id).length > 0 && (
-										<span title="Task Discussions">
-											<MessageSquareMore className="text-sm text-gray-500" size={16} />
-										</span>
 									)}
 								</div>
 								{/* Actions */}
