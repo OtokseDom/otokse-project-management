@@ -14,6 +14,8 @@ export default function GridList({ tasks, setIsOpen, setUpdateData, setParentId,
 	const { tasksLoading, setTaskPositions, updateTaskPositionLocal, getSortedTasks, positionsLoaded, setPositionsLoaded } = useTasksStore();
 
 	const [activeId, setActiveId] = useState(null);
+	const [searchValue, setSearchValue] = useState("");
+	const [searchTasks, setSearchTasks] = useState([]);
 
 	// Compute key for this context
 	const ctxKey = `${context}-${contextId ?? "null"}`;
@@ -47,7 +49,10 @@ export default function GridList({ tasks, setIsOpen, setUpdateData, setParentId,
 
 	// Get sorted tasks using store helper
 	const sortedTasks = getSortedTasks(tasks, context, contextId);
-	const sortableIds = sortedTasks.map((t) => `grid-item-${t.id}`);
+
+	// Use filtered tasks if search is active, otherwise use all sorted tasks
+	const displayTasks = searchValue.trim() ? searchTasks : sortedTasks;
+	const sortableIds = displayTasks.map((t) => `grid-item-${t.id}`);
 
 	const sensors = useSensors(useSensor(PointerSensor), useSensor(KeyboardSensor));
 
@@ -141,6 +146,16 @@ export default function GridList({ tasks, setIsOpen, setUpdateData, setParentId,
 		}
 	}, 50);
 
+	// Update search results whenever search value or sorted tasks change
+	useEffect(() => {
+		if (searchValue.trim()) {
+			const searchResults = sortedTasks.filter((task) => {
+				return task.title.toLowerCase().includes(searchValue.toLowerCase());
+			});
+			setSearchTasks(searchResults);
+		}
+	}, [searchValue]);
+
 	if (tasksLoading || !loaded) {
 		return (
 			<div className="w-full scrollbar-custom mt-10">
@@ -155,27 +170,26 @@ export default function GridList({ tasks, setIsOpen, setUpdateData, setParentId,
 
 	return (
 		<div className="w-full scrollbar-custom mt-10">
-			<Input
-				placeholder={"Search title ..."}
-				// value={table.getColumn("title")?.getFilterValue() || ""}
-				// onChange={(event) => table.getColumn("title")?.setFilterValue(event.target.value)}
-				className="max-w-sm"
-			/>
+			<Input placeholder={"Search title ..."} value={searchValue} onChange={(event) => setSearchValue(event.target.value)} className="max-w-sm" />
 			<DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={handleDragStart} onDragEnd={debouncedHandleDragEnd}>
 				<SortableContext items={sortableIds} strategy={verticalListSortingStrategy}>
-					<div className="flex flex-col gap-4 w-full">
-						{sortedTasks.map((task) => (
-							<TaskGridItem
-								key={task.id}
-								task={task}
-								setIsOpen={setIsOpen}
-								setUpdateData={setUpdateData}
-								setParentId={setParentId}
-								setProjectId={setProjectId}
-								deleteDialogOpen={deleteDialogOpen}
-								setDeleteDialogOpen={setDeleteDialogOpen}
-							/>
-						))}
+					<div className="flex flex-col gap-4 w-full mt-4">
+						{displayTasks.length > 0 ? (
+							displayTasks.map((task) => (
+								<TaskGridItem
+									key={task.id}
+									task={task}
+									setIsOpen={setIsOpen}
+									setUpdateData={setUpdateData}
+									setParentId={setParentId}
+									setProjectId={setProjectId}
+									deleteDialogOpen={deleteDialogOpen}
+									setDeleteDialogOpen={setDeleteDialogOpen}
+								/>
+							))
+						) : (
+							<div className="text-center text-muted-foreground py-8">No tasks found matching "{searchValue}"</div>
+						)}
 					</div>
 				</SortableContext>
 			</DndContext>
