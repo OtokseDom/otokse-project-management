@@ -149,7 +149,7 @@ export function DataTableTasks({ columns, data, showLess = true }) {
 			<div className="flex flex-col md:flex-row justify-between py-4">
 				<div className="flex flex-row gap-4 max-w-sm w-full">
 					<Input
-						placeholder={"filter title ..."}
+						placeholder={"Search title ..."}
 						value={table.getColumn("title")?.getFilterValue() || ""}
 						onChange={(event) => table.getColumn("title")?.setFilterValue(event.target.value)}
 						className="w-full"
