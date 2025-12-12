@@ -8,6 +8,7 @@ import TaskGridItem from "./gridItem";
 import { Skeleton } from "@/components/ui/skeleton";
 import { API } from "@/constants/api";
 import axiosClient from "@/axios.client";
+import { Input } from "@/components/ui/input";
 
 export default function GridList({ tasks, setIsOpen, setUpdateData, setParentId, setProjectId, deleteDialogOpen, setDeleteDialogOpen, context, contextId }) {
 	const { tasksLoading, setTaskPositions, updateTaskPositionLocal, getSortedTasks, positionsLoaded, setPositionsLoaded } = useTasksStore();
@@ -154,6 +155,12 @@ export default function GridList({ tasks, setIsOpen, setUpdateData, setParentId,
 
 	return (
 		<div className="w-full scrollbar-custom mt-10">
+			<Input
+				placeholder={"Search title ..."}
+				// value={table.getColumn("title")?.getFilterValue() || ""}
+				// onChange={(event) => table.getColumn("title")?.setFilterValue(event.target.value)}
+				className="max-w-sm"
+			/>
 			<DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={handleDragStart} onDragEnd={debouncedHandleDragEnd}>
 				<SortableContext items={sortableIds} strategy={verticalListSortingStrategy}>
 					<div className="flex flex-col gap-4 w-full">
