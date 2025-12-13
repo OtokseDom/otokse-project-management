@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Plus, Rows3, Table } from "lucide-react";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import ProjectForm from "../form";
+import { Input } from "@/components/ui/input";
 
 export default function Projects() {
 	const { projects, projectsLoaded, projectsLoading, setProjectsLoading } = useProjectsStore([]);
@@ -25,6 +26,8 @@ export default function Projects() {
 	const [dialogOpen, setDialogOpen] = useState(false);
 	const [selectedProjectId, setSelectedProjectId] = useState(null);
 	const [hasRelation, setHasRelation] = useState(false);
+	const [searchValue, setSearchValue] = useState("");
+	const [searchProjects, setSearchProjects] = useState([]);
 
 	useEffect(() => {
 		if (!isOpen) setUpdateData({});
@@ -55,6 +58,17 @@ export default function Projects() {
 		if (!dialogOpen) setHasRelation(false);
 	}, [dialogOpen]);
 
+	const displayProjects = searchValue.trim() ? searchProjects : projects;
+	// Update search results whenever search value or sorted tasks change
+	useEffect(() => {
+		if (searchValue.trim()) {
+			const searchResults = projects.filter((project) => {
+				return project.title.toLowerCase().includes(searchValue.toLowerCase());
+			});
+			setSearchProjects(searchResults);
+		}
+	}, [searchValue]);
+
 	return (
 		<div className="w-screen md:w-full bg-card text-card-foreground border border-border rounded-2xl container p-4 md:p-10 shadow-md">
 			<div
@@ -73,14 +87,32 @@ export default function Projects() {
 					<Button title="Grid view" variant={view === "grid" ? "" : "ghost"} onClick={() => setView("grid")}>
 						<Rows3 size={16} />
 					</Button>
-					<Button title="Table view" variant={view === "list" ? "" : "ghost"} onClick={() => setView("list")}>
+					<Button
+						title="Table view"
+						variant={view === "list" ? "" : "ghost"}
+						onClick={() => {
+							setView("list");
+							setSearchValue("");
+						}}
+					>
 						<Table size={16} />
 					</Button>
 				</div>
 			</div>
 			<Sheet open={isOpen} onOpenChange={setIsOpen} modal={false}>
 				{!projectsLoading && (
-					<div className="flex w-full items-end justify-end my-4">
+					<div className={`flex w-full my-4 ${view === "grid" ? "justify-between" : "justify-end"}`}>
+						{view === "grid" ? (
+							<Input
+								placeholder={"Search title ..."}
+								value={searchValue}
+								onChange={(event) => setSearchValue(event.target.value)}
+								className="max-w-sm"
+							/>
+						) : (
+							""
+						)}
+
 						<SheetTrigger asChild>
 							<Button variant="">
 								<Plus />
@@ -123,17 +155,21 @@ export default function Projects() {
 							</>
 						) : (
 							<>
-								<GridList
-									projects={projects}
-									setIsOpen={setIsOpen}
-									setUpdateData={setUpdateData}
-									checkHasRelation={checkHasRelation}
-									dialogOpen={dialogOpen}
-									setDialogOpen={setDialogOpen}
-									hasRelation={hasRelation}
-									// context={context}
-									// contextId={contextId}
-								/>
+								{displayProjects.length > 0 ? (
+									<GridList
+										projects={displayProjects}
+										setIsOpen={setIsOpen}
+										setUpdateData={setUpdateData}
+										checkHasRelation={checkHasRelation}
+										dialogOpen={dialogOpen}
+										setDialogOpen={setDialogOpen}
+										hasRelation={hasRelation}
+										// context={context}
+										// contextId={contextId}
+									/>
+								) : (
+									<div className="text-center text-muted-foreground py-8">No projects found matching "{searchValue}"</div>
+								)}
 								{dialog}
 							</>
 						)}
