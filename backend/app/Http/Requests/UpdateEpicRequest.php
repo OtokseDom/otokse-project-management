@@ -11,7 +11,7 @@ class UpdateEpicRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,7 +22,16 @@ class UpdateEpicRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'organization_id' => 'required|exists:organizations,id',
+            'status_id' => 'nullable|exists:task_statuses,id',
+            'title'           => 'required|string|max:255',
+            'owner_id' => 'nullable|exists:users,id',
+            'slug'           => 'nullable|string|max:255',
+            'description'     => 'nullable|string',
+            'start_date'      => 'nullable|date',
+            'end_date'        => 'nullable|date',
+            'priority'        => 'nullable|in:Low,Medium,High,Urgent,Critical',
+            'remarks'         => 'nullable|string',
         ];
     }
 }
