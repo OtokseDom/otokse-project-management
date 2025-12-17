@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\v1\AuthController;
 use App\Http\Controllers\Api\v1\CategoryController;
 use App\Http\Controllers\Api\v1\DashboardReportController;
+use App\Http\Controllers\Api\v1\EpicController;
 use App\Http\Controllers\Api\v1\KanbanColumnController;
 use App\Http\Controllers\Api\v1\OrganizationController;
 use App\Http\Controllers\Api\v1\ProjectController;
@@ -39,6 +40,7 @@ Route::prefix('v1')->group(function () {
         Route::apiResource('/organization', OrganizationController::class);
         Route::apiResource('/user', UserController::class);
         Route::apiResource('/task-status', TaskStatusController::class);
+        Route::apiResource('/epic', EpicController::class);
         Route::apiResource('/project', ProjectController::class);
         Route::apiResource('/category', CategoryController::class);
         Route::apiResource('/task', TaskController::class);
