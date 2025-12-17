@@ -6,6 +6,7 @@ export const API = (version = "v1") => ({
 	user_auth: `/${version}/user-auth`,
 	relation_check: (type = "", value = "") => `/${version}/relation-check?type=${type}&value=${value}`,
 	task_status: (id = "") => `/${version}/task-status${id ? `/${id}` : ""}`,
+	epic: (id = "") => `/${version}/epic${id ? `/${id}` : ""}`,
 	project: (id = "") => `/${version}/project${id ? `/${id}` : ""}`,
 	category: (id = "") => `/${version}/category${id ? `/${id}` : ""}`,
 	user: (id = "") => `/${version}/user${id ? `/${id}` : ""}`,
