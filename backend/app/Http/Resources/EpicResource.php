@@ -34,6 +34,14 @@ class EpicResource extends JsonResource
                     'color' => $this->status->color
                 ] : null;
             }),
+            'owner' => $this->whenLoaded('owner', function () {
+                return $this->owner ? [
+                    'name' => $this->owner->name,
+                    'email' => $this->owner->email,
+                    'role' => $this->role,
+                    'position' => $this->position,
+                ] : null;
+            }),
         ];
     }
 }
