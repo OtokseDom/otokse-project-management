@@ -45,12 +45,18 @@ class Epic extends Model
         return $this->belongsTo(TaskStatus::class);
     }
 
+    // Relationship with Owner
+    public function owner()
+    {
+        return $this->belongsTo(User::class);
+    }
+
     /* -------------------------------------------------------------------------- */
     /*                          Controller Logic Function                         */
     /* -------------------------------------------------------------------------- */
     public function getEpics($organization_id)
     {
-        return $this->with('status:id,name,color')
+        return $this->with(['status:id,name,color', 'owner:id,name,email,role,position'])
             ->orderBy("id", "DESC")
             ->where('organization_id', $organization_id)
             ->get();
@@ -78,7 +84,7 @@ class Epic extends Model
             //     ]);
             // }
 
-            $epic->load(['status:id,name,color']);
+            $epic->load(['status:id,name,color', 'owner:id,name,email,role,position']);
 
             $data = [
                 "epic" => $epic,
@@ -90,7 +96,7 @@ class Epic extends Model
 
     public function showEpic($organization_id, $epic_id)
     {
-        return $this->with('status:id,name,color')->where('id', $epic_id)
+        return $this->with(['status:id,name,color', 'owner:id,name,email,role,position'])->where('id', $epic_id)
             ->where('organization_id', $organization_id)
             ->first();
     }
