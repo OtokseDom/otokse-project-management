@@ -21,7 +21,7 @@ class EpicController extends Controller
     }
     public function index()
     {
-        $epics = $this->epic->getProjects($this->userData->organization_id);
+        $epics = $this->epic->getEpics($this->userData->organization_id);
         $data = [
             "epics" => $epics,
         ];
