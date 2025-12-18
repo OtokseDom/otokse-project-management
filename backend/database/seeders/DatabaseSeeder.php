@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             TaskStatusSeeder::class,
             ProjectSeeder::class,
+            EpicSeeder::class,
             CategorySeeder::class,
             TaskSeeder::class,
             TaskHistorySeeder::class,
