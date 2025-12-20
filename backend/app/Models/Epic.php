@@ -111,6 +111,7 @@ class Epic extends Model
         if (!$updated) {
             return null;
         }
+        $epic->load(['status:id,name,color', 'owner:id,name,email,role,position']);
         return $updated;
     }
 
