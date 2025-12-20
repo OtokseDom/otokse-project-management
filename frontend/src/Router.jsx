@@ -16,6 +16,7 @@ import ErrorFallback from "./pages/ErrorFallback";
 import Projects from "./pages/Projects/List";
 import TaskStatuses from "./pages/TaskStatuses/List";
 import Kanban from "./pages/Kanban";
+import Epics from "./pages/Epics/List";
 
 const router = createBrowserRouter(
 	[
@@ -62,6 +63,14 @@ const router = createBrowserRouter(
 					element: (
 						<ErrorFallback>
 							<Projects />
+						</ErrorFallback>
+					),
+				},
+				{
+					path: "/epics",
+					element: (
+						<ErrorFallback>
+							<Epics />
 						</ErrorFallback>
 					),
 				},
