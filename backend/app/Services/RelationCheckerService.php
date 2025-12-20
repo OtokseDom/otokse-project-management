@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Http\Resources\TaskResource;
+use App\Models\Project;
 use App\Models\Task;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -10,10 +11,12 @@ use Illuminate\Support\Facades\DB;
 class RelationCheckerService
 {
     protected Task $task;
+    protected Project $project;
     protected $organization_id;
-    public function __construct(Task $task)
+    public function __construct(Task $task, Project $project)
     {
         $this->task = $task;
+        $this->project = $project;
         $this->organization_id = Auth::user()->organization_id;
     }
     public function checkTaskStatus($value)
@@ -29,6 +32,11 @@ class RelationCheckerService
     public function checkTaskProject($value)
     {
         return $this->task->where('project_id', $value)->where('organization_id', $this->organization_id)->exists();
+    }
+
+    public function checkProjectEpic($value)
+    {
+        return $this->project->where('epic_id', $value)->where('organization_id', $this->organization_id)->exists();
     }
 
     public function checkTaskAssignee($value)
