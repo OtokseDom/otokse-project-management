@@ -1,17 +1,17 @@
-import React, { useEffect, useState } from "react";
-import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
-import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
-import debounce from "lodash.debounce";
-import { useAppStore } from "@/store/appStore";
+// import React, { useEffect, useState } from "react";
+// import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
+// import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
+// import debounce from "lodash.debounce";
+// import { useAppStore } from "@/store/appStore";
 import { Skeleton } from "@/components/ui/skeleton";
-import { API } from "@/constants/api";
-import axiosClient from "@/axios.client";
-import ProjectGridItem from "./gridItem";
-import { useProjectsStore } from "@/store/projects/projectsStore";
+// import { API } from "@/constants/api";
+// import axiosClient from "@/axios.client";
+import EpicGridItem from "./gridItem";
+import { useEpicsStore } from "@/store/epics/epicsStore";
 
-export default function GridList({ projects, setIsOpen, setUpdateData, checkHasRelation, setDialogOpen, dialogOpen, hasRelation }) {
+export default function GridList({ epics, setIsOpen, setUpdateData, checkHasRelation, setDialogOpen, dialogOpen, hasRelation }) {
 	// const { tasksLoading, setTaskPositions, updateTaskPositionLocal, getSortedTasks, positionsLoaded, setPositionsLoaded } = useTasksStore();
-	const { projectsLoading } = useProjectsStore();
+	const { epicsLoading } = useEpicsStore();
 
 	/* -------------------------------------------------------------------------- */
 	/*                                DND Functions                               */
@@ -46,10 +46,10 @@ export default function GridList({ projects, setIsOpen, setUpdateData, checkHasR
 	// 	// eslint-disable-next-line react-hooks/exhaustive-deps
 	// }, [context, contextId, setTaskPositions, setPositionsLoaded, loaded]);
 
-	// if (!projects) return null;
+	// if (!epics) return null;
 
-	// // Get sorted projects using store helper
-	// const sortedTasks = getSortedTasks(projects, context, contextId);
+	// // Get sorted epics using store helper
+	// const sortedTasks = getSortedTasks(epics, context, contextId);
 	// const sortableIds = sortedTasks.map((t) => `grid-item-${t.id}`);
 
 	// const sensors = useSensors(useSensor(PointerSensor), useSensor(KeyboardSensor));
@@ -75,16 +75,16 @@ export default function GridList({ projects, setIsOpen, setUpdateData, checkHasR
 	// 	const activeTask = sortedTasks[activeIndex];
 	// 	const newPosition = overIndex + 1;
 
-	// 	// Optimistic update - calculate affected projects locally first
+	// 	// Optimistic update - calculate affected epics locally first
 	// 	const affectedPositions = [];
 	// 	affectedPositions.push({
 	// 		task_id: activeTask.id,
 	// 		position: newPosition,
 	// 	});
 
-	// 	// Calculate which projects are affected based on movement direction
+	// 	// Calculate which epics are affected based on movement direction
 	// 	if (activeIndex < overIndex) {
-	// 		// Moving down: projects between activeIndex and overIndex shift up
+	// 		// Moving down: epics between activeIndex and overIndex shift up
 	// 		for (let i = activeIndex + 1; i <= overIndex; i++) {
 	// 			affectedPositions.push({
 	// 				task_id: sortedTasks[i].id,
@@ -92,7 +92,7 @@ export default function GridList({ projects, setIsOpen, setUpdateData, checkHasR
 	// 			});
 	// 		}
 	// 	} else {
-	// 		// Moving up: projects between overIndex and activeIndex shift down
+	// 		// Moving up: epics between overIndex and activeIndex shift down
 	// 		for (let i = overIndex; i < activeIndex; i++) {
 	// 			affectedPositions.push({
 	// 				task_id: sortedTasks[i].id,
@@ -144,7 +144,7 @@ export default function GridList({ projects, setIsOpen, setUpdateData, checkHasR
 	// 	}
 	// }, 50);
 
-	if (projectsLoading) {
+	if (epicsLoading) {
 		return (
 			<div className="w-full scrollbar-custom mt-10">
 				<div className="flex flex-col space-y-2 h-full w-full">
@@ -161,10 +161,10 @@ export default function GridList({ projects, setIsOpen, setUpdateData, checkHasR
 			{/* <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={handleDragStart} onDragEnd={debouncedHandleDragEnd}>
 				<SortableContext items={sortableIds} strategy={verticalListSortingStrategy}> */}
 			<div className="flex flex-col gap-4 w-full">
-				{projects.map((project) => (
-					<ProjectGridItem
-						key={project.id}
-						project={project}
+				{epics.map((epic) => (
+					<EpicGridItem
+						key={epic.id}
+						epic={epic}
 						setIsOpen={setIsOpen}
 						setUpdateData={setUpdateData}
 						checkHasRelation={checkHasRelation}
