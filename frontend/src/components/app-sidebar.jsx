@@ -78,7 +78,7 @@ const items = [
 	},
 	{
 		title: "Epics",
-		url: "/",
+		url: "/epics",
 		icon: FolderTreeIcon,
 		collapsible: false,
 		subItems: [],
