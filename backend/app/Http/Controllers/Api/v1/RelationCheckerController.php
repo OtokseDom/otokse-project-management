@@ -24,8 +24,12 @@ class RelationCheckerController extends Controller
 
         $type = $request->input('type');
         $value = $request->input('value');
-
-        $method = "checkTask" . ucfirst($type);
+        $method = "";
+        if ($type === 'epic') {
+            $method = "checkProjectEpic";
+        } else {
+            $method = "checkTask" . ucfirst($type);
+        }
 
         if (!method_exists($this->relationChecker, $method)) {
             return apiResponse(null, 'Invalid check type', false, 400);
