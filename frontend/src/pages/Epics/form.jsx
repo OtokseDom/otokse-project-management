@@ -22,6 +22,7 @@ import { useTaskStatusesStore } from "@/store/taskStatuses/taskStatusesStore";
 import { useEpicsStore } from "@/store/epics/epicsStore";
 import { useUsersStore } from "@/store/users/usersStore";
 
+const slugRegex = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const formSchema = z.object({
 	status_id: z.number().optional(),
 	owner_id: z.number().optional(),
