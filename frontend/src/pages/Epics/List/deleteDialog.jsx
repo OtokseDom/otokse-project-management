@@ -2,34 +2,34 @@
 
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { useProjectsStore } from "@/store/projects/projectsStore";
-import { useDashboardStore } from "@/store/dashboard/dashboardStore";
-import { useKanbanColumnsStore } from "@/store/kanbanColumns/kanbanColumnsStore";
+import { useEpicsStore } from "@/store/epics/epicsStore";
+// import { useDashboardStore } from "@/store/dashboard/dashboardStore";
+// import { useKanbanColumnsStore } from "@/store/kanbanColumns/kanbanColumnsStore";
 import { API } from "@/constants/api";
 import axiosClient from "@/axios.client";
 import { useToast } from "@/contexts/ToastContextProvider";
 
-export default function DeleteDialog({ dialogOpen, setDialogOpen, hasRelation, selectedProjectId }) {
-	const { projectsLoading, removeProject, removeSelectedProject, setProjectsLoading } = useProjectsStore([]);
-	const { removeProjectFilter } = useDashboardStore();
-	const { removeKanbanColumnByProject } = useKanbanColumnsStore();
+export default function DeleteDialog({ dialogOpen, setDialogOpen, hasRelation, selectedEpicId }) {
+	const { epicsLoading, removeEpic, removeSelectedEpic, setEpicsLoading } = useEpicsStore([]);
+	// const { removeEpicFilter } = useDashboardStore();
+	// const { removeKanbanColumnByEpic } = useKanbanColumnsStore();
 	const showToast = useToast();
 
 	const handleDelete = async (id) => {
-		setProjectsLoading(true);
+		setEpicsLoading(true);
 		try {
-			await axiosClient.delete(API().project(id));
-			removeProject(id);
-			removeKanbanColumnByProject(id);
-			removeProjectFilter(id);
-			removeSelectedProject();
-			showToast("Success!", "Project deleted.", 3000);
+			await axiosClient.delete(API().epic(id));
+			removeEpic(id);
+			// removeKanbanColumnByEpic(id);
+			// removeEpicFilter(id);
+			removeSelectedEpic();
+			showToast("Success!", "Epic deleted.", 3000);
 		} catch (e) {
 			showToast("Failed!", e.response?.data?.message, 3000, "fail");
 			if (e.message !== "Request aborted") console.error("Error fetching data:", e.message);
 		} finally {
 			setDialogOpen(false);
-			setProjectsLoading(false);
+			setEpicsLoading(false);
 		}
 	};
 
@@ -43,7 +43,7 @@ export default function DeleteDialog({ dialogOpen, setDialogOpen, hasRelation, s
 				<div className="ml-4 text-base">
 					{hasRelation && (
 						<>
-							<span className="text-yellow-800">Project cannot be deleted because it has assigned tasks.</span>
+							<span className="text-yellow-800">Epic cannot be deleted because it has assigned projects.</span>
 						</>
 					)}
 				</div>
@@ -55,9 +55,9 @@ export default function DeleteDialog({ dialogOpen, setDialogOpen, hasRelation, s
 					</DialogClose>
 					{!hasRelation && (
 						<Button
-							disabled={projectsLoading}
+							disabled={epicsLoading}
 							onClick={() => {
-								handleDelete(selectedProjectId);
+								handleDelete(selectedEpicId);
 								setDialogOpen(false);
 							}}
 						>
