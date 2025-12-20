@@ -1,71 +1,74 @@
 import axiosClient from "@/axios.client";
 import React, { useEffect, useState } from "react";
-import { columnsProject } from "./columns";
+import { columnsEpic } from "./columns";
 import { useToast } from "@/contexts/ToastContextProvider";
-import { DataTableProjects } from "./data-table";
+import { DataTableEpics } from "./data-table";
 import { API } from "@/constants/api";
-import { useProjectsStore } from "@/store/projects/projectsStore";
+import { useEpicsStore } from "@/store/epics/epicsStore";
 import { useTaskStatusesStore } from "@/store/taskStatuses/taskStatusesStore";
 import { useTaskHelpers } from "@/utils/taskHelpers";
 import GridList from "./grid/gridList";
 import { Button } from "@/components/ui/button";
 import { Plus, Rows3, Table } from "lucide-react";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import ProjectForm from "../form";
+import EpicForm from "../form";
 import { Input } from "@/components/ui/input";
+import { useUsersStore } from "@/store/users/usersStore";
 
-export default function Projects() {
-	const { projects, projectsLoaded, projectsLoading, setProjectsLoading } = useProjectsStore([]);
+export default function Epics() {
+	const { epics, epicsLoaded, epicsLoading, setEpicsLoading } = useEpicsStore([]);
 	const { taskStatuses } = useTaskStatusesStore();
-	const { fetchProjects, fetchTaskStatuses } = useTaskHelpers();
+	const { users } = useUsersStore();
+	const { fetchEpics, fetchTaskStatuses, fetchUsers } = useTaskHelpers();
 
 	const [view, setView] = useState(() => "grid");
 	const showToast = useToast();
 	const [isOpen, setIsOpen] = useState(false);
 	const [updateData, setUpdateData] = useState({});
 	const [dialogOpen, setDialogOpen] = useState(false);
-	const [selectedProjectId, setSelectedProjectId] = useState(null);
+	const [selectedEpicId, setSelectedEpicId] = useState(null);
 	const [hasRelation, setHasRelation] = useState(false);
 	const [searchValue, setSearchValue] = useState("");
-	const [searchProjects, setSearchProjects] = useState([]);
+	const [searchEpics, setSearchEpics] = useState([]);
 
 	useEffect(() => {
 		if (!isOpen) setUpdateData({});
 	}, [isOpen]);
 	useEffect(() => {
-		document.title = "Task Management | Projects";
+		document.title = "Task Management | Epics";
 		if (!taskStatuses || taskStatuses.length === 0) fetchTaskStatuses();
-		if ((!projects || projects.length === 0) && !projectsLoaded) fetchProjects();
+		if (!users || users.length === 0) fetchUsers();
+		if ((!epics || epics.length === 0) && !epicsLoaded) fetchEpics();
 	}, []);
 
-	const checkHasRelation = async (project = {}) => {
-		setProjectsLoading(true);
+	const checkHasRelation = async (epic = {}) => {
+		setEpicsLoading(true);
 		setTimeout(() => {
 			setDialogOpen(true);
 		}, 100);
-		setSelectedProjectId(project.id);
+		setSelectedEpicId(epic.id);
 		try {
-			const hasRelationResponse = await axiosClient.post(API().relation_check("project", project.id));
+			const hasRelationResponse = await axiosClient.post(API().relation_check("epic", epic.id));
 			setHasRelation(hasRelationResponse?.data?.data?.exists);
 		} catch (e) {
 			showToast("Failed!", e.response?.data?.message, 3000, "fail");
 			if (e.message !== "Request aborted") console.error("Error fetching data:", e.message);
 		} finally {
-			setProjectsLoading(false);
+			setEpicsLoading(false);
 		}
 	};
 	useEffect(() => {
 		if (!dialogOpen) setHasRelation(false);
 	}, [dialogOpen]);
 
-	const displayProjects = searchValue.trim() ? searchProjects : projects;
+	const displayEpics = searchValue.trim() ? searchEpics : epics;
 	// Update search results whenever search value or sorted tasks change
 	useEffect(() => {
 		if (searchValue.trim()) {
-			const searchResults = projects.filter((project) => {
-				return project.title.toLowerCase().includes(searchValue.toLowerCase());
+			const searchResults = epics.filter((epic) => {
+				return epic.title.toLowerCase().includes(searchValue.toLowerCase());
 			});
-			setSearchProjects(searchResults);
+			setSearchEpics(searchResults);
 		}
 	}, [searchValue]);
 
@@ -79,8 +82,8 @@ export default function Projects() {
 			/>
 			<div className="flex items-center justify-between">
 				<div>
-					<h1 className=" font-extrabold text-3xl">Projects</h1>
-					<p>View list of all projects</p>
+					<h1 className=" font-extrabold text-3xl">Epics</h1>
+					<p>View list of all epics</p>
 				</div>
 				{/* Tabs */}
 				<div className="gap-1 ml-4 inline-flex rounded-md bg-muted/5 p-1">
@@ -100,7 +103,7 @@ export default function Projects() {
 				</div>
 			</div>
 			<Sheet open={isOpen} onOpenChange={setIsOpen} modal={false}>
-				{!projectsLoading && (
+				{!epicsLoading && (
 					<div className={`flex w-full my-4 ${view === "grid" ? "justify-between" : "justify-end"}`}>
 						{view === "grid" ? (
 							<Input
@@ -116,36 +119,36 @@ export default function Projects() {
 						<SheetTrigger asChild>
 							<Button variant="">
 								<Plus />
-								Add Project
+								Add Epic
 							</Button>
 						</SheetTrigger>
 					</div>
 				)}
 				<SheetContent side="right" className="overflow-y-auto w-[400px] sm:w-[540px]">
 					<SheetHeader>
-						<SheetTitle>{updateData?.id ? "Update Project" : "Add Project"}</SheetTitle>
+						<SheetTitle>{updateData?.id ? "Update Epic" : "Add Epic"}</SheetTitle>
 						<SheetDescription className="sr-only">Navigate through the app using the options below.</SheetDescription>
 					</SheetHeader>
-					<ProjectForm setIsOpen={setIsOpen} updateData={updateData} setUpdateData={setUpdateData} />
+					<EpicForm setIsOpen={setIsOpen} updateData={updateData} setUpdateData={setUpdateData} />
 				</SheetContent>
 			</Sheet>
 			{/* Updated table to fix dialog per column issue */}
 			{(() => {
-				const { columnsProject: projectColumns, dialog } = columnsProject({
+				const { columnsEpic: epicColumns, dialog } = columnsEpic({
 					setIsOpen,
 					setUpdateData,
 					dialogOpen,
 					setDialogOpen,
 					checkHasRelation,
 					hasRelation,
-					selectedProjectId,
+					selectedEpicId,
 				});
 				return (
 					<>
 						{view === "list" ? (
 							<>
-								<DataTableProjects
-									columns={projectColumns}
+								<DataTableEpics
+									columns={epicColumns}
 									updateData={updateData}
 									setUpdateData={setUpdateData}
 									isOpen={isOpen}
@@ -155,9 +158,9 @@ export default function Projects() {
 							</>
 						) : (
 							<>
-								{displayProjects.length > 0 ? (
+								{displayEpics.length > 0 ? (
 									<GridList
-										projects={displayProjects}
+										epics={displayEpics}
 										setIsOpen={setIsOpen}
 										setUpdateData={setUpdateData}
 										checkHasRelation={checkHasRelation}
@@ -168,7 +171,7 @@ export default function Projects() {
 										// contextId={contextId}
 									/>
 								) : (
-									<div className="text-center text-muted-foreground py-8">No projects found matching "{searchValue}"</div>
+									<div className="text-center text-muted-foreground py-8">No epics found matching "{searchValue}"</div>
 								)}
 								{dialog}
 							</>
