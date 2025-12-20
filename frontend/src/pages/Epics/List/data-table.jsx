@@ -9,18 +9,16 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useProjectsStore } from "@/store/projects/projectsStore";
+import { useEpicsStore } from "@/store/epics/epicsStore";
 
 // Convert the DataTable component to JavaScript
-export function DataTableProjects({ columns, isOpen, setIsOpen, updateData, setUpdateData }) {
+export function DataTableEpics({ columns }) {
 	const [sorting, setSorting] = useState([]);
 	const [columnFilters, setColumnFilters] = useState([]);
 	const [columnVisibility, setColumnVisibility] = useState({
-		"actual date": false,
-		"delay reason": false,
 		remarks: false,
 	});
-	const { projects: data, projectsLoading } = useProjectsStore();
+	const { epics: data, epicsLoading } = useEpicsStore();
 	const table = useReactTable({
 		data: data,
 		columns,
@@ -42,7 +40,7 @@ export function DataTableProjects({ columns, isOpen, setIsOpen, updateData, setU
 		<div className="w-full scrollbar-custom">
 			<div className="flex flex-col md:flex-row py-4">
 				<Input
-					placeholder={"filter project title..."}
+					placeholder={"filter epic title..."}
 					value={table.getColumn("title")?.getFilterValue() || ""}
 					onChange={(category) => table.getColumn("title")?.setFilterValue(category.target.value)}
 					className="max-w-sm"
@@ -94,7 +92,7 @@ export function DataTableProjects({ columns, isOpen, setIsOpen, updateData, setU
 						))}
 					</TableHeader>
 					<TableBody>
-						{projectsLoading ? (
+						{epicsLoading ? (
 							// Show skeleton while loading
 							<TableRow>
 								<TableCell colSpan={columns.length} className="h-24">
