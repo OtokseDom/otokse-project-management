@@ -13,7 +13,6 @@ import {
 	Trash2,
 	User,
 	CalendarDaysIcon,
-	Target,
 	CircleDot,
 	Circle,
 	GoalIcon,
@@ -29,26 +28,25 @@ import { Progress } from "@/components/ui/progress";
 import { getSubtaskProgress, priorityColors, statusColors } from "@/utils/taskHelpers";
 import { useTaskDiscussionsStore } from "@/store/taskDiscussions/taskDiscussionsStore";
 import { useTaskStatusesStore } from "@/store/taskStatuses/taskStatusesStore";
-import { useProjectsStore } from "@/store/projects/projectsStore";
+import { useEpicsStore } from "@/store/epics/epicsStore";
 import { Link } from "react-router-dom";
 
-export default function ProjectGridItem({ project, setIsOpen = () => {}, setUpdateData = () => {}, checkHasRelation = () => {} }) {
-	const { tasks, taskHistory, setSelectedTaskHistory, setRelations } = useTasksStore();
-	const { projects, setSelectedProject } = useProjectsStore();
+export default function EpicGridItem({ epic, setIsOpen = () => {}, setUpdateData = () => {}, checkHasRelation = () => {} }) {
+	const { epics, setSelectedEpic } = useEpicsStore();
 	const { taskStatuses } = useTaskStatusesStore();
 	const [open, setOpen] = useState(false);
-	const [selectedProjects, setSelectedProjects] = useState(null);
+	const [selectedEpics, setSelectedEpics] = useState(null);
 
 	// DnD Kit integration
 	// const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
-	// 	id: `grid-item-${project.id}`,
+	// 	id: `grid-item-${epic.id}`,
 	// 	data: {
 	// 		type: "grid-item",
-	// 		project: project,
+	// 		epic: epic,
 	// 	},
 	// });
 
-	// const hasChildren = Array.isArray(project.children) && project.children.length > 0;
+	// const hasChildren = Array.isArray(epic.children) && epic.children.length > 0;
 
 	const formatDateSafe = (d) => {
 		if (!d) return null;
@@ -59,30 +57,29 @@ export default function ProjectGridItem({ project, setIsOpen = () => {}, setUpda
 		}
 	};
 
-	const endString = project.end_date ? formatDateSafe(project.end_date) : null;
-	const startString = project.start_date ? formatDateSafe(project.start_date) : null;
-	const actualString = project.actual_date ? formatDateSafe(project.actual_date) : null;
-	const priority = project.priority ?? null;
+	const endString = epic.end_date ? formatDateSafe(epic.end_date) : null;
+	const startString = epic.start_date ? formatDateSafe(epic.start_date) : null;
+	const priority = epic.priority ?? null;
 
-	const statusKey = project.status?.color ? String(project.status.color).toLowerCase() : null;
+	const statusKey = epic.status?.color ? String(epic.status.color).toLowerCase() : null;
 	const statusClass = statusColors?.[statusKey] ?? "bg-muted/20 text-muted-foreground";
 	const priorityClass = priorityColors?.[priority] ?? "bg-muted/20 text-muted-foreground";
 
-	const handleUpdateProject = (project) => {
+	const handleUpdateEpic = (epic) => {
 		setTimeout(() => {
 			setIsOpen(true);
-			setUpdateData(project);
+			setUpdateData(epic);
 		}, 100);
 	};
-	// const openEdit = (project) => {
-	// 	setUpdateData(project);
+	// const openEdit = (epic) => {
+	// 	setUpdateData(epic);
 	// 	setIsOpen(true);
-	// 	const filteredHistory = taskHistory.filter((th) => th.task_id === project.id);
+	// 	const filteredHistory = taskHistory.filter((th) => th.task_id === epic.id);
 	// 	setSelectedTaskHistory(filteredHistory);
-	// 	if (!project.parent_id) {
-	// 		setRelations(project);
+	// 	if (!epic.parent_id) {
+	// 		setRelations(epic);
 	// 	} else {
-	// 		const parentTask = tasks.find((t) => t.id == project.parent_id);
+	// 		const parentTask = tasks.find((t) => t.id == epic.parent_id);
 	// 		setRelations(parentTask);
 	// 	}
 	// };
@@ -100,16 +97,16 @@ export default function ProjectGridItem({ project, setIsOpen = () => {}, setUpda
 
 	// const handleAddSubtask = (parent) => {
 	// 	setParentId(parent.id);
-	// 	setProjectId(parent.project_id || null);
+	// 	setEpicId(parent.epic_id || null);
 	// 	setUpdateData({}); // empty payload for new subtask
 	// 	setIsOpen(true);
 	// };
 
 	// const handleDelete = async (t) => {
-	// 	if (!confirm("Delete project? This cannot be undone.")) return;
+	// 	if (!confirm("Delete epic? This cannot be undone.")) return;
 	// 	setLoading(true);
 	// 	try {
-	// 		await axiosClient.delete(API().project(t.id));
+	// 		await axiosClient.delete(API().epic(t.id));
 	// 		await fetchTasks();
 	// 		await fetchReports();
 	// 		showToast("Success!", "Task deleted.", 3000);
@@ -133,13 +130,13 @@ export default function ProjectGridItem({ project, setIsOpen = () => {}, setUpda
 	// };
 	// // Helper to clear selection and reset dialogs
 	// const clearSelection = () => {
-	// 	setSelectedProjects(null);
+	// 	setSelectedEpics(null);
 	// 	setBulkAction(null);
 	// 	setDeleteDialogOpen(false);
 	// };
 
-	// compute subtask progress for this project
-	// const { text: subtaskProgressText, value: subtaskProgressValue } = getSubtaskProgress(project, taskStatuses);
+	// compute subtask progress for this epic
+	// const { text: subtaskProgressText, value: subtaskProgressValue } = getSubtaskProgress(epic, taskStatuses);
 
 	return (
 		<div
@@ -160,28 +157,28 @@ export default function ProjectGridItem({ project, setIsOpen = () => {}, setUpda
 			</div> */}
 			<div className="flex flex-col md:flex-row items-start justify-between gap-2">
 				<div className="min-w-0 flex flex-col order-2 md:order-1 gap-2">
-					<h3 className="text-lg font-bold">{project.title || "Untitled project"}</h3>
-
+					<h3 className="text-lg font-bold">{epic.title || "Untitled epic"}</h3>
+					{epic.slug ? <div className="text-xs text-muted-foreground">{epic.slug}</div> : ""}
 					<div
 						className="text-xs text-muted-foreground prose prose-sm max-w-none
 												 			[&_ul]:list-disc [&_ul]:pl-6
 															[&_ol]:list-decimal [&_ol]:pl-6
 															[&_li]:my-1"
-						dangerouslySetInnerHTML={{ __html: project.description }}
+						dangerouslySetInnerHTML={{ __html: epic.description }}
 					/>
 				</div>
 				<div className="flex flex-col order-1 md:order-2 justify-end gap-1">
 					<div className="flex flex-row justify-end gap-2">
 						{/* status pill uses statusColors mapping */}
-						{project.status?.name ? (
+						{epic.status?.name ? (
 							<span
 								onClick={() => {
 									setBulkAction("status");
-									setSelectedProjects([project]);
+									setSelectedEpics([epic]);
 								}}
 								className={`text-xs min-w-fit px-2 py-1 rounded-full font-medium hover:cursor-pointer ${statusClass}`}
 							>
-								{project.status.name}
+								{epic.status.name}
 							</span>
 						) : (
 							""
@@ -190,7 +187,7 @@ export default function ProjectGridItem({ project, setIsOpen = () => {}, setUpda
 							<span
 								onClick={() => {
 									setBulkAction("priority");
-									setSelectedProjects([project]);
+									setSelectedEpics([epic]);
 								}}
 								className={`text-xs min-w-fit px-2 py-1 rounded-full font-medium hover:cursor-pointer ${priorityClass}`}
 							>
@@ -211,7 +208,7 @@ export default function ProjectGridItem({ project, setIsOpen = () => {}, setUpda
 							<div
 								onClick={() => {
 									setBulkAction("start_date");
-									setSelectedProjects([project]);
+									setSelectedEpics([epic]);
 								}}
 								className="flex gap-1 hover:cursor-pointer"
 							>
@@ -222,41 +219,30 @@ export default function ProjectGridItem({ project, setIsOpen = () => {}, setUpda
 							<div
 								onClick={() => {
 									setBulkAction("end_date");
-									setSelectedProjects([project]);
+									setSelectedEpics([epic]);
 								}}
 								className="flex gap-1 hover:cursor-pointer"
 							>
 								<CalendarDaysIcon size={16} /> End: <span className="text-card-foreground">{endString}</span>
 							</div>
 						)}
-						{actualString && (
-							<div
-								onClick={() => {
-									setBulkAction("actual_date");
-									setSelectedProjects([project]);
-								}}
-								className="flex gap-1 hover:cursor-pointer"
-							>
-								<Target size={16} /> Actual: <span className="text-card-foreground">{actualString}</span>
-							</div>
-						)}
 					</div>
 					{/* Actions */}
 					<div className="flex w-full md:w-fit justify-end gap-2">
-						<Button variant="ghost" size="sm" title="Edit" onClick={() => handleUpdateProject(project)}>
+						<Button variant="ghost" size="sm" title="Edit" onClick={() => handleUpdateEpic(epic)}>
 							<Edit size={12} />
 							<span className="hidden sm:inline text-xs">Edit</span>
 						</Button>
 						<Link
-							to="/tasks"
+							to="/projects"
 							onClick={(e) => {
 								e.stopPropagation();
-								setSelectedProject(project);
+								setSelectedEpic(epic);
 							}}
 						>
-							<Button variant="ghost" title="View tasks">
+							<Button variant="ghost" title="View projects">
 								<ListTodo />
-								<span className="hidden sm:inline text-xs">View Tasks</span>
+								<span className="hidden sm:inline text-xs">View Projects</span>
 							</Button>
 						</Link>
 						<Button
@@ -264,7 +250,7 @@ export default function ProjectGridItem({ project, setIsOpen = () => {}, setUpda
 							size="sm"
 							title="Delete"
 							onClick={() => {
-								checkHasRelation(project);
+								checkHasRelation(epic);
 							}}
 						>
 							<Trash2 size={12} className="text-destructive" />
