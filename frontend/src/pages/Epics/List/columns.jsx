@@ -5,17 +5,17 @@ import { useMemo } from "react";
 import { useAuthContext } from "@/contexts/AuthContextProvider";
 import { format } from "date-fns";
 import { statusColors, priorityColors } from "@/utils/taskHelpers";
-import { useProjectsStore } from "@/store/projects/projectsStore";
+import { useEpicsStore } from "@/store/epics/epicsStore";
 import { Link } from "react-router-dom";
 import DeleteDialog from "./deleteDialog";
-export const columnsProject = ({ setIsOpen, setUpdateData, dialogOpen, setDialogOpen, checkHasRelation, hasRelation, selectedProjectId }) => {
-	const { setSelectedProject, projects } = useProjectsStore();
+export const columnsEpic = ({ setIsOpen, setUpdateData, dialogOpen, setDialogOpen, checkHasRelation, hasRelation, selectedEpicId }) => {
+	const { setSelectedEpic, epics } = useEpicsStore();
 	const { user } = useAuthContext(); // Get authenticated user details
 
-	const handleUpdateProject = (project) => {
+	const handleUpdateEpic = (epic) => {
 		setTimeout(() => {
 			setIsOpen(true);
-			setUpdateData(project);
+			setUpdateData(epic);
 		}, 100);
 	};
 
@@ -33,12 +33,34 @@ export const columnsProject = ({ setIsOpen, setUpdateData, dialogOpen, setDialog
 				},
 			},
 			{
+				id: "slug",
+				accessorKey: "slug",
+				header: ({ column }) => {
+					return (
+						<button className="flex" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
+							Slug <ArrowUpDown className="ml-2 h-4 w-4" />
+						</button>
+					);
+				},
+			},
+			{
 				id: "description",
 				accessorKey: "description",
 				header: ({ column }) => {
 					return (
 						<button className="flex" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
 							Description <ArrowUpDown className="ml-2 h-4 w-4" />
+						</button>
+					);
+				},
+			},
+			{
+				id: "owner",
+				accessorKey: "owner.name",
+				header: ({ column }) => {
+					return (
+						<button className="flex" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
+							Owner <ArrowUpDown className="ml-2 h-4 w-4" />
 						</button>
 					);
 				},
@@ -126,74 +148,6 @@ export const columnsProject = ({ setIsOpen, setUpdateData, dialogOpen, setDialog
 				},
 			},
 			{
-				id: "actual date",
-				accessorKey: "actual_date",
-				header: ({ column }) => (
-					<button className="flex items-center" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
-						Actual Date <ArrowUpDown className="ml-2 h-4 w-4" />
-					</button>
-				),
-				// keep raw value for sorting
-				accessorFn: (row) => row.actual_date,
-				// display formatted
-				cell: ({ row }) => {
-					const { actual_date, days_estimate, days_taken, delay_days } = row.original;
-
-					const hasEstimate = days_estimate !== null && days_estimate !== undefined && days_estimate !== 0;
-					const hasTaken = days_taken !== null && days_taken !== undefined && days_taken !== 0;
-					const hasDelay = delay_days !== null && delay_days !== undefined && delay_days !== 0;
-
-					return (
-						<div>
-							{/* Date */}
-							{actual_date ? format(new Date(actual_date), "MMM-dd yyyy") : "-"}
-							<br />
-
-							{/* Estimate */}
-							{hasEstimate && (
-								<>
-									<span className="text-xs text-muted-foreground">
-										<span className="font-semibold">Estimate:</span> {days_estimate}
-									</span>
-									<br />
-								</>
-							)}
-
-							{/* Taken */}
-							{hasTaken && (
-								<>
-									<span className="text-xs text-muted-foreground">
-										<span className="font-semibold">Taken:</span> {days_taken}
-									</span>
-									<br />
-								</>
-							)}
-
-							{/* Delay */}
-							{hasDelay && (
-								<>
-									<span className="text-xs text-muted-foreground">
-										<span className="font-semibold">Delay:</span> {delay_days}
-									</span>
-									<br />
-								</>
-							)}
-						</div>
-					);
-				},
-			},
-			{
-				id: "delay reason",
-				accessorKey: "delay_reason",
-				header: ({ column }) => {
-					return (
-						<button className="flex" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
-							Delay Reason <ArrowUpDown className="ml-2 h-4 w-4" />
-						</button>
-					);
-				},
-			},
-			{
 				id: "remarks",
 				accessorKey: "remarks",
 				header: ({ column }) => {
@@ -205,7 +159,7 @@ export const columnsProject = ({ setIsOpen, setUpdateData, dialogOpen, setDialog
 				},
 			},
 		],
-		[projects]
+		[epics]
 	);
 	// Add actions column for Superadmin
 	const columnsWithActions = useMemo(() => {
@@ -215,7 +169,7 @@ export const columnsProject = ({ setIsOpen, setUpdateData, dialogOpen, setDialog
 				{
 					id: "actions",
 					cell: ({ row }) => {
-						const project = row.original;
+						const epic = row.original;
 						return (
 							<div className="flex justify-center items-center">
 								<Button
@@ -224,17 +178,17 @@ export const columnsProject = ({ setIsOpen, setUpdateData, dialogOpen, setDialog
 									className="h-8 w-8 p-0 cursor-pointer pointer-events-auto"
 									onClick={(e) => {
 										e.stopPropagation();
-										handleUpdateProject(project);
+										handleUpdateEpic(epic);
 									}}
 								>
 									<Edit size={16} />
 								</Button>
-								<Button variant="ghost" title="View tasks" className="h-8 w-8 p-0 cursor-pointer pointer-events-auto">
+								<Button variant="ghost" title="View projects" className="h-8 w-8 p-0 cursor-pointer pointer-events-auto">
 									<Link
-										to="/tasks"
+										to="/projects"
 										onClick={(e) => {
 											e.stopPropagation();
-											setSelectedProject(project);
+											setSelectedEpic(epic);
 										}}
 									>
 										<ListTodo size={20} />
@@ -242,11 +196,11 @@ export const columnsProject = ({ setIsOpen, setUpdateData, dialogOpen, setDialog
 								</Button>
 								<Button
 									variant="ghost"
-									title="Delete task"
+									title="Delete epic"
 									className="h-8 w-8 p-0 cursor-pointer pointer-events-auto"
 									onClick={(e) => {
 										e.stopPropagation();
-										checkHasRelation(project);
+										checkHasRelation(epic);
 									}}
 								>
 									<Trash2Icon className="text-destructive" />
@@ -261,7 +215,7 @@ export const columnsProject = ({ setIsOpen, setUpdateData, dialogOpen, setDialog
 	}, [baseColumns, user?.data?.role]);
 
 	return {
-		columnsProject: columnsWithActions,
-		dialog: <DeleteDialog dialogOpen={dialogOpen} setDialogOpen={setDialogOpen} hasRelation={hasRelation} selectedProjectId={selectedProjectId} />,
+		columnsEpic: columnsWithActions,
+		dialog: <DeleteDialog dialogOpen={dialogOpen} setDialogOpen={setDialogOpen} hasRelation={hasRelation} selectedEpicId={selectedEpicId} />,
 	};
 };
