@@ -56,19 +56,19 @@ export const useTaskHelpers = () => {
 		try {
 			const res = await axiosClient.get(API().epic());
 			setEpics(res?.data?.data?.epics);
-			setKanbanColumns(res?.data?.data?.kanbanColumns);
+			// setKanbanColumns(res?.data?.data?.kanbanColumns);
 			setSelectedEpic(res?.data?.data?.epics[res?.data?.data?.epics?.length - 1]);
-			if (res.data.data.epics.length !== epicFilter.length || res.data.data.epics.length !== profileEpicFilter.length) {
-				const mappedEpics = res.data.data.epics.map((epic) => ({ value: epic.id, label: epic.title }));
-				// Used in user profile
-				// setProfileEpicFilter(mappedEpics);
-				// Used in dashboard
-				setEpicFilter(mappedEpics);
-			}
+			// if (res.data.data.epics.length !== epicFilter.length || res.data.data.epics.length !== profileEpicFilter.length) {
+			// 	const mappedEpics = res.data.data.epics.map((epic) => ({ value: epic.id, label: epic.title }));
+			// Used in user profile
+			// setProfileEpicFilter(mappedEpics);
+			// Used in dashboard
+			// 	setEpicFilter(mappedEpics);
+			// }
 		} catch (e) {
 			if (e.message !== "Request aborted") console.error("Error fetching data:", e.message);
 		} finally {
-			setProjectsLoading(false);
+			setEpicsLoading(false);
 		}
 	};
 
