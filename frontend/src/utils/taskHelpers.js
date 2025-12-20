@@ -164,6 +164,7 @@ export const useTaskHelpers = () => {
 	return {
 		fetchTasks,
 		fetchTaskDiscussions,
+		fetchEpics,
 		fetchProjects,
 		fetchUsers,
 		fetchCategories,
