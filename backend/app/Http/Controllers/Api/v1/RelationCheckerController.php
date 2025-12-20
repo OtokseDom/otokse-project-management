@@ -18,7 +18,7 @@ class RelationCheckerController extends Controller
     public function check(Request $request)
     {
         $request->validate([
-            'type' => 'required|string|in:status,category,project,assignee,children',
+            'type' => 'required|string|in:status,category,project,epic,assignee,children',
             'value' => 'required|integer',
         ]);
 
@@ -26,7 +26,7 @@ class RelationCheckerController extends Controller
         $value = $request->input('value');
         $method = "";
         if ($type === 'epic') {
-            $method = "checkProjectEpic";
+            $method = "checkProject" . ucfirst($type);
         } else {
             $method = "checkTask" . ucfirst($type);
         }
