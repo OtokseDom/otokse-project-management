@@ -15,6 +15,7 @@ import EpicForm from "../form";
 import { Input } from "@/components/ui/input";
 import { useUsersStore } from "@/store/users/usersStore";
 
+// TODO: Epic dashboard
 export default function Epics() {
 	const { epics, epicsLoaded, epicsLoading, setEpicsLoading } = useEpicsStore([]);
 	const { taskStatuses } = useTaskStatusesStore();
