@@ -52,90 +52,104 @@ import { useCategoriesStore } from "@/store/categories/categoriesStore";
 import { useTaskStatusesStore } from "@/store/taskStatuses/taskStatusesStore";
 import { useDashboardStore } from "@/store/dashboard/dashboardStore";
 import { useUserStore } from "@/store/user/userStore";
-
-// Menu items.
-const items = [
-	{
-		title: "Dashboard",
-		url: "/dashboard",
-		icon: Gauge,
-		collapsible: false,
-		subItems: [],
-	},
-	{
-		title: "Kanban Board",
-		url: "/kanban",
-		icon: KanbanSquareDashedIcon,
-		collapsible: false,
-		subItems: [],
-	},
-	{
-		title: "Calendar",
-		url: "/calendar",
-		icon: CalendarClock,
-		collapsible: false,
-		subItems: [],
-	},
-	{
-		title: "Epics",
-		url: "/epics",
-		icon: FolderTreeIcon,
-		collapsible: false,
-		subItems: [],
-	},
-	{
-		title: "Projects",
-		url: "/projects",
-		icon: FolderKanban,
-		collapsible: false,
-		subItems: [],
-	},
-	{
-		title: "Tasks",
-		url: "/tasks",
-		icon: ClipboardList,
-		collapsible: false,
-		subItems: [],
-	},
-	{
-		title: "Members",
-		url: "/users",
-		icon: Users2,
-		collapsible: false,
-		subItems: [],
-	},
-	{
-		title: "Settings",
-		url: "/settings",
-		icon: Settings,
-		collapsible: true,
-		subItems: [
-			{
-				title: "Organization",
-				url: "/organization",
-				icon: Building,
-				collapsible: false,
-				subItems: [],
-			},
-			{
-				title: "Categories",
-				url: "/categories",
-				icon: Tag,
-				collapsible: false,
-				subItems: [],
-			},
-			{
-				title: "Task Statuses",
-				url: "/task-statuses",
-				icon: ListCheck,
-				collapsible: false,
-				subItems: [],
-			},
-		],
-	},
-];
+import { useEpicsStore } from "@/store/epics/epicsStore";
+import { useTaskHelpers } from "@/utils/taskHelpers";
 
 export function AppSidebar() {
+	const { fetchEpics } = useTaskHelpers();
+	const { epics, epicsLoaded } = useEpicsStore();
+
+	useEffect(() => {
+		if ((!epics || epics.length === 0) && !epicsLoaded) fetchEpics();
+	}, []);
+	const epicItems = epics.map((epic) => ({
+		title: epic.title,
+		url: `/${epic.id}`,
+		icon: ListOrderedIcon,
+		collapsible: false,
+		subItems: [],
+	}));
+	// Menu items.
+	const items = [
+		{
+			title: "Dashboard",
+			url: "/dashboard",
+			icon: Gauge,
+			collapsible: false,
+			subItems: [],
+		},
+		{
+			title: "Kanban Board",
+			url: "/kanban",
+			icon: KanbanSquareDashedIcon,
+			collapsible: false,
+			subItems: [],
+		},
+		{
+			title: "Calendar",
+			url: "/calendar",
+			icon: CalendarClock,
+			collapsible: false,
+			subItems: [],
+		},
+		{
+			title: "Epics",
+			url: "/epics",
+			icon: FolderTreeIcon,
+			collapsible: true,
+			subItems: epicItems,
+		},
+		{
+			title: "Projects",
+			url: "/projects",
+			icon: FolderKanban,
+			collapsible: false,
+			subItems: [],
+		},
+		{
+			title: "Tasks",
+			url: "/tasks",
+			icon: ClipboardList,
+			collapsible: false,
+			subItems: [],
+		},
+		{
+			title: "Members",
+			url: "/users",
+			icon: Users2,
+			collapsible: false,
+			subItems: [],
+		},
+		{
+			title: "Settings",
+			url: "/settings",
+			icon: Settings,
+			collapsible: true,
+			subItems: [
+				{
+					title: "Organization",
+					url: "/organization",
+					icon: Building,
+					collapsible: false,
+					subItems: [],
+				},
+				{
+					title: "Categories",
+					url: "/categories",
+					icon: Tag,
+					collapsible: false,
+					subItems: [],
+				},
+				{
+					title: "Task Statuses",
+					url: "/task-statuses",
+					icon: ListCheck,
+					collapsible: false,
+					subItems: [],
+				},
+			],
+		},
+	];
 	const { user, setToken, setUser } = useAuthContext();
 	const { isMobile, openMobile, setOpenMobile } = useSidebar(); // Add this line
 	const { setTasks, setTasksLoaded } = useTasksStore();
