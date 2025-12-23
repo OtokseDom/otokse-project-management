@@ -1,5 +1,5 @@
 import { Link, useParams } from "react-router-dom";
-import { ArrowLeft, Plus, Rows3, Table } from "lucide-react";
+import { ArrowLeft, Flag, Plus, Rows3, Table } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import axiosClient from "@/axios.client";
@@ -69,31 +69,26 @@ export default function EpicDetails() {
 			</Sheet> */}
 
 			{/* Main Content Grid */}
-			<div className="w-full grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-4 auto-rows-auto mt-4">
+			<div className="w-full grid grid-cols-1 md:grid-cols-12 gap-2 auto-rows-auto mt-4">
+				<div className="col-span-12 mb-4">
+					<h1 className="flex items-center gap-4 font-bold text-3xl">
+						<Flag /> Some of the most epic title in the history
+					</h1>
+					{/* <p>View list of all epics</p> */}
+				</div>
 				{/* Filter Section */}
-				<div className="md:col-span-12">
-					<div className="flex flex-wrap justify-start items-center gap-4">
-						Epic profile here
-						{/* <Dialog modal={false} open={isOpenFilter} onOpenChange={setIsOpenFilter}>
-							<DialogTrigger asChild>{!userReportsLoading && <Button variant="default">Filter</Button>}</DialogTrigger>
-							<DialogContent>
-								<DialogHeader>
-									<DialogTitle>Select filter</DialogTitle>
-									<DialogDescription>Apply available filters to view specific reports</DialogDescription>
-								</DialogHeader>
-								<FilterForm
-									setIsOpen={setIsOpenFilter}
-									setReports={setUserReports}
-									filters={profileFilters}
-									setFilters={setProfileFilters}
-									projects={projectFilter}
-									selectedProjects={profileSelectedProjects}
-									setSelectedProjects={setProfileSelectedProjects}
-									userId={id}
-								/>
-							</DialogContent>
-						</Dialog>
-						<FilterTags filters={profileFilters.display} onRemove={handleRemoveFilter} /> */}
+				<div className="md:col-span-8 h-fit bg-card text-card-foreground border border-border rounded-xl container p-6">
+					<div className="flex w-full font-bold text-lg mb-4">Details</div>
+					<div className="flex flex-wrap justify-start items-center gap-4">Long description of epic here. Can be Markdown in future.</div>
+				</div>
+				{/* Epic Details */}
+				<div className="md:col-span-4 h-fit bg-card text-card-foreground border border-border rounded-xl container p-6">
+					<div className="flex w-full font-bold text-lg mb-4">Projects</div>
+					<div className="flex flex-col justify-start items-start gap-4">
+						<p>Project 1</p>
+						<p>Project 2</p>
+						<p>Project 3</p>
+						<p>Project 4</p>
 					</div>
 				</div>
 			</div>
