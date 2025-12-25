@@ -53,10 +53,10 @@ import { useTaskStatusesStore } from "@/store/taskStatuses/taskStatusesStore";
 import { useDashboardStore } from "@/store/dashboard/dashboardStore";
 import { useUserStore } from "@/store/user/userStore";
 import { useEpicsStore } from "@/store/epics/epicsStore";
-import { useTaskHelpers } from "@/utils/taskHelpers";
+import { useEpicHelpers } from "@/utils/epicHelpers";
 
 export function AppSidebar() {
-	const { fetchEpics } = useTaskHelpers();
+	const { fetchEpics } = useEpicHelpers();
 	const { epics, epicsLoaded } = useEpicsStore();
 
 	useEffect(() => {
