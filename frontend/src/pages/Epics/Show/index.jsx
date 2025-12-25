@@ -37,9 +37,18 @@ import Tabs from "@/components/task/Tabs";
 import { TaskDiscussions } from "@/components/task/Discussion";
 import GridList from "@/pages/Tasks/List/grid/gridList";
 import { Progress } from "@/components/ui/progress";
+import { useEpicHelpers } from "@/utils/epicHelpers";
+import { useEpicStore } from "@/store/epic/epicStore";
 
 export default function EpicDetails() {
 	const { id } = useParams();
+	const { epic, epicLoading } = useEpicStore();
+	const { fetchEpic } = useEpicHelpers();
+	// Fetch user details and reports when ID changes
+	useEffect(() => {
+		if (Object.keys(epic).length === 0 || parseInt(epic.id) !== parseInt(id)) fetchEpic(id);
+		// if (!epicReports || epicReports.length === 0 || epic.id != parseInt(id)) fetchEpicReports(id);
+	}, [id]);
 
 	return (
 		<div className="flex flex-col w-screen md:w-full container p-5 md:p-0 sm:text-sm -mt-10">
@@ -49,13 +58,6 @@ export default function EpicDetails() {
 				}`}
 				aria-hidden="true"
 			/> */}
-
-			{/* Back button */}
-			<Link to="/users">
-				<Button variant="ghost" className="flex items-center">
-					<ArrowLeft />
-				</Button>
-			</Link>
 
 			{/* Update user Form Sheet */}
 			{/* <Sheet open={isOpenUser} onOpenChange={setIsOpenUser} modal={false}>
@@ -72,7 +74,7 @@ export default function EpicDetails() {
 			<div className="w-full grid grid-cols-1 md:grid-cols-12 gap-2 auto-rows-auto mt-4">
 				<div className="col-span-12 mb-4">
 					<h1 className="flex items-start md:items-center gap-4 font-bold text-3xl">
-						<Flag className="hidden md:block" size={24} /> Some of the most epic title in the history
+						<Flag className="hidden md:block" size={24} /> {epic?.title || "N/A"}
 					</h1>
 					{/* <p>View list of all epics</p> */}
 				</div>
