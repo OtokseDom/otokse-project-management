@@ -40,6 +40,7 @@ import { Progress } from "@/components/ui/progress";
 import { useEpicHelpers } from "@/utils/epicHelpers";
 import { useEpicStore } from "@/store/epic/epicStore";
 import { Skeleton } from "@/components/ui/skeleton";
+import { format } from "date-fns";
 
 export default function EpicDetails() {
 	const { id } = useParams();
@@ -87,13 +88,80 @@ export default function EpicDetails() {
 					</div>
 				)}
 				<div className="col-span-12 h-fit flex flex-col gap-2">
-					{/* Epic Details - mobile view */}
+					{/* Epic Details */}
 					<div className="col-span-12  bg-card text-card-foreground border border-border rounded-xl container p-6">
 						<div className="flex w-full font-bold text-lg mb-4">Details</div>
-						<div className="flex flex-wrap justify-start items-center gap-4">Long description of epic here. Can be Markdown in future.</div>
-						<div className="flex flex-wrap justify-start items-center gap-4">Long description of epic here. Can be Markdown in future.</div>
-						<div className="flex flex-wrap justify-start items-center gap-4">Long description of epic here. Can be Markdown in future.</div>
-						<div className="flex flex-wrap justify-start items-center gap-4">Long description of epic here. Can be Markdown in future.</div>
+						{epicLoading ? (
+							<>
+								<div className="flex flex-col gap-2 col-span-12 mb-2">
+									<Skeleton className="w-full h-6 rounded-full" />
+									<Skeleton className="w-full h-6 rounded-full" />
+								</div>
+								<div className="w-full grid grid-cols-2 md:grid-cols-12 gap-2">
+									<div className="col-span-1 md:col-span-3 flex flex-col gap-2">
+										<Skeleton className="w-full h-12 rounded-full" />
+									</div>
+									<div className="col-span-1 md:col-span-3 flex flex-col gap-2">
+										<Skeleton className="w-full h-12 rounded-full" />
+									</div>
+									<div className="col-span-1 md:col-span-3 flex flex-col gap-2">
+										<Skeleton className="w-full h-12 rounded-full" />
+									</div>
+									<div className="col-span-1 md:col-span-3 flex flex-col gap-2">
+										<Skeleton className="w-full h-12 rounded-full" />
+									</div>
+								</div>
+								<hr className="w-full my-4 h-1" />
+								<div className="w-full grid grid-cols-2 md:grid-cols-12 gap-2">
+									<div className="col-span-1 md:col-span-3 flex flex-col gap-2">
+										<Skeleton className="w-full h-12 rounded-full" />
+									</div>
+									<div className="col-span-1 md:col-span-3 flex flex-col gap-2">
+										<Skeleton className="w-full h-12 rounded-full" />
+									</div>
+									<div className="col-span-2 md:col-span-6 flex flex-col gap-2">
+										<Skeleton className="w-full h-12 rounded-full" />
+									</div>
+								</div>
+							</>
+						) : (
+							<>
+								<div className="mb-4">{epic?.description}</div>
+								<div className="grid grid-cols-2 md:grid-cols-12 justify-evenly mb-4 gap-2">
+									<div className="col-span-1 md:col-span-3 flex flex-col items-start gap-1">
+										<span className="text-muted-foreground font-bold">Status</span>
+										<span className="">{epic?.status?.name}</span>
+									</div>
+									<div className="col-span-1 md:col-span-3 flex flex-col items-start gap-1">
+										<span className="text-muted-foreground font-bold">Priority</span>
+										<span>{epic?.priority}</span>
+									</div>
+									<div className="col-span-1 md:col-span-3 flex flex-col items-start gap-1">
+										<span className="text-muted-foreground font-bold">Owner</span>
+										<span>{epic?.owner?.name}</span>
+									</div>
+									<div className="col-span-1 md:col-span-3 flex flex-col items-start gap-1">
+										<span className="text-muted-foreground font-bold">Slug</span>
+										<span>{epic?.slug}</span>
+									</div>
+								</div>
+								<hr className="w-full my-4 h-1" />
+								<div className="w-full grid grid-cols-2 md:grid-cols-12 auto-rows-auto gap-2">
+									<div className="col-span-1 md:col-span-3 flex flex-col items-start gap-1">
+										<span className="text-muted-foreground font-bold">Start Date</span>
+										<span>{epic?.start_date ? format(new Date(epic.start_date), "MMM-dd yyyy") : "--"}</span>
+									</div>
+									<div className="col-span-1 md:col-span-3 flex flex-col items-start gap-1">
+										<span className="text-muted-foreground font-bold">End Date</span>
+										<span>{epic?.end_date ? format(new Date(epic.end_date), "MMM-dd yyyy") : "--"}</span>
+									</div>
+									<div className="col-span-2 md:col-span-6 flex flex-col items-start gap-1">
+										<span className="text-muted-foreground font-bold">Remarks</span>
+										<span>{epic?.remarks}</span>
+									</div>
+								</div>
+							</>
+						)}
 					</div>
 				</div>
 				{/* Side panel */}
