@@ -39,6 +39,7 @@ import GridList from "@/pages/Tasks/List/grid/gridList";
 import { Progress } from "@/components/ui/progress";
 import { useEpicHelpers } from "@/utils/epicHelpers";
 import { useEpicStore } from "@/store/epic/epicStore";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function EpicDetails() {
 	const { id } = useParams();
@@ -72,12 +73,19 @@ export default function EpicDetails() {
 
 			{/* Main Content Grid */}
 			<div className="w-full grid grid-cols-1 md:grid-cols-12 gap-2 auto-rows-auto mt-4">
-				<div className="col-span-12 mb-4">
-					<h1 className="flex items-start md:items-center gap-4 font-bold text-3xl">
-						<Flag className="hidden md:block" size={24} /> {epic?.title || "N/A"}
-					</h1>
-					{/* <p>View list of all epics</p> */}
-				</div>
+				{epicLoading ? (
+					<div className="flex gap-2 col-span-12">
+						<Skeleton className="w-12 h-12 rounded-full" />
+						<Skeleton className="w-full md:w-1/2 h-12 rounded-full" />
+					</div>
+				) : (
+					<div className="col-span-12 mb-4">
+						<h1 className="flex items-start md:items-center gap-4 font-bold text-3xl">
+							<Flag className="hidden md:block" size={24} /> {epic?.title || "N/A"}
+						</h1>
+						{/* <p>View list of all epics</p> */}
+					</div>
+				)}
 				<div className="col-span-12 h-fit flex flex-col gap-2">
 					{/* Epic Details - mobile view */}
 					<div className="col-span-12  bg-card text-card-foreground border border-border rounded-xl container p-6">
