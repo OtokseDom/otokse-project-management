@@ -76,20 +76,22 @@ export default function EpicDetails() {
 					</h1>
 					{/* <p>View list of all epics</p> */}
 				</div>
-				{/* Main Panel */}
-				<div className="col-span-12 md:col-span-8 h-fit flex flex-col gap-2">
+				<div className="col-span-12 h-fit flex flex-col gap-2">
 					{/* Epic Details - mobile view */}
-					<div className="block md:hidden bg-card text-card-foreground border border-border rounded-xl container p-6">
+					<div className="col-span-12  bg-card text-card-foreground border border-border rounded-xl container p-6">
 						<div className="flex w-full font-bold text-lg mb-4">Details</div>
 						<div className="flex flex-wrap justify-start items-center gap-4">Long description of epic here. Can be Markdown in future.</div>
 						<div className="flex flex-wrap justify-start items-center gap-4">Long description of epic here. Can be Markdown in future.</div>
 						<div className="flex flex-wrap justify-start items-center gap-4">Long description of epic here. Can be Markdown in future.</div>
 						<div className="flex flex-wrap justify-start items-center gap-4">Long description of epic here. Can be Markdown in future.</div>
 					</div>
+				</div>
+				{/* Side panel */}
+				<div className="col-span-12 md:col-span-4 h-fit flex flex-col gap-2">
 					{/* Epic Projects */}
 					<div className="bg-card text-card-foreground border border-border rounded-xl container p-6">
 						<div className="flex w-full font-bold text-lg mb-4">Projects</div>
-						<div className="flex overflow-auto justify-start items-start gap-2 pb-2">
+						<div className="flex flex-col overflow-auto justify-start items-start gap-2 pb-2">
 							<Button variant="secondary" className="min-w-fit">
 								Long ass Project name with uninterruptability. Niyugon mo yan. Ata ka na
 							</Button>
@@ -104,87 +106,44 @@ export default function EpicDetails() {
 							</Button>
 						</div>
 					</div>
-					{/* Epic Project-Tasks */}
-					{/* TODO: Bring grid list and item here */}
-					<div className="bg-card text-card-foreground max-h-screen overflow-auto border border-border rounded-xl container p-6">
-						<div className="flex w-full font-bold text-lg mb-4">Tasks</div>
-						<div className="flex flex-col justify-start items-start gap-2 pb-2">
-							<Button variant="secondary" className="min-w-fit">
-								Long ass Task name with uninterruptability. Niyugon mo yan. Ata ka na
-							</Button>
-							<Button variant="secondary" className="w-fit md:w-full">
-								Task 2
-							</Button>
-							<Button variant="secondary" className="w-fit md:w-full">
-								Task 3
-							</Button>
-							<Button variant="secondary" className="w-fit md:w-full">
-								Task 4
-							</Button>
-							<Button variant="secondary" className="w-fit md:w-full">
-								Task 4
-							</Button>
-							<Button variant="secondary" className="w-fit md:w-full">
-								Long ass Task name with uninterruptability. Niyugon mo yan. Ata ka na Task 4
-							</Button>
-							<Button variant="secondary" className="w-fit md:w-full">
-								Long ass Task name with uninterruptability. Niyugon mo yan. Ata ka na Task 4
-							</Button>
-							<Button variant="secondary" className="w-fit md:w-full">
-								Long ass Task name with uninterruptability. Niyugon mo yan. Ata ka na Task 4
-							</Button>
-							<Button variant="secondary" className="w-fit md:w-full">
-								Long ass Task name with uninterruptability. Niyugon mo yan. Ata ka na Task 4
-							</Button>
-							<Button variant="secondary" className="w-fit md:w-full">
-								Long ass Task name with uninterruptability. Niyugon mo yan. Ata ka na Task 4
-							</Button>
-							<Button variant="secondary" className="w-fit md:w-full">
-								Long ass Task name with uninterruptability. Niyugon mo yan. Ata ka na Task 4
-							</Button>
-							<Button variant="secondary" className="w-fit md:w-full">
-								Long ass Task name with uninterruptability. Niyugon mo yan. Ata ka na Task 4
-							</Button>
-							<Button variant="secondary" className="w-fit md:w-full">
-								Long ass Task name with uninterruptability. Niyugon mo yan. Ata ka na Task 4
-							</Button>
-							<Button variant="secondary" className="w-fit md:w-full">
-								Long ass Task name with uninterruptability. Niyugon mo yan. Ata ka na Task 4
-							</Button>
-							<Button variant="secondary" className="w-fit md:w-full">
-								Long ass Task name with uninterruptability. Niyugon mo yan. Ata ka na Task 4
-							</Button>
-							<Button variant="secondary" className="w-fit md:w-full">
-								Long ass Task name with uninterruptability. Niyugon mo yan. Ata ka na Task 4
-							</Button>
-							<Button variant="secondary" className="w-fit md:w-full">
-								Long ass Task name with uninterruptability. Niyugon mo yan. Ata ka na Task 4
-							</Button>
-							<Button variant="secondary" className="w-fit md:w-full">
-								Long ass Task name with uninterruptability. Niyugon mo yan. Ata ka na Task 4
-							</Button>
-							<Button variant="secondary" className="w-fit md:w-full">
-								Long ass Task name with uninterruptability. Niyugon mo yan. Ata ka na Task 4
-							</Button>
-						</div>
-					</div>
-				</div>
-				{/* Side panel */}
-				<div className="col-span-12 md:col-span-4 h-fit flex flex-col gap-2">
-					{/* Epic Details */}
-					<div className="hidden md:block bg-card text-card-foreground border border-border rounded-xl container p-6">
-						<div className="flex w-full font-bold text-lg mb-4">Details</div>
-						<div className="flex flex-wrap justify-start items-center gap-4">Long description of epic here. Can be Markdown in future.</div>
-						<div className="flex flex-wrap justify-start items-center gap-4">Long description of epic here. Can be Markdown in future.</div>
-						<div className="flex flex-wrap justify-start items-center gap-4">Long description of epic here. Can be Markdown in future.</div>
-						<div className="flex flex-wrap justify-start items-center gap-4">Long description of epic here. Can be Markdown in future.</div>
-					</div>
 					{/* Some Widgets */}
-
 					<div className="bg-card text-card-foreground border border-border rounded-xl container p-6">
 						<div className="flex w-full font-bold text-lg mb-4">Widget here</div>
 						<div className="flex flex-wrap justify-start items-center gap-4">Long description of epic here. Can be Markdown in future.</div>
 						<div className="flex flex-wrap justify-start items-center gap-4">Long description of epic here. Can be Markdown in future.</div>
+					</div>
+				</div>
+				{/* Main Panel */}
+				<div className="col-span-12 md:col-span-8 h-fit flex flex-col gap-2">
+					{/* Epic Project-Tasks */}
+					{/* TODO: Bring grid list and item here */}
+					<div className="bg-card text-card-foreground border border-border rounded-xl container p-6">
+						<div className="flex w-full font-bold text-lg mb-4">Tasks</div>
+						<div className="flex flex-col justify-start items-start gap-2 pb-2 max-h-screen overflow-auto">
+							<div className="flex flex-wrap text-wrap w-full min-h-fit bg-secondary">
+								Long ass Task name with uninterruptability. Niyugon mo yan. Ata ka na Long ass Task name with uninterruptability. Niyugon mo
+								yan. Ata ka na Long ass Task name with uninterruptability. Niyugon mo yan. Ata ka na Long ass Task name with uninterruptability.
+								Niyugon mo yan. Ata ka na
+							</div>
+							<div className="w-fit md:w-full">Task 2</div>
+							<div className="w-fit md:w-full">Task 3</div>
+							<div className="w-fit md:w-full">Task 4</div>
+							<div className="w-fit md:w-full">Task 4</div>
+							<div className="w-fit md:w-full">Long ass Task name with uninterruptability. Niyugon mo yan. Ata ka na Task 4</div>
+							<div className="w-fit md:w-full">Long ass Task name with uninterruptability. Niyugon mo yan. Ata ka na Task 4</div>
+							<div className="w-fit md:w-full">Long ass Task name with uninterruptability. Niyugon mo yan. Ata ka na Task 4</div>
+							<div className="w-fit md:w-full">Long ass Task name with uninterruptability. Niyugon mo yan. Ata ka na Task 4</div>
+							<div className="w-fit md:w-full">Long ass Task name with uninterruptability. Niyugon mo yan. Ata ka na Task 4</div>
+							<div className="w-fit md:w-full">Long ass Task name with uninterruptability. Niyugon mo yan. Ata ka na Task 4</div>
+							<div className="w-fit md:w-full">Long ass Task name with uninterruptability. Niyugon mo yan. Ata ka na Task 4</div>
+							<div className="w-fit md:w-full">Long ass Task name with uninterruptability. Niyugon mo yan. Ata ka na Task 4</div>
+							<div className="w-fit md:w-full">Long ass Task name with uninterruptability. Niyugon mo yan. Ata ka na Task 4</div>
+							<div className="w-fit md:w-full">Long ass Task name with uninterruptability. Niyugon mo yan. Ata ka na Task 4</div>
+							<div className="w-fit md:w-full">Long ass Task name with uninterruptability. Niyugon mo yan. Ata ka na Task 4</div>
+							<div className="w-fit md:w-full">Long ass Task name with uninterruptability. Niyugon mo yan. Ata ka na Task 4</div>
+							<div className="w-fit md:w-full">Long ass Task name with uninterruptability. Niyugon mo yan. Ata ka na Task 4</div>
+							<div className="w-fit md:w-full">Long ass Task name with uninterruptability. Niyugon mo yan. Ata ka na Task 4</div>
+						</div>
 					</div>
 				</div>
 			</div>
