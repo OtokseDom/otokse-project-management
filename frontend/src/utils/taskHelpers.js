@@ -3,7 +3,6 @@ import axiosClient from "@/axios.client";
 import { API } from "@/constants/api";
 import { useCategoriesStore } from "@/store/categories/categoriesStore";
 import { useDashboardStore } from "@/store/dashboard/dashboardStore";
-import { useEpicsStore } from "@/store/epics/epicsStore";
 import { useKanbanColumnsStore } from "@/store/kanbanColumns/kanbanColumnsStore";
 import { useProjectsStore } from "@/store/projects/projectsStore";
 import { useTaskDiscussionsStore } from "@/store/taskDiscussions/taskDiscussionsStore";
@@ -16,7 +15,6 @@ export const useTaskHelpers = () => {
 	const { projectFilter, setProjectFilter, userFilter, setUserFilter, setReports, setDashboardReportsLoading } = useDashboardStore();
 	const { setTasks, setTaskHistory, setOptions, setSelectedUser, setTasksLoading } = useTasksStore();
 	const { setTaskDiscussions, setTaskDiscussionsLoading } = useTaskDiscussionsStore();
-	const { setEpics, setSelectedEpic, setEpicsLoading } = useEpicsStore();
 	const { setProjects, setSelectedProject, setProjectsLoading } = useProjectsStore();
 	const { setUsersLoading, setUsers } = useUsersStore();
 	const { setCategories, setCategoriesLoading } = useCategoriesStore();
@@ -48,27 +46,6 @@ export const useTaskHelpers = () => {
 			if (e.message !== "Request aborted") console.error("Error fetching data:", e.message);
 		} finally {
 			setTaskDiscussionsLoading(false);
-		}
-	};
-
-	const fetchEpics = async () => {
-		setEpicsLoading(true);
-		try {
-			const res = await axiosClient.get(API().epic());
-			setEpics(res?.data?.data?.epics);
-			// setKanbanColumns(res?.data?.data?.kanbanColumns);
-			setSelectedEpic(res?.data?.data?.epics[res?.data?.data?.epics?.length - 1]);
-			// if (res.data.data.epics.length !== epicFilter.length || res.data.data.epics.length !== profileEpicFilter.length) {
-			// 	const mappedEpics = res.data.data.epics.map((epic) => ({ value: epic.id, label: epic.title }));
-			// Used in user profile
-			// setProfileEpicFilter(mappedEpics);
-			// Used in dashboard
-			// 	setEpicFilter(mappedEpics);
-			// }
-		} catch (e) {
-			if (e.message !== "Request aborted") console.error("Error fetching data:", e.message);
-		} finally {
-			setEpicsLoading(false);
 		}
 	};
 
@@ -164,7 +141,6 @@ export const useTaskHelpers = () => {
 	return {
 		fetchTasks,
 		fetchTaskDiscussions,
-		fetchEpics,
 		fetchProjects,
 		fetchUsers,
 		fetchCategories,
