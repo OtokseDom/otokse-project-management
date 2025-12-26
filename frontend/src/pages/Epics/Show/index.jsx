@@ -199,25 +199,19 @@ export default function EpicDetails() {
 					<div className="bg-card text-card-foreground border border-border rounded-xl container p-6">
 						<div className="flex w-full font-bold text-lg mb-4">Projects</div>
 						<div className="flex flex-col overflow-auto justify-start items-start gap-2 pb-2">
-							<Button variant="secondary" className="min-w-fit">
-								Long ass Project name with uninterruptability. Niyugon mo yan. Ata ka na
-							</Button>
-							<Button variant="secondary" className="w-fit md:w-full">
-								Project 2
-							</Button>
-							<Button variant="secondary" className="w-fit md:w-full">
-								Project 3
-							</Button>
-							<Button variant="secondary" className="w-fit md:w-full">
-								Project 4
-							</Button>
+							{Array.from({ length: 5 }).map((_, index) => (
+								<Skeleton key={index} className="w-full h-10 rounded-lg" />
+							))}
 						</div>
 					</div>
 					{/* Some Widgets */}
 					<div className="bg-card text-card-foreground border border-border rounded-xl container p-6">
-						<div className="flex w-full font-bold text-lg mb-4">Widget here</div>
-						<div className="flex flex-wrap justify-start items-center gap-4">Long description of epic here. Can be Markdown in future.</div>
-						<div className="flex flex-wrap justify-start items-center gap-4">Long description of epic here. Can be Markdown in future.</div>
+						<div className="flex w-full font-bold text-lg mb-4">Widget</div>
+						<div className="flex flex-col overflow-auto justify-start items-start gap-2 pb-2">
+							{Array.from({ length: 3 }).map((_, index) => (
+								<Skeleton key={index} className="w-full h-10 rounded-lg" />
+							))}
+						</div>
 					</div>
 				</div>
 				{/* Main Panel */}
@@ -226,30 +220,10 @@ export default function EpicDetails() {
 					{/* TODO: Bring grid list and item here */}
 					<div className="bg-card text-card-foreground border border-border rounded-xl container p-6">
 						<div className="flex w-full font-bold text-lg mb-4">Tasks</div>
-						<div className="flex flex-col justify-start items-start gap-2 pb-2 max-h-screen overflow-auto">
-							<div className="flex flex-wrap text-wrap w-full min-h-fit bg-secondary">
-								Long ass Task name with uninterruptability. Niyugon mo yan. Ata ka na Long ass Task name with uninterruptability. Niyugon mo
-								yan. Ata ka na Long ass Task name with uninterruptability. Niyugon mo yan. Ata ka na Long ass Task name with uninterruptability.
-								Niyugon mo yan. Ata ka na
-							</div>
-							<div className="w-fit md:w-full">Task 2</div>
-							<div className="w-fit md:w-full">Task 3</div>
-							<div className="w-fit md:w-full">Task 4</div>
-							<div className="w-fit md:w-full">Task 4</div>
-							<div className="w-fit md:w-full">Long ass Task name with uninterruptability. Niyugon mo yan. Ata ka na Task 4</div>
-							<div className="w-fit md:w-full">Long ass Task name with uninterruptability. Niyugon mo yan. Ata ka na Task 4</div>
-							<div className="w-fit md:w-full">Long ass Task name with uninterruptability. Niyugon mo yan. Ata ka na Task 4</div>
-							<div className="w-fit md:w-full">Long ass Task name with uninterruptability. Niyugon mo yan. Ata ka na Task 4</div>
-							<div className="w-fit md:w-full">Long ass Task name with uninterruptability. Niyugon mo yan. Ata ka na Task 4</div>
-							<div className="w-fit md:w-full">Long ass Task name with uninterruptability. Niyugon mo yan. Ata ka na Task 4</div>
-							<div className="w-fit md:w-full">Long ass Task name with uninterruptability. Niyugon mo yan. Ata ka na Task 4</div>
-							<div className="w-fit md:w-full">Long ass Task name with uninterruptability. Niyugon mo yan. Ata ka na Task 4</div>
-							<div className="w-fit md:w-full">Long ass Task name with uninterruptability. Niyugon mo yan. Ata ka na Task 4</div>
-							<div className="w-fit md:w-full">Long ass Task name with uninterruptability. Niyugon mo yan. Ata ka na Task 4</div>
-							<div className="w-fit md:w-full">Long ass Task name with uninterruptability. Niyugon mo yan. Ata ka na Task 4</div>
-							<div className="w-fit md:w-full">Long ass Task name with uninterruptability. Niyugon mo yan. Ata ka na Task 4</div>
-							<div className="w-fit md:w-full">Long ass Task name with uninterruptability. Niyugon mo yan. Ata ka na Task 4</div>
-							<div className="w-fit md:w-full">Long ass Task name with uninterruptability. Niyugon mo yan. Ata ka na Task 4</div>
+						<div className="flex flex-col justify-start items-start gap-2 pb-2 max-h-96 overflow-auto">
+							{Array.from({ length: 8 }).map((_, index) => (
+								<Skeleton key={index} className="w-full min-h-28 rounded-lg" />
+							))}
 						</div>
 					</div>
 				</div>
