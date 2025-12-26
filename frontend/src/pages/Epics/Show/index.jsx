@@ -1,5 +1,5 @@
 import { Link, useParams } from "react-router-dom";
-import { ArrowLeft, Flag, Plus, Rows3, Table } from "lucide-react";
+import { ArrowLeft, CalendarDaysIcon, Flag, Plus, Rows3, Table, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import axiosClient from "@/axios.client";
@@ -19,7 +19,7 @@ import FilterForm from "@/components/form/filter-form";
 import FilterTags from "@/components/form/FilterTags";
 import { API } from "@/constants/api";
 import GalaxyProgressBar from "@/components/design/GalaxyProgressBar";
-import { statusColors, flattenTasks, getProfileProjectProgress, useTaskHelpers } from "@/utils/taskHelpers";
+import { statusColors, priorityColors, flattenTasks, getProfileProjectProgress, useTaskHelpers } from "@/utils/taskHelpers";
 import { useUsersStore } from "@/store/users/usersStore";
 import { useProjectsStore } from "@/store/projects/projectsStore";
 import { useCategoriesStore } from "@/store/categories/categoriesStore";
@@ -90,7 +90,7 @@ export default function EpicDetails() {
 				<div className="col-span-12 h-fit flex flex-col gap-2">
 					{/* Epic Details */}
 					<div className="col-span-12  bg-card text-card-foreground border border-border rounded-xl container p-6">
-						<div className="flex w-full font-bold text-lg mb-4">Details</div>
+						{/* <div className="flex w-full font-bold text-lg mb-4">Details</div> */}
 						{epicLoading ? (
 							<>
 								<div className="flex flex-col gap-2 col-span-12 mb-2">
@@ -98,7 +98,7 @@ export default function EpicDetails() {
 								</div>
 								<div className="w-full grid grid-cols-2 md:grid-cols-12 gap-2">
 									{Array.from({ length: 4 }).map((_, index) => (
-										<div className="col-span-1 md:col-span-3 flex flex-col w-full gap-2">
+										<div key={index} className="col-span-1 md:col-span-3 flex flex-col w-full gap-2">
 											{/* <Skeleton className="w-full h-4 rounded-full" /> */}
 											<span className="text-muted-foreground font-bold">
 												{index === 0 ? "Status" : index === 1 ? "Priority" : index === 2 ? "Owner" : "Slug"}
@@ -110,7 +110,10 @@ export default function EpicDetails() {
 								<hr className="w-full my-4 h-1" />
 								<div className="w-full grid grid-cols-2 md:grid-cols-12 gap-2">
 									{Array.from({ length: 3 }).map((_, index) => (
-										<div className={`${index === 2 ? "col-span-2 md:col-span-6" : "col-span-1 md:col-span-3"} flex flex-col w-full gap-2`}>
+										<div
+											key={index}
+											className={`${index === 2 ? "col-span-2 md:col-span-6" : "col-span-1 md:col-span-3"} flex flex-col w-full gap-2`}
+										>
 											<span className="text-muted-foreground font-bold">
 												{index === 0 ? "Start Date" : index === 1 ? "End Date" : "Remarks"}
 											</span>
@@ -125,15 +128,36 @@ export default function EpicDetails() {
 								<div className="grid grid-cols-2 md:grid-cols-12 justify-evenly mb-4 gap-2">
 									<div className="col-span-1 md:col-span-3 flex flex-col items-start gap-1">
 										<span className="text-muted-foreground font-bold">Status</span>
-										<span className="">{epic?.status?.name}</span>
+										<span
+											className={`px-2 py-1 w-fit text-center rounded-2xl text-xs ${
+												statusColors[epic?.status?.color?.toLowerCase()] || ""
+											}`}
+										>
+											{epic?.status?.name}
+										</span>
 									</div>
 									<div className="col-span-1 md:col-span-3 flex flex-col items-start gap-1">
 										<span className="text-muted-foreground font-bold">Priority</span>
-										<span>{epic?.priority}</span>
+										<span
+											className={`px-2 py-1 w-fit text-center rounded text-xs ${
+												priorityColors[epic?.priority] || "bg-gray-200 text-gray-800"
+											}`}
+										>
+											{epic?.priority?.replace("_", " ")}
+										</span>
 									</div>
 									<div className="col-span-1 md:col-span-3 flex flex-col items-start gap-1">
 										<span className="text-muted-foreground font-bold">Owner</span>
-										<span>{epic?.owner?.name}</span>
+										{epic.owner_id && (
+											<Link to={`/users/${epic.owner_id}`}>
+												<span
+													title="View Profile"
+													className="flex justify-center items-center px-2 py-1 rounded-full bg-background/50 border-2 border-foreground/50 text-foreground text-xs gap-2 hover:cursor-pointer"
+												>
+													<User size={16} /> {epic.owner.name}
+												</span>
+											</Link>
+										)}
 									</div>
 									<div className="col-span-1 md:col-span-3 flex flex-col items-start gap-1">
 										<span className="text-muted-foreground font-bold">Slug</span>
@@ -144,11 +168,21 @@ export default function EpicDetails() {
 								<div className="w-full grid grid-cols-2 md:grid-cols-12 auto-rows-auto gap-2">
 									<div className="col-span-1 md:col-span-3 flex flex-col items-start gap-1">
 										<span className="text-muted-foreground font-bold">Start Date</span>
-										<span>{epic?.start_date ? format(new Date(epic.start_date), "MMM-dd yyyy") : "--"}</span>
+										<div className="flex gap-1">
+											<CalendarDaysIcon size={16} />
+											<span className="text-card-foreground">
+												{epic?.start_date ? format(new Date(epic.start_date), "MMM-dd yyyy") : "--"}
+											</span>
+										</div>
 									</div>
 									<div className="col-span-1 md:col-span-3 flex flex-col items-start gap-1">
 										<span className="text-muted-foreground font-bold">End Date</span>
-										<span>{epic?.end_date ? format(new Date(epic.end_date), "MMM-dd yyyy") : "--"}</span>
+										<div className="flex gap-1">
+											<CalendarDaysIcon size={16} />
+											<span className="text-card-foreground">
+												{epic?.end_date ? format(new Date(epic.end_date), "MMM-dd yyyy") : "--"}
+											</span>
+										</div>
 									</div>
 									<div className="col-span-2 md:col-span-6 flex flex-col items-start gap-1">
 										<span className="text-muted-foreground font-bold">Remarks</span>
