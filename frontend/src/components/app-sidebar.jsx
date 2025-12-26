@@ -243,7 +243,7 @@ export function AppSidebar() {
 										</SidebarMenuItem>
 									</Link>
 								) : (
-									<Collapsible key={item.title} className="group/collapsible cursor-pointer">
+									<Collapsible defaultOpen={item.title === "Epics"} key={item.title} className="group/collapsible cursor-pointer">
 										<SidebarMenuItem>
 											<CollapsibleTrigger asChild>
 												<SidebarMenuButton isActive={currentPath === item.url || currentPath.startsWith(item.url + "/")} asChild>
