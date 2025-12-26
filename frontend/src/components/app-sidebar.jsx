@@ -93,11 +93,11 @@ export function AppSidebar() {
 			subItems: [],
 		},
 		{
-			title: "Epics",
-			url: "/epics",
-			icon: FolderTreeIcon,
-			collapsible: true,
-			subItems: epicItems,
+			title: "Tasks",
+			url: "/tasks",
+			icon: ClipboardList,
+			collapsible: false,
+			subItems: [],
 		},
 		{
 			title: "Projects",
@@ -107,11 +107,11 @@ export function AppSidebar() {
 			subItems: [],
 		},
 		{
-			title: "Tasks",
-			url: "/tasks",
-			icon: ClipboardList,
-			collapsible: false,
-			subItems: [],
+			title: "Epics",
+			url: "/epics",
+			icon: FolderTreeIcon,
+			collapsible: true,
+			subItems: epicItems,
 		},
 		{
 			title: "Members",
