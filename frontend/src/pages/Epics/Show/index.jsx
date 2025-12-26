@@ -94,34 +94,24 @@ export default function EpicDetails() {
 						{epicLoading ? (
 							<>
 								<div className="flex flex-col gap-2 col-span-12 mb-2">
-									<Skeleton className="w-full h-6 rounded-full" />
-									<Skeleton className="w-full h-6 rounded-full" />
+									<Skeleton className="w-full h-12 rounded-lg" />
 								</div>
 								<div className="w-full grid grid-cols-2 md:grid-cols-12 gap-2">
-									<div className="col-span-1 md:col-span-3 flex flex-col gap-2">
-										<Skeleton className="w-full h-12 rounded-full" />
-									</div>
-									<div className="col-span-1 md:col-span-3 flex flex-col gap-2">
-										<Skeleton className="w-full h-12 rounded-full" />
-									</div>
-									<div className="col-span-1 md:col-span-3 flex flex-col gap-2">
-										<Skeleton className="w-full h-12 rounded-full" />
-									</div>
-									<div className="col-span-1 md:col-span-3 flex flex-col gap-2">
-										<Skeleton className="w-full h-12 rounded-full" />
-									</div>
+									{Array.from({ length: 4 }).map((_, index) => (
+										<div className="col-span-1 md:col-span-3 flex flex-col w-full gap-2">
+											<Skeleton className="w-full h-4 rounded-full" />
+											<Skeleton className="w-full h-4 rounded-full" />
+										</div>
+									))}
 								</div>
 								<hr className="w-full my-4 h-1" />
 								<div className="w-full grid grid-cols-2 md:grid-cols-12 gap-2">
-									<div className="col-span-1 md:col-span-3 flex flex-col gap-2">
-										<Skeleton className="w-full h-12 rounded-full" />
-									</div>
-									<div className="col-span-1 md:col-span-3 flex flex-col gap-2">
-										<Skeleton className="w-full h-12 rounded-full" />
-									</div>
-									<div className="col-span-2 md:col-span-6 flex flex-col gap-2">
-										<Skeleton className="w-full h-12 rounded-full" />
-									</div>
+									{Array.from({ length: 3 }).map((_, index) => (
+										<div className={`${index === 2 ? "col-span-2 md:col-span-6" : "col-span-1 md:col-span-3"} flex flex-col w-full gap-2`}>
+											<Skeleton className="w-full h-4 rounded-full" />
+											<Skeleton className="w-full h-4 rounded-full" />
+										</div>
+									))}
 								</div>
 							</>
 						) : (
