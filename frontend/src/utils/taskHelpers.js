@@ -178,7 +178,7 @@ export function flattenTasks(tasks) {
 }
 
 export const statusColors = {
-	yellow: "bg-yellow-100 border border-yellow-800 border-2 text-yellow-800",
+	yellow: "bg-yellow-100 border border-yellow-800 border-2 text-yellow-900",
 	blue: "bg-blue-100 border border-blue-800 border-2 text-blue-800",
 	orange: "bg-orange-100 border border-orange-800 border-2 text-orange-800",
 	green: "bg-green-100 border border-green-800 border-2 text-green-800",
