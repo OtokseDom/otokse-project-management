@@ -19,7 +19,7 @@ import FilterForm from "@/components/form/filter-form";
 import FilterTags from "@/components/form/FilterTags";
 import { API } from "@/constants/api";
 import GalaxyProgressBar from "@/components/design/GalaxyProgressBar";
-import { flattenTasks, getProfileProjectProgress, useTaskHelpers } from "@/utils/taskHelpers";
+import { statusColors, flattenTasks, getProfileProjectProgress, useTaskHelpers } from "@/utils/taskHelpers";
 import { useUsersStore } from "@/store/users/usersStore";
 import { useProjectsStore } from "@/store/projects/projectsStore";
 import { useCategoriesStore } from "@/store/categories/categoriesStore";
@@ -94,13 +94,16 @@ export default function EpicDetails() {
 						{epicLoading ? (
 							<>
 								<div className="flex flex-col gap-2 col-span-12 mb-2">
-									<Skeleton className="w-full h-12 rounded-lg" />
+									<Skeleton className="w-full h-8 rounded-lg" />
 								</div>
 								<div className="w-full grid grid-cols-2 md:grid-cols-12 gap-2">
 									{Array.from({ length: 4 }).map((_, index) => (
 										<div className="col-span-1 md:col-span-3 flex flex-col w-full gap-2">
-											<Skeleton className="w-full h-4 rounded-full" />
-											<Skeleton className="w-full h-4 rounded-full" />
+											{/* <Skeleton className="w-full h-4 rounded-full" /> */}
+											<span className="text-muted-foreground font-bold">
+												{index === 0 ? "Status" : index === 1 ? "Priority" : index === 2 ? "Owner" : "Slug"}
+											</span>
+											<Skeleton className="w-full h-6 rounded-full" />
 										</div>
 									))}
 								</div>
@@ -108,7 +111,9 @@ export default function EpicDetails() {
 								<div className="w-full grid grid-cols-2 md:grid-cols-12 gap-2">
 									{Array.from({ length: 3 }).map((_, index) => (
 										<div className={`${index === 2 ? "col-span-2 md:col-span-6" : "col-span-1 md:col-span-3"} flex flex-col w-full gap-2`}>
-											<Skeleton className="w-full h-4 rounded-full" />
+											<span className="text-muted-foreground font-bold">
+												{index === 0 ? "Start Date" : index === 1 ? "End Date" : "Remarks"}
+											</span>
 											<Skeleton className="w-full h-4 rounded-full" />
 										</div>
 									))}
