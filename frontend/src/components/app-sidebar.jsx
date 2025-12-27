@@ -16,6 +16,7 @@ import {
 	KanbanSquareDashedIcon,
 	ListOrderedIcon,
 	FolderTreeIcon,
+	List,
 } from "lucide-react";
 import logo from "../assets/logo.png";
 
@@ -252,12 +253,24 @@ export function AppSidebar() {
 															<item.icon size={16} />
 															{item.title}
 														</span>
-														<span>
-															<ChevronDown
-																size={18}
-																className="transition-transform duration-200 group-data-[state=closed]/collapsible:rotate-[-90deg]"
-															/>
-														</span>
+														<div className="flex gap-2">
+															<span>
+																<ChevronDown
+																	size={18}
+																	className="transition-transform duration-200 group-data-[state=closed]/collapsible:rotate-[-90deg]"
+																/>
+															</span>
+															{item.title === "Epics" && (
+																<Link to={item.url} onClick={() => setCurrentPath(item.url)}>
+																	<span
+																		title="Epic List"
+																		className="flex items-center justify-center rounded bg-background shadow-inner shadow-foreground/50 aspect-square w-6"
+																	>
+																		<List className="w-4 hover:w-3 transition-all text-foreground" />
+																	</span>
+																</Link>
+															)}
+														</div>
 													</span>
 												</SidebarMenuButton>
 											</CollapsibleTrigger>
