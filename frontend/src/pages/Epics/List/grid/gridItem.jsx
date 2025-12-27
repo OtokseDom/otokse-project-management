@@ -234,15 +234,14 @@ export default function EpicGridItem({ epic, setIsOpen = () => {}, setUpdateData
 							<span className="hidden sm:inline text-xs">Edit</span>
 						</Button>
 						<Link
-							to="/projects"
+							to={`/epics/${epic.id}`}
 							onClick={(e) => {
 								e.stopPropagation();
-								setSelectedEpic(epic);
 							}}
 						>
-							<Button variant="ghost" title="View projects">
+							<Button variant="ghost" title={`View ${epic.title}`}>
 								<ListTodo />
-								<span className="hidden sm:inline text-xs">View Projects</span>
+								<span className="hidden sm:inline text-xs">View Epic</span>
 							</Button>
 						</Link>
 						<Button
