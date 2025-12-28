@@ -1,186 +1,130 @@
 "use client";
-import { useLoadContext } from "@/contexts/LoadContextProvider";
-import { useAuthContext } from "@/contexts/AuthContextProvider";
-import { Button } from "@/components/ui/button";
+import { CalendarDaysIcon, Flag, User } from "lucide-react";
 import { Skeleton } from "../../../components/ui/skeleton";
-import { Edit, User2 } from "lucide-react";
-import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { useState } from "react";
-import axiosClient from "@/axios.client";
-import { useToast } from "@/contexts/ToastContextProvider";
-import { useNavigate } from "react-router-dom";
-import { API } from "@/constants/api";
-import { useUserStore } from "@/store/user/userStore";
-import { useUsersStore } from "@/store/users/usersStore";
+import { useEpicStore } from "@/store/epic/epicStore";
+import { priorityColors, statusColors } from "@/utils/taskHelpers";
+import { Link } from "react-router-dom";
+import { format } from "date-fns";
 
-export default function UserDetails({ setIsOpenUser, setDetailsLoading, detailsLoading }) {
-	const { user: user_auth, setUser } = useAuthContext();
-	const { setLoading } = useLoadContext();
-	const showToast = useToast();
-	const [dialogOpen, setDialogOpen] = useState(false);
-	const [dialogType, setDialogType] = useState(null);
-	const { user } = useUserStore();
-	const { removeUser } = useUsersStore();
-	const navigate = useNavigate();
-
-	const openDialog = (type) => {
-		setDialogType(type);
-		setDialogOpen(true);
-	};
-	const handleApproval = async (id) => {
-		setDetailsLoading(true);
-		try {
-			const form = {
-				...user,
-				status: "active",
-			};
-			try {
-				const userResponse = await axiosClient.put(API().user(id), form);
-				setUser(userResponse?.data?.data);
-				showToast("Success!", userResponse?.data?.message, 3000);
-			} catch (e) {
-				showToast("Failed!", e.response?.data?.message, 3000, "fail");
-				if (e.message !== "Request aborted") console.error("Error fetching data:", e.message);
-			}
-			// }
-		} catch (e) {
-			showToast("Failed!", e.response?.data?.message, 3000, "fail");
-			if (e.message !== "Request aborted") console.error("Error fetching data:", e.message);
-		} finally {
-			// Always stop loading when done
-			setDetailsLoading(false);
-		}
-	};
-	const handleDelete = async (id) => {
-		setLoading(true);
-		try {
-			const userResponse = await axiosClient.delete(API().user(id));
-			navigate("/users");
-			removeUser(id);
-			showToast("Success!", userResponse?.data?.message, 3000);
-		} catch (e) {
-			showToast("Failed!", e.response?.data?.message, 3000, "fail");
-			console.error("Error fetching data:", e);
-		} finally {
-			setLoading(false);
-		}
-	};
-
-	const { name = "Not Found", position = "", email = "", role = "", status = "", dob = "" } = user || {};
-
-	const isEditable =
-		user_auth?.data?.role === "Superadmin" || user_auth?.data?.role === "Admin" || user_auth?.data?.role === "Manager" || user_auth?.data?.id === user?.id;
+export default function EpicDetails() {
+	const { epic, epicLoading } = useEpicStore();
 
 	return (
-		<div className="absolute inset-0 flex flex-col justify-center items-start p-6 bg-gradient-to-r from-indigo-900/20 via-purple-900/20 to-indigo-900/20">
-			<Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-				<DialogContent>
-					<DialogHeader>
-						<DialogTitle className="flex flex-row items-center gap-2">Are you absolutely sure?</DialogTitle>
-						<DialogDescription>This action cannot be undone.</DialogDescription>
-					</DialogHeader>
-					<DialogFooter>
-						<DialogClose asChild>
-							<Button type="button" variant="secondary">
-								Close
-							</Button>
-						</DialogClose>
-						<DialogClose asChild>
-							<Button onClick={() => handleDelete(user.id)}>{dialogType === "delete" ? "Yes, delete" : "Yes, reject"}</Button>
-						</DialogClose>
-					</DialogFooter>
-				</DialogContent>
-
-				<div className="flex flex-col gap-3 w-full">
-					{detailsLoading ? (
-						<div className="flex gap-5">
-							<Skeleton className="w-24 h-24 rounded-full" />
-							<div className="flex flex-col gap-2">
-								<Skeleton className="w-60 h-10 rounded-full" />
-								<Skeleton className="w-60 h-10 rounded-full" />
+		<>
+			{/* Epic title */}
+			{epicLoading ? (
+				<div className="flex gap-2 col-span-12">
+					<Skeleton className="w-12 h-12 rounded-full" />
+					<Skeleton className="w-full md:w-1/2 h-12 rounded-full" />
+				</div>
+			) : (
+				<div className="col-span-12 mb-4 mx-4">
+					<h1 className="flex items-start md:items-center gap-4 font-bold text-3xl">
+						<Flag className="hidden md:block" size={24} /> {epic?.title || "N/A"}
+					</h1>
+					{/* <p>View list of all epics</p> */}
+				</div>
+			)}
+			<div className="col-span-12 h-fit flex flex-col gap-2">
+				{/* Epic Details */}
+				<div className="col-span-12  bg-card text-card-foreground border border-border rounded-2xl container p-4 md:p-10">
+					{/* <div className="flex w-full font-bold text-lg mb-4">Details</div> */}
+					{epicLoading ? (
+						<>
+							<div className="flex flex-col gap-2 col-span-12 mb-2">
+								<Skeleton className="w-full h-8 rounded-lg" />
 							</div>
-						</div>
+							<div className="w-full grid grid-cols-2 md:grid-cols-12 gap-2">
+								{Array.from({ length: 4 }).map((_, index) => (
+									<div key={index} className="col-span-1 md:col-span-3 flex flex-col w-full gap-2">
+										{/* <Skeleton className="w-full h-4 rounded-full" /> */}
+										<span className="text-muted-foreground font-bold">
+											{index === 0 ? "Status" : index === 1 ? "Priority" : index === 2 ? "Owner" : "Slug"}
+										</span>
+										<Skeleton className="w-full h-6 rounded-full" />
+									</div>
+								))}
+							</div>
+							<hr className="w-full my-4 h-1" />
+							<div className="w-full grid grid-cols-2 md:grid-cols-12 gap-2">
+								{Array.from({ length: 3 }).map((_, index) => (
+									<div
+										key={index}
+										className={`${index === 2 ? "col-span-2 md:col-span-6" : "col-span-1 md:col-span-3"} flex flex-col w-full gap-2`}
+									>
+										<span className="text-muted-foreground font-bold">
+											{index === 0 ? "Start Date" : index === 1 ? "End Date" : "Remarks"}
+										</span>
+										<Skeleton className="w-full h-4 rounded-full" />
+									</div>
+								))}
+							</div>
+						</>
 					) : (
-						<div className="flex items-start justify-between w-full">
-							<div className="flex gap-5 items-center">
-								<div>
-									{/* <div className="w-24 h-24 bg-foreground rounded-full"></div> */}
-									<User2 className="text-white" size={80} />
+						<>
+							<div className="mb-4">{epic?.description}</div>
+							<div className="grid grid-cols-2 md:grid-cols-12 justify-evenly mb-4 gap-2">
+								<div className="col-span-1 md:col-span-3 flex flex-col items-start gap-1">
+									<span className="text-muted-foreground font-bold">Status</span>
+									<span
+										className={`px-2 py-1 w-fit text-center rounded-2xl text-xs ${statusColors[epic?.status?.color?.toLowerCase()] || ""}`}
+									>
+										{epic?.status?.name}
+									</span>
 								</div>
-								<div className="w-full">
-									<span className="flex gap-3 text-md md:text-3xl font-bold text-white mb-0 md:mb-2">{name}</span>
-									<span className="text-xs md:text-lg text-purple-200">{position}</span>
+								<div className="col-span-1 md:col-span-3 flex flex-col items-start gap-1">
+									<span className="text-muted-foreground font-bold">Priority</span>
+									<span
+										className={`px-2 py-1 w-fit text-center rounded text-xs ${
+											priorityColors[epic?.priority] || "bg-gray-200 text-gray-800"
+										}`}
+									>
+										{epic?.priority?.replace("_", " ")}
+									</span>
 								</div>
-							</div>
-
-							{isEditable && (
-								<DropdownMenu modal={false}>
-									<DropdownMenuTrigger asChild>
-										<Button variant="default" className="flex items-center bg-foreground text-background">
-											<Edit size={20} />
-										</Button>
-									</DropdownMenuTrigger>
-									<DropdownMenuContent align="end">
-										{user?.status == "pending" && (
-											<>
-												<DropdownMenuItem className="cursor-pointer text-green-500" onClick={() => handleApproval(user.id)}>
-													Approve User
-												</DropdownMenuItem>
-												<DropdownMenuItem className="cursor-pointer text-red-500" onClick={() => openDialog("reject")}>
-													Reject User
-												</DropdownMenuItem>
-												<hr />
-											</>
-										)}
-										<button
-											className="w-full text-left px-2 py-1.5 text-sm cursor-pointer hover:bg-accent"
-											onClick={(e) => {
-												e.stopPropagation();
-												setIsOpenUser(true);
-											}}
+								<div className="col-span-1 md:col-span-3 flex flex-col items-start gap-1">
+									<span className="text-muted-foreground font-bold">Owner</span>
+									{epic.owner_id && (
+										<span
+											title="View Profile"
+											className="flex justify-center items-center px-2 py-1 rounded-full bg-background/50 border-2 border-foreground/50 text-foreground text-xs gap-2 hover:cursor-pointer"
 										>
-											Update Account
-										</button>
-										<DropdownMenuItem onClick={() => openDialog("delete")}>
-											<DialogTrigger asChild>
-												<span className="cursor-pointer">Delete Account</span>
-											</DialogTrigger>
-										</DropdownMenuItem>
-									</DropdownMenuContent>
-								</DropdownMenu>
-							)}
-						</div>
-					)}
-
-					{detailsLoading ? (
-						<div className="flex gap-5">
-							<Skeleton className="w-24 h-8 rounded-full" />
-							<Skeleton className="w-24 h-8 rounded-full" />
-						</div>
-					) : (
-						<div className="flex flex-wrap mt-4 gap-2 md:gap-4">
-							<div
-								className={`backdrop-blur-sm px-3 py-1 w-fit rounded-full flex items-center ${
-									status === "pending"
-										? "text-yellow-100 bg-yellow-900/50"
-										: status === "active"
-										? "text-green-100 bg-green-900/50"
-										: status === "inactive"
-										? "text-gray-100 bg-gray-900/50"
-										: status === "banned"
-										? "text-red-100 bg-red-900/50"
-										: ""
-								}`}
-							>
-								{status}
+											<User size={16} /> {epic.owner.name}
+										</span>
+									)}
+								</div>
+								<div className="col-span-1 md:col-span-3 flex flex-col items-start gap-1">
+									<span className="text-muted-foreground font-bold">Slug</span>
+									<span>{epic?.slug}</span>
+								</div>
 							</div>
-							<div className="bg-purple-900/50 backdrop-blur-sm px-3 py-1 w-fit rounded-full flex items-center text-purple-100">✨{role}</div>
-							<div className="bg-indigo-900/50 backdrop-blur-sm px-3 py-1 w-fit rounded-full flex items-center text-indigo-100">🌌 {email}</div>
-						</div>
+							<hr className="w-full my-4 h-1" />
+							<div className="w-full grid grid-cols-2 md:grid-cols-12 auto-rows-auto gap-2">
+								<div className="col-span-1 md:col-span-3 flex flex-col items-start gap-1">
+									<span className="text-muted-foreground font-bold">Start Date</span>
+									<div className="flex gap-1">
+										<CalendarDaysIcon size={16} />
+										<span className="text-card-foreground">
+											{epic?.start_date ? format(new Date(epic.start_date), "MMM-dd yyyy") : "--"}
+										</span>
+									</div>
+								</div>
+								<div className="col-span-1 md:col-span-3 flex flex-col items-start gap-1">
+									<span className="text-muted-foreground font-bold">End Date</span>
+									<div className="flex gap-1">
+										<CalendarDaysIcon size={16} />
+										<span className="text-card-foreground">{epic?.end_date ? format(new Date(epic.end_date), "MMM-dd yyyy") : "--"}</span>
+									</div>
+								</div>
+								<div className="col-span-2 md:col-span-6 flex flex-col items-start gap-1">
+									<span className="text-muted-foreground font-bold">Remarks</span>
+									<span>{epic?.remarks}</span>
+								</div>
+							</div>
+						</>
 					)}
 				</div>
-			</Dialog>
-		</div>
+			</div>
+		</>
 	);
 }
