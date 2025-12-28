@@ -18,12 +18,15 @@ import Relations from "@/components/task/Relations";
 import Tabs from "@/components/task/Tabs";
 import { TaskDiscussions } from "@/components/task/Discussion";
 import { Progress } from "@/components/ui/progress";
+import { useEpicsStore } from "@/store/epics/epicsStore";
 
 export default function Tasks() {
 	// const { loading, setLoading } = useLoadContext();
+	const inTasks = location.pathname.startsWith("/tasks") ? true : false;
 	const { tasks, tasksLoaded, setRelations, selectedTaskHistory, activeTab, setActiveTab, tasksLoading } = useTasksStore();
 	const [filteredTasks, setFilteredTasks] = useState([]);
 	const { users } = useUsersStore();
+	const { selectedEpic, setSelectedEpic } = useEpicsStore();
 	const { projects, projectsLoaded, selectedProject, setSelectedProject } = useProjectsStore();
 	const { taskStatuses } = useTaskStatusesStore();
 	const { categories } = useCategoriesStore();
@@ -36,6 +39,9 @@ export default function Tasks() {
 	const [updateData, setUpdateData] = useState({});
 	const [parentId, setParentId] = useState(null); //for adding subtasks from relations tab
 	const [projectId, setProjectId] = useState(null); //for adding subtasks from relations tab
+
+	// Set whether Epic projects or all projects are in use
+	const [activeProjects, setActiveProjects] = useState([]);
 
 	// Flatten tasks for datatable usage (also groups children below parent)
 	const [tableData, setTableData] = useState([]);
@@ -61,14 +67,36 @@ export default function Tasks() {
 		if ((!tasks || tasks.length === 0) && !tasksLoaded) fetchTasks();
 		if ((!projects || projects.length === 0) && !projectsLoaded) fetchProjects();
 	}, []);
+
+	useEffect(() => {
+		const allProjects = Array.isArray(projects) ? projects : [];
+
+		if (inTasks) {
+			// On tasks page show all projects
+			setActiveProjects(allProjects);
+			// ensure selected project is a single project object (first one if none or no longer valid)
+			if (!selectedProject || !allProjects.find((p) => p?.id === selectedProject?.id)) {
+				setSelectedProject(allProjects.length ? allProjects[0] : null);
+			}
+		} else {
+			// On epics page show only projects belonging to selectedEpic
+			const tempEpicProjects =
+				selectedEpic !== null && selectedEpic !== undefined ? allProjects.filter((project) => String(project?.epic_id) === String(selectedEpic)) : [];
+			setActiveProjects(tempEpicProjects);
+			if (!selectedProject || !tempEpicProjects.find((p) => p?.id === selectedProject?.id)) {
+				setSelectedProject(tempEpicProjects.length ? tempEpicProjects[0] : null);
+			}
+		}
+	}, [projects, selectedEpic, inTasks]);
+
 	useEffect(() => {
 		if (selectedProject) {
 			const filtered = tasks.filter((task) => task.project_id === selectedProject.id);
 			if (filtered !== null) setTableData(flattenTasks(filtered));
 			setFilteredTasks(filtered);
 		} else {
-			if (tasks !== null) setTableData(flattenTasks(tasks));
-			setFilteredTasks(tasks);
+			setTableData([]);
+			setFilteredTasks([]);
 		}
 	}, [tasks, selectedProject]);
 
@@ -110,18 +138,16 @@ export default function Tasks() {
 				<div className="flex flex-col gap-2 justify-between w-[350px] ml-2 md:ml-0">
 					<Select
 						onValueChange={(value) => {
-							const selected = projects.find((project) => String(project.id) === value);
-							setSelectedProject(selected);
+							setSelectedProject(activeProjects.find((project) => String(project.id) === value));
 						}}
 						value={selectedProject ? String(selectedProject.id) : ""}
 					>
 						<SelectTrigger>
-							<SelectValue placeholder="All Projects" />
+							<SelectValue placeholder="Select Project" />
 						</SelectTrigger>
 						<SelectContent>
-							<SelectItem value={null}>All Projects</SelectItem>
-							{Array.isArray(projects) && projects.length > 0 ? (
-								projects.map((project) => (
+							{Array.isArray(activeProjects) && activeProjects.length > 0 ? (
+								activeProjects.map((project) => (
 									// <SelectItem key={project.id} value={project.id}>
 									<SelectItem key={project.id} value={String(project.id)}>
 										{project.title}
