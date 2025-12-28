@@ -63,7 +63,8 @@ export function AppSidebar() {
 	useEffect(() => {
 		if ((!epics || epics.length === 0) && !epicsLoaded) fetchEpics();
 	}, []);
-	const epicItems = epics.map((epic) => ({
+	const epicItems = epics.map((epic, index) => ({
+		id: 6 + index / 100,
 		title: epic.title,
 		url: `/${epic.id}`,
 		icon: ListOrderedIcon,
@@ -73,6 +74,7 @@ export function AppSidebar() {
 	// Menu items.
 	const items = [
 		{
+			id: 1,
 			title: "Dashboard",
 			url: "/dashboard",
 			icon: Gauge,
@@ -80,6 +82,7 @@ export function AppSidebar() {
 			subItems: [],
 		},
 		{
+			id: 2,
 			title: "Kanban Board",
 			url: "/kanban",
 			icon: KanbanSquareDashedIcon,
@@ -87,6 +90,7 @@ export function AppSidebar() {
 			subItems: [],
 		},
 		{
+			id: 3,
 			title: "Calendar",
 			url: "/calendar",
 			icon: CalendarClock,
@@ -94,6 +98,7 @@ export function AppSidebar() {
 			subItems: [],
 		},
 		{
+			id: 4,
 			title: "Tasks",
 			url: "/tasks",
 			icon: ClipboardList,
@@ -101,6 +106,7 @@ export function AppSidebar() {
 			subItems: [],
 		},
 		{
+			id: 5,
 			title: "Projects",
 			url: "/projects",
 			icon: FolderKanban,
@@ -108,6 +114,7 @@ export function AppSidebar() {
 			subItems: [],
 		},
 		{
+			id: 6,
 			title: "Epics",
 			url: "/epics",
 			icon: FolderTreeIcon,
@@ -115,6 +122,7 @@ export function AppSidebar() {
 			subItems: epicItems,
 		},
 		{
+			id: 7,
 			title: "Members",
 			url: "/users",
 			icon: Users2,
@@ -122,12 +130,14 @@ export function AppSidebar() {
 			subItems: [],
 		},
 		{
+			id: 8,
 			title: "Settings",
 			url: "/settings",
 			icon: Settings,
 			collapsible: true,
 			subItems: [
 				{
+					id: 8.1,
 					title: "Organization",
 					url: "/organization",
 					icon: Building,
@@ -135,6 +145,7 @@ export function AppSidebar() {
 					subItems: [],
 				},
 				{
+					id: 8.2,
 					title: "Categories",
 					url: "/categories",
 					icon: Tag,
@@ -142,6 +153,7 @@ export function AppSidebar() {
 					subItems: [],
 				},
 				{
+					id: 8.3,
 					title: "Task Statuses",
 					url: "/task-statuses",
 					icon: ListCheck,
@@ -233,8 +245,8 @@ export function AppSidebar() {
 						<SidebarMenu>
 							{items.map((item) =>
 								!item.collapsible ? (
-									<Link key={item.title} to={item.url} onClick={() => setCurrentPath(item.url)}>
-										<SidebarMenuItem key={item.title}>
+									<Link key={item.id} to={item.url} onClick={() => setCurrentPath(item.url)}>
+										<SidebarMenuItem>
 											<SidebarMenuButton isActive={currentPath === item.url || currentPath.startsWith(item.url + "/")} asChild>
 												<span title={item.title}>
 													<item.icon />
@@ -244,7 +256,7 @@ export function AppSidebar() {
 										</SidebarMenuItem>
 									</Link>
 								) : (
-									<Collapsible defaultOpen={item.title === "Epics"} key={item.title} className="group/collapsible cursor-pointer">
+									<Collapsible defaultOpen={item.title === "Epics"} key={item.id} className="group/collapsible cursor-pointer">
 										<SidebarMenuItem>
 											<CollapsibleTrigger asChild>
 												<SidebarMenuButton isActive={currentPath === item.url || currentPath.startsWith(item.url + "/")} asChild>
@@ -278,14 +290,13 @@ export function AppSidebar() {
 												<SidebarMenuSub>
 													{item.subItems.map((subItem) => (
 														<Link
-															key={subItem.title}
+															key={subItem.id}
 															to={item.url + subItem.url}
 															onClick={() => setCurrentPath(item.url + subItem.url)}
 														>
 															<SidebarMenuSubItem>
 																<SidebarMenuButton
 																	isChild={true}
-																	key={subItem.title}
 																	isActive={
 																		currentPath === item.url + subItem.url ||
 																		currentPath.startsWith(item.url + subItem.url + "/")
