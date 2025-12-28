@@ -41,19 +41,25 @@ import { useEpicHelpers } from "@/utils/epicHelpers";
 import { useEpicStore } from "@/store/epic/epicStore";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
+import Tasks from "@/pages/Tasks/List";
+import EpicDetails from "./details";
+import { useEpicsStore } from "@/store/epics/epicsStore";
 
-export default function EpicDetails() {
+export default function Epic() {
 	const { id } = useParams();
 	const { epic, epicLoading } = useEpicStore();
+	const { setSelectedEpic } = useEpicsStore();
 	const { fetchEpic } = useEpicHelpers();
 	// Fetch user details and reports when ID changes
 	useEffect(() => {
+		document.title = "Task Management | Epic";
 		if (Object.keys(epic).length === 0 || parseInt(epic.id) !== parseInt(id)) fetchEpic(id);
+		setSelectedEpic(id);
 		// if (!epicReports || epicReports.length === 0 || epic.id != parseInt(id)) fetchEpicReports(id);
 	}, [id]);
 
 	return (
-		<div className="flex flex-col w-screen md:w-full container p-5 md:p-0 sm:text-sm -mt-10">
+		<div className="flex flex-col w-screen md:w-full container  sm:text-sm">
 			{/* <div
 				className={`fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm z-40 transition-opacity duration-300 pointer-events-none ${
 					isOpen || isOpenUser || isOpenFilter || dialogOpen || deleteDialogOpen ? "opacity-100" : "opacity-0"
@@ -73,159 +79,10 @@ export default function EpicDetails() {
 			</Sheet> */}
 
 			{/* Main Content Grid */}
-			<div className="w-full grid grid-cols-1 md:grid-cols-12 gap-2 auto-rows-auto mt-4">
-				{epicLoading ? (
-					<div className="flex gap-2 col-span-12">
-						<Skeleton className="w-12 h-12 rounded-full" />
-						<Skeleton className="w-full md:w-1/2 h-12 rounded-full" />
-					</div>
-				) : (
-					<div className="col-span-12 mb-4">
-						<h1 className="flex items-start md:items-center gap-4 font-bold text-3xl">
-							<Flag className="hidden md:block" size={24} /> {epic?.title || "N/A"}
-						</h1>
-						{/* <p>View list of all epics</p> */}
-					</div>
-				)}
+			<div className="w-full grid grid-cols-1 md:grid-cols-12 gap-4 auto-rows-auto mt-4">
+				<EpicDetails />
 				<div className="col-span-12 h-fit flex flex-col gap-2">
-					{/* Epic Details */}
-					<div className="col-span-12  bg-card text-card-foreground border border-border rounded-xl container p-6">
-						{/* <div className="flex w-full font-bold text-lg mb-4">Details</div> */}
-						{epicLoading ? (
-							<>
-								<div className="flex flex-col gap-2 col-span-12 mb-2">
-									<Skeleton className="w-full h-8 rounded-lg" />
-								</div>
-								<div className="w-full grid grid-cols-2 md:grid-cols-12 gap-2">
-									{Array.from({ length: 4 }).map((_, index) => (
-										<div key={index} className="col-span-1 md:col-span-3 flex flex-col w-full gap-2">
-											{/* <Skeleton className="w-full h-4 rounded-full" /> */}
-											<span className="text-muted-foreground font-bold">
-												{index === 0 ? "Status" : index === 1 ? "Priority" : index === 2 ? "Owner" : "Slug"}
-											</span>
-											<Skeleton className="w-full h-6 rounded-full" />
-										</div>
-									))}
-								</div>
-								<hr className="w-full my-4 h-1" />
-								<div className="w-full grid grid-cols-2 md:grid-cols-12 gap-2">
-									{Array.from({ length: 3 }).map((_, index) => (
-										<div
-											key={index}
-											className={`${index === 2 ? "col-span-2 md:col-span-6" : "col-span-1 md:col-span-3"} flex flex-col w-full gap-2`}
-										>
-											<span className="text-muted-foreground font-bold">
-												{index === 0 ? "Start Date" : index === 1 ? "End Date" : "Remarks"}
-											</span>
-											<Skeleton className="w-full h-4 rounded-full" />
-										</div>
-									))}
-								</div>
-							</>
-						) : (
-							<>
-								<div className="mb-4">{epic?.description}</div>
-								<div className="grid grid-cols-2 md:grid-cols-12 justify-evenly mb-4 gap-2">
-									<div className="col-span-1 md:col-span-3 flex flex-col items-start gap-1">
-										<span className="text-muted-foreground font-bold">Status</span>
-										<span
-											className={`px-2 py-1 w-fit text-center rounded-2xl text-xs ${
-												statusColors[epic?.status?.color?.toLowerCase()] || ""
-											}`}
-										>
-											{epic?.status?.name}
-										</span>
-									</div>
-									<div className="col-span-1 md:col-span-3 flex flex-col items-start gap-1">
-										<span className="text-muted-foreground font-bold">Priority</span>
-										<span
-											className={`px-2 py-1 w-fit text-center rounded text-xs ${
-												priorityColors[epic?.priority] || "bg-gray-200 text-gray-800"
-											}`}
-										>
-											{epic?.priority?.replace("_", " ")}
-										</span>
-									</div>
-									<div className="col-span-1 md:col-span-3 flex flex-col items-start gap-1">
-										<span className="text-muted-foreground font-bold">Owner</span>
-										{epic.owner_id && (
-											<Link to={`/users/${epic.owner_id}`}>
-												<span
-													title="View Profile"
-													className="flex justify-center items-center px-2 py-1 rounded-full bg-background/50 border-2 border-foreground/50 text-foreground text-xs gap-2 hover:cursor-pointer"
-												>
-													<User size={16} /> {epic.owner.name}
-												</span>
-											</Link>
-										)}
-									</div>
-									<div className="col-span-1 md:col-span-3 flex flex-col items-start gap-1">
-										<span className="text-muted-foreground font-bold">Slug</span>
-										<span>{epic?.slug}</span>
-									</div>
-								</div>
-								<hr className="w-full my-4 h-1" />
-								<div className="w-full grid grid-cols-2 md:grid-cols-12 auto-rows-auto gap-2">
-									<div className="col-span-1 md:col-span-3 flex flex-col items-start gap-1">
-										<span className="text-muted-foreground font-bold">Start Date</span>
-										<div className="flex gap-1">
-											<CalendarDaysIcon size={16} />
-											<span className="text-card-foreground">
-												{epic?.start_date ? format(new Date(epic.start_date), "MMM-dd yyyy") : "--"}
-											</span>
-										</div>
-									</div>
-									<div className="col-span-1 md:col-span-3 flex flex-col items-start gap-1">
-										<span className="text-muted-foreground font-bold">End Date</span>
-										<div className="flex gap-1">
-											<CalendarDaysIcon size={16} />
-											<span className="text-card-foreground">
-												{epic?.end_date ? format(new Date(epic.end_date), "MMM-dd yyyy") : "--"}
-											</span>
-										</div>
-									</div>
-									<div className="col-span-2 md:col-span-6 flex flex-col items-start gap-1">
-										<span className="text-muted-foreground font-bold">Remarks</span>
-										<span>{epic?.remarks}</span>
-									</div>
-								</div>
-							</>
-						)}
-					</div>
-				</div>
-				{/* Side panel */}
-				<div className="col-span-12 md:col-span-4 h-fit flex flex-col gap-2">
-					{/* Epic Projects */}
-					<div className="bg-card text-card-foreground border border-border rounded-xl container p-6">
-						<div className="flex w-full font-bold text-lg mb-4">Projects</div>
-						<div className="flex flex-col overflow-auto justify-start items-start gap-2 pb-2">
-							{Array.from({ length: 5 }).map((_, index) => (
-								<Skeleton key={index} className="w-full h-10 rounded-lg" />
-							))}
-						</div>
-					</div>
-					{/* Some Widgets */}
-					<div className="bg-card text-card-foreground border border-border rounded-xl container p-6">
-						<div className="flex w-full font-bold text-lg mb-4">Widget</div>
-						<div className="flex flex-col overflow-auto justify-start items-start gap-2 pb-2">
-							{Array.from({ length: 3 }).map((_, index) => (
-								<Skeleton key={index} className="w-full h-10 rounded-lg" />
-							))}
-						</div>
-					</div>
-				</div>
-				{/* Main Panel */}
-				<div className="col-span-12 md:col-span-8 h-fit flex flex-col gap-2">
-					{/* Epic Project-Tasks */}
-					{/* TODO: Bring grid list and item here */}
-					<div className="bg-card text-card-foreground border border-border rounded-xl container p-6">
-						<div className="flex w-full font-bold text-lg mb-4">Tasks</div>
-						<div className="flex flex-col justify-start items-start gap-2 pb-2 max-h-96 overflow-auto">
-							{Array.from({ length: 8 }).map((_, index) => (
-								<Skeleton key={index} className="w-full min-h-28 rounded-lg" />
-							))}
-						</div>
-					</div>
+					<Tasks />
 				</div>
 			</div>
 		</div>
