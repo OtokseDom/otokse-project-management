@@ -237,6 +237,7 @@ export default function EpicGridItem({ epic, setIsOpen = () => {}, setUpdateData
 							to={`/epics/${epic.id}`}
 							onClick={(e) => {
 								e.stopPropagation();
+								setSelectedEpic(epic.id);
 							}}
 						>
 							<Button variant="ghost" title={`View ${epic.title}`}>
