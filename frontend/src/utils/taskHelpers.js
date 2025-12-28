@@ -220,12 +220,14 @@ export function getProjectProgress() {
 	if (selectedProject) {
 		projectTasks = tasks.filter((task) => task.project_id === selectedProject.id && task.parent_id === null);
 	} else {
-		projectTasks = (tasks || []).filter((task) => task.parent_id === null);
+		// All projects
+		// projectTasks = (tasks || []).filter((task) => task.parent_id === null);
+		projectTasks = [];
 	}
 
 	const tasksCount = projectTasks.length;
 	if (tasksCount === 0) {
-		const text = `0/0 (0.00%) tasks completed for ${selectedProject ? "selected project" : "all projects"}`;
+		const text = `${selectedProject ? "0/0 (0.00%) tasks completed for selected project" : ""}`;
 		return { value: 0, text };
 	}
 
