@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { flexRender, getSortedRowModel, getFilteredRowModel, getCoreRowModel, getPaginationRowModel, useReactTable } from "@tanstack/react-table";
 // import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -10,9 +10,12 @@ import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useProjectsStore } from "@/store/projects/projectsStore";
+import { useEpicsStore } from "@/store/epics/epicsStore";
 
 // Convert the DataTable component to JavaScript
 export function DataTableProjects({ columns, isOpen, setIsOpen, updateData, setUpdateData }) {
+	const inProjects = location.pathname.startsWith("/projects") ? true : false;
+	const { selectedEpic } = useEpicsStore();
 	const [sorting, setSorting] = useState([]);
 	const [columnFilters, setColumnFilters] = useState([]);
 	const [columnVisibility, setColumnVisibility] = useState({
@@ -20,9 +23,19 @@ export function DataTableProjects({ columns, isOpen, setIsOpen, updateData, setU
 		"delay reason": false,
 		remarks: false,
 	});
-	const { projects: data, projectsLoading } = useProjectsStore();
+	const { projects, projectsLoading } = useProjectsStore();
+	const [filteredProjects, setFilteredProjects] = useState([]);
+
+	useEffect(() => {
+		if (inProjects) {
+			setFilteredProjects(projects);
+		} else {
+			setFilteredProjects(selectedEpic !== null && selectedEpic !== undefined ? projects.filter((project) => project.epic_id === selectedEpic) : []);
+		}
+		// console.log(inProjects);
+	}, [selectedEpic, inProjects]);
 	const table = useReactTable({
-		data: data,
+		data: filteredProjects,
 		columns,
 		getCoreRowModel: getCoreRowModel(),
 		getPaginationRowModel: getPaginationRowModel(),
