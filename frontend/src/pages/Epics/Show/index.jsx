@@ -44,6 +44,7 @@ import { format } from "date-fns";
 import Tasks from "@/pages/Tasks/List";
 import EpicDetails from "./details";
 import { useEpicsStore } from "@/store/epics/epicsStore";
+import Projects from "@/pages/Projects/List";
 
 export default function Epic() {
 	const { id } = useParams();
@@ -81,7 +82,10 @@ export default function Epic() {
 			{/* Main Content Grid */}
 			<div className="w-full grid grid-cols-1 md:grid-cols-12 gap-4 auto-rows-auto mt-4">
 				<EpicDetails />
-				<div className="col-span-12 h-fit flex flex-col gap-2">
+				<div className="col-span-6 h-fit flex flex-col gap-2">
+					<Projects />
+				</div>
+				<div className="col-span-6 h-fit flex flex-col gap-2">
 					<Tasks />
 				</div>
 			</div>
