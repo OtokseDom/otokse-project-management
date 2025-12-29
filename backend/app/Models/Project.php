@@ -13,6 +13,7 @@ class Project extends Model
 
     protected $fillable = [
         'organization_id',
+        'epic_id',
         'status_id',
         'title',
         'description',
@@ -41,6 +42,12 @@ class Project extends Model
         return $this->belongsTo(Organization::class);
     }
 
+    // Relationship with Epic
+    public function epic()
+    {
+        return $this->belongsTo(Epic::class);
+    }
+
     // Relationship with Task
     public function tasks()
     {
@@ -58,7 +65,7 @@ class Project extends Model
     /* -------------------------------------------------------------------------- */
     public function getProjects($organization_id)
     {
-        return $this->with('status:id,name,color')
+        return $this->with(['epic:id,title', 'status:id,name,color'])
             ->orderBy("id", "DESC")
             ->where('organization_id', $organization_id)
             ->get();
@@ -87,7 +94,7 @@ class Project extends Model
                 ]);
             }
 
-            $project->load(['status:id,name,color']);
+            $project->load(['epic:id,title', 'status:id,name,color']);
 
             $data = [
                 "project" => $project,
@@ -99,7 +106,7 @@ class Project extends Model
 
     public function showProject($organization_id, $project_id)
     {
-        return $this->with('status:id,name,color')->where('id', $project_id)
+        return $this->with(['epic:id,title', 'status:id,name,color'])->where('id', $project_id)
             ->where('organization_id', $organization_id)
             ->first();
     }
