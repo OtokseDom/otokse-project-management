@@ -23,6 +23,7 @@ class StoreProjectRequest extends FormRequest
     {
         return [
             'organization_id' => 'required|exists:organizations,id',
+            'epic_id' => 'nullable|exists:epics,id',
             'status_id' => 'nullable|exists:task_statuses,id',
             'title'           => 'required|string|max:255',
             'description'     => 'nullable|string',
