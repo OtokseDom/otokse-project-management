@@ -165,12 +165,12 @@ export default function TaskGridItem({
 			</div>
 			<div className="flex flex-col md:flex-row items-start justify-between gap-2">
 				<div className="min-w-0 max-w-full flex flex-col order-2 md:order-1 gap-2">
-					<div className="flex gap-2">
-						<GoalIcon size={32} className="inline-block mt-2 text-primary/50" />
+					<div className="flex items-center gap-2">
+						<GoalIcon size={24} className="inline-block text-primary/50" />
 						<div className="flex flex-col gap-0">
 							<h3 className="text-lg font-bold">{task.title || "Untitled task"}</h3>
 							{/* project */}
-							{projectName && <span className="font-bold text-muted-foreground text-sm">{projectName}</span>}
+							{/* {projectName && <span className="font-bold text-muted-foreground text-sm">{projectName}</span>} */}
 						</div>
 					</div>
 
