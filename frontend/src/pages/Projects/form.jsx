@@ -21,8 +21,10 @@ import { useTaskStatusesStore } from "@/store/taskStatuses/taskStatusesStore";
 import { useTaskHelpers } from "@/utils/taskHelpers";
 import { useKanbanColumnsStore } from "@/store/kanbanColumns/kanbanColumnsStore";
 import { useDashboardStore } from "@/store/dashboard/dashboardStore";
+import { useEpicsStore } from "@/store/epics/epicsStore";
 
 const formSchema = z.object({
+	epic_id: z.number().optional(),
 	title: z.string().refine((data) => data.trim() !== "", {
 		message: "Title is required.",
 	}),
@@ -44,6 +46,7 @@ const formSchema = z.object({
 export default function ProjectForm({ setIsOpen, updateData, setUpdateData }) {
 	const { user: user_auth } = useAuthContext();
 	const showToast = useToast();
+	const { epics } = useEpicsStore();
 	const { addProject, updateProject, projectsLoading, setProjectsLoading } = useProjectsStore([]);
 	const { updateProjectFilter, addProjectFilter } = useDashboardStore();
 	const { addKanbanColumn } = useKanbanColumnsStore();
@@ -53,6 +56,7 @@ export default function ProjectForm({ setIsOpen, updateData, setUpdateData }) {
 	const form = useForm({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
+			epic_id: undefined,
 			title: "",
 			description: "",
 			// target_date: undefined,
@@ -77,9 +81,23 @@ export default function ProjectForm({ setIsOpen, updateData, setUpdateData }) {
 	});
 	useEffect(() => {
 		if (updateData) {
-			const { title, description, start_date, end_date, actual_date, days_estimate, days_taken, delay_days, delay_reason, priority, remarks, status_id } =
-				updateData;
+			const {
+				epic_id,
+				title,
+				description,
+				start_date,
+				end_date,
+				actual_date,
+				days_estimate,
+				days_taken,
+				delay_days,
+				delay_reason,
+				priority,
+				remarks,
+				status_id,
+			} = updateData;
 			form.reset({
+				epic_id: epic_id || undefined,
 				title: title || "",
 				description: description || "",
 				start_date: start_date ? parseISO(start_date) : null,
@@ -200,6 +218,39 @@ export default function ProjectForm({ setIsOpen, updateData, setUpdateData }) {
 	return (
 		<Form {...form}>
 			<form onSubmit={form.handleSubmit(handleSubmit)} className="flex flex-col gap-4 max-w-md w-full">
+				<FormField
+					disabled={!isEditable}
+					control={form.control}
+					name="epic_id"
+					render={({ field }) => {
+						return (
+							<FormItem>
+								<FormLabel>Epic</FormLabel>
+								<Select onValueChange={(value) => field.onChange(Number(value))} value={field.value ? field.value.toString() : ""}>
+									<FormControl>
+										<SelectTrigger>
+											<SelectValue placeholder="Select an epic">
+												{field.value ? epics?.find((epic) => epic.id == field.value).title : "Select an epic"}
+											</SelectValue>
+										</SelectTrigger>
+									</FormControl>
+									<SelectContent>
+										{Array.isArray(epics) && epics.length > 0 ? (
+											epics.map((epic) => (
+												<SelectItem key={epic.id} value={epic.id.toString()}>
+													{epic.title}
+												</SelectItem>
+											))
+										) : (
+											<></>
+										)}
+									</SelectContent>
+								</Select>
+								<FormMessage />
+							</FormItem>
+						);
+					}}
+				/>
 				<FormField
 					disabled={!isEditable}
 					control={form.control}
