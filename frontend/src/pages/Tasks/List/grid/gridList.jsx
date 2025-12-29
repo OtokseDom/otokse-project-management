@@ -187,8 +187,10 @@ export default function GridList({ tasks, setIsOpen, setUpdateData, setParentId,
 									setDeleteDialogOpen={setDeleteDialogOpen}
 								/>
 							))
-						) : (
+						) : searchValue ? (
 							<div className="text-center text-muted-foreground py-8">No tasks found matching "{searchValue}"</div>
+						) : (
+							<div className="text-center text-muted-foreground py-8">No tasks found</div>
 						)}
 					</div>
 				</SortableContext>
