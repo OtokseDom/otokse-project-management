@@ -18,6 +18,7 @@ class ProjectResource extends JsonResource
         return [
             'id'             => $this->id,
             'organization_id' => $this->organization_id,
+            'epic_id' => $this->epic_id,
             'status_id' => $this->status_id,
             'title'          => $this->title,
             'description'    => $this->description,
@@ -34,6 +35,11 @@ class ProjectResource extends JsonResource
             'remarks'        => $this->remarks,
             'created_at'     => $this->created_at->format('Y-m-d H:i:s'),
             'updated_at'     => $this->updated_at->format('Y-m-d H:i:s'),
+            'epic' => $this->whenLoaded('epic', function () {
+                return $this->epic ? [
+                    'title' => $this->epic->title,
+                ] : null;
+            }),
             'status' => $this->whenLoaded('status', function () {
                 return $this->status ? [
                     'name' => $this->status->name,
