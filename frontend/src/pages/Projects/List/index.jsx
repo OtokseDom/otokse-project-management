@@ -13,14 +13,19 @@ import { Plus, Rows3, Table } from "lucide-react";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import ProjectForm from "../form";
 import { Input } from "@/components/ui/input";
+import { useEpicsStore } from "@/store/epics/epicsStore";
 
 export default function Projects() {
+	// Determine if in projects page or in epic page
+	const inProjects = location.pathname.startsWith("/projects") ? true : false;
+	const { selectedEpic } = useEpicsStore();
 	const { projects, projectsLoaded, projectsLoading, setProjectsLoading } = useProjectsStore([]);
 	const { taskStatuses } = useTaskStatusesStore();
 	const { fetchProjects, fetchTaskStatuses } = useTaskHelpers();
 
 	const [view, setView] = useState(() => "grid");
 	const showToast = useToast();
+	const [filteredProjects, setFilteredProjects] = useState([]);
 	const [isOpen, setIsOpen] = useState(false);
 	const [updateData, setUpdateData] = useState({});
 	const [dialogOpen, setDialogOpen] = useState(false);
@@ -37,6 +42,14 @@ export default function Projects() {
 		if (!taskStatuses || taskStatuses.length === 0) fetchTaskStatuses();
 		if ((!projects || projects.length === 0) && !projectsLoaded) fetchProjects();
 	}, []);
+	useEffect(() => {
+		if (inProjects) {
+			setFilteredProjects(projects);
+		} else {
+			setFilteredProjects(selectedEpic !== null && selectedEpic !== undefined ? projects.filter((project) => project.epic_id === selectedEpic) : []);
+		}
+		// console.log(inProjects);
+	}, [selectedEpic, inProjects, projects]);
 
 	const checkHasRelation = async (project = {}) => {
 		setProjectsLoading(true);
@@ -58,11 +71,11 @@ export default function Projects() {
 		if (!dialogOpen) setHasRelation(false);
 	}, [dialogOpen]);
 
-	const displayProjects = searchValue.trim() ? searchProjects : projects;
+	const displayProjects = searchValue.trim() ? searchProjects : filteredProjects;
 	// Update search results whenever search value or sorted tasks change
 	useEffect(() => {
 		if (searchValue.trim()) {
-			const searchResults = projects.filter((project) => {
+			const searchResults = filteredProjects.filter((project) => {
 				return project.title.toLowerCase().includes(searchValue.toLowerCase());
 			});
 			setSearchProjects(searchResults);
@@ -167,8 +180,10 @@ export default function Projects() {
 										// context={context}
 										// contextId={contextId}
 									/>
-								) : (
+								) : searchValue ? (
 									<div className="text-center text-muted-foreground py-8">No projects found matching "{searchValue}"</div>
+								) : (
+									<div className="text-center text-muted-foreground py-8">No projects found</div>
 								)}
 								{dialog}
 							</>
