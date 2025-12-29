@@ -55,7 +55,7 @@ export default function Epic() {
 	useEffect(() => {
 		document.title = "Task Management | Epic";
 		if (Object.keys(epic).length === 0 || parseInt(epic.id) !== parseInt(id)) fetchEpic(id);
-		setSelectedEpic(id);
+		setSelectedEpic(Number(id));
 		// if (!epicReports || epicReports.length === 0 || epic.id != parseInt(id)) fetchEpicReports(id);
 	}, [id]);
 
@@ -82,10 +82,10 @@ export default function Epic() {
 			{/* Main Content Grid */}
 			<div className="w-full grid grid-cols-1 md:grid-cols-12 gap-4 auto-rows-auto mt-4">
 				<EpicDetails />
-				<div className="col-span-6 h-fit flex flex-col gap-2">
+				<div className="col-span-12 h-fit max:h-screen overflow-auto">
 					<Projects />
 				</div>
-				<div className="col-span-6 h-fit flex flex-col gap-2">
+				<div className="col-span-12 h-fit max:h-screen overflow-auto">
 					<Tasks />
 				</div>
 			</div>
