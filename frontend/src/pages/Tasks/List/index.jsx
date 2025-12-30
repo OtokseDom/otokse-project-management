@@ -121,8 +121,8 @@ export default function Tasks() {
 			/>
 			<div className="flex items-center justify-between">
 				<div>
-					<h1 className=" font-extrabold text-3xl">Tasks</h1>
-					<p>View list of all tasks</p>
+					<h1 className=" font-extrabold text-xl">Tasks</h1>
+					{/* <p>View list of all tasks</p> */}
 				</div>
 				{/* Tabs */}
 				<div className="gap-1 ml-4 inline-flex rounded-md bg-muted/5 p-1">
