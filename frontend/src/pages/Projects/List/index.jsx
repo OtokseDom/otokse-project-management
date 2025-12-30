@@ -92,8 +92,8 @@ export default function Projects() {
 			/>
 			<div className="flex items-center justify-between">
 				<div>
-					<h1 className=" font-extrabold text-3xl">Projects</h1>
-					<p>View list of all projects</p>
+					<h1 className=" font-extrabold text-xl">Projects</h1>
+					{/* <p>View list of all projects</p> */}
 				</div>
 				{/* Tabs */}
 				<div className="gap-1 ml-4 inline-flex rounded-md bg-muted/5 p-1">
