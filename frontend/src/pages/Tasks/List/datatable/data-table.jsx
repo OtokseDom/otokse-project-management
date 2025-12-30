@@ -267,7 +267,7 @@ export function DataTableTasks({ columns, data, showLess = true }) {
 					Reset sort
 				</Button>
 			</div>
-			<div className="rounded-md">
+			<div className="rounded-md h-fit max-h-screen overflow-auto">
 				<Table>
 					<TableHeader>
 						{table.getHeaderGroups().map((headerGroup) => (
