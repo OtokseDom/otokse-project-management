@@ -91,7 +91,7 @@ export function DataTableProjects({ columns, isOpen, setIsOpen, updateData, setU
 					</Button>
 				</div>
 			</div>
-			<div className="rounded-md">
+			<div className="rounded-md h-fit max-h-screen overflow-auto">
 				<Table>
 					<TableHeader>
 						{table.getHeaderGroups().map((headerGroup) => (
