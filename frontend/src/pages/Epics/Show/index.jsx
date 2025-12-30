@@ -82,10 +82,10 @@ export default function Epic() {
 			{/* Main Content Grid */}
 			<div className="w-full grid grid-cols-1 md:grid-cols-12 gap-4 auto-rows-auto mt-4">
 				<EpicDetails />
-				<div className="col-span-12 h-fit max:h-screen overflow-auto">
+				<div className="col-span-12 h-fit max-h-screen">
 					<Projects />
 				</div>
-				<div className="col-span-12 h-fit max:h-screen overflow-auto">
+				<div className="col-span-12 h-fit max-h-screen">
 					<Tasks />
 				</div>
 			</div>
