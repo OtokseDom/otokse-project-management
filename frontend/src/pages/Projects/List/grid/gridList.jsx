@@ -160,7 +160,7 @@ export default function GridList({ projects, setIsOpen, setUpdateData, checkHasR
 		<div className="w-full scrollbar-custom mt-10">
 			{/* <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={handleDragStart} onDragEnd={debouncedHandleDragEnd}>
 				<SortableContext items={sortableIds} strategy={verticalListSortingStrategy}> */}
-			<div className="flex flex-col gap-4 w-full">
+			<div className="flex flex-col gap-4 w-full h-fit max-h-screen overflow-auto">
 				{projects.map((project) => (
 					<ProjectGridItem
 						key={project.id}
