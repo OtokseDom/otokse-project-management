@@ -60,7 +60,7 @@ export default function Epic() {
 	}, [id]);
 
 	return (
-		<div className="flex flex-col w-screen md:w-full container  sm:text-sm">
+		<div className="flex flex-col w-screen md:w-full items-center justify-center ">
 			{/* <div
 				className={`fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm z-40 transition-opacity duration-300 pointer-events-none ${
 					isOpen || isOpenUser || isOpenFilter || dialogOpen || deleteDialogOpen ? "opacity-100" : "opacity-0"
@@ -80,10 +80,28 @@ export default function Epic() {
 			</Sheet> */}
 
 			{/* Main Content Grid */}
-			<div className="w-full grid grid-cols-1 md:grid-cols-12 gap-4 auto-rows-auto mt-4">
-				<EpicDetails />
-				<div className="col-span-12 h-fit max-h-full">
-					<Projects />
+			<div className="w-full grid grid-cols-1 md:grid-cols-12 items-center justify-center gap-2 md:gap-4 auto-rows-auto mt-4">
+				{/* Epic title */}
+				{epicLoading ? (
+					<div className="flex gap-2 col-span-12">
+						<Skeleton className="w-12 h-12 rounded-full" />
+						<Skeleton className="w-full md:w-1/2 h-12 rounded-full" />
+					</div>
+				) : (
+					<div className="col-span-12 mb-4 mx-4">
+						<h1 className="flex items-start md:items-center gap-4 font-bold text-3xl">
+							<Flag className="hidden md:block" size={24} /> {epic?.title || "N/A"}
+						</h1>
+						{/* <p>View list of all epics</p> */}
+					</div>
+				)}
+				<div className="grid grid-cols-1 md:grid-cols-12 col-span-12 gap-2 md:gap-4">
+					<div className="order-2 md:order-1 col-span-1 md:col-span-8 h-fit max-h-full">
+						<Projects />
+					</div>
+					<div className="order-1 md:order-2 col-span-1 md:col-span-4">
+						<EpicDetails />
+					</div>
 				</div>
 				<div className="col-span-12 h-fit max-h-full">
 					<Tasks />
