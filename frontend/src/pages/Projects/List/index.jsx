@@ -83,114 +83,116 @@ export default function Projects() {
 	}, [searchValue]);
 
 	return (
-		<div className="w-screen md:w-full bg-card text-card-foreground border border-border rounded-2xl container p-4 md:p-10 shadow-md">
-			<div
-				className={`fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm z-40 transition-opacity duration-300 pointer-events-none ${
-					isOpen ? "opacity-100" : "opacity-0"
-				}`}
-				aria-hidden="true"
-			/>
-			<div className="flex items-center justify-between">
-				<div>
-					<h1 className=" font-extrabold text-xl">Projects</h1>
-					{/* <p>View list of all projects</p> */}
-				</div>
-				{/* Tabs */}
-				<div className="gap-1 ml-4 inline-flex rounded-md bg-muted/5 p-1">
-					<Button title="Grid view" variant={view === "grid" ? "" : "ghost"} onClick={() => setView("grid")}>
-						<Rows3 size={16} />
-					</Button>
-					<Button
-						title="Table view"
-						variant={view === "list" ? "" : "ghost"}
-						onClick={() => {
-							setView("list");
-							setSearchValue("");
-						}}
-					>
-						<Table size={16} />
-					</Button>
-				</div>
-			</div>
-			<Sheet open={isOpen} onOpenChange={setIsOpen} modal={false}>
-				{!projectsLoading && (
-					<div className={`flex w-full my-4 ${view === "grid" ? "justify-between" : "justify-end"}`}>
-						{view === "grid" ? (
-							<Input
-								placeholder={"Search title ..."}
-								value={searchValue}
-								onChange={(event) => setSearchValue(event.target.value)}
-								className="max-w-sm"
-							/>
-						) : (
-							""
-						)}
-
-						<SheetTrigger asChild>
-							<Button variant="">
-								<Plus />
-								Add Project
-							</Button>
-						</SheetTrigger>
+		<div className="w-screen md:w-full px-2 md:px-0">
+			<div className="w-full bg-card text-card-foreground border border-border rounded-2xl p-4 md:p-6 shadow-md">
+				<div
+					className={`fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm z-40 transition-opacity duration-300 pointer-events-none ${
+						isOpen ? "opacity-100" : "opacity-0"
+					}`}
+					aria-hidden="true"
+				/>
+				<div className="flex items-center justify-between">
+					<div>
+						<h1 className=" font-extrabold text-xl">Projects</h1>
+						{/* <p>View list of all projects</p> */}
 					</div>
-				)}
-				<SheetContent side="right" className="overflow-y-auto w-[400px] sm:w-[540px]">
-					<SheetHeader>
-						<SheetTitle>{updateData?.id ? "Update Project" : "Add Project"}</SheetTitle>
-						<SheetDescription className="sr-only">Navigate through the app using the options below.</SheetDescription>
-					</SheetHeader>
-					<ProjectForm setIsOpen={setIsOpen} updateData={updateData} setUpdateData={setUpdateData} />
-				</SheetContent>
-			</Sheet>
-			{/* Updated table to fix dialog per column issue */}
-			{(() => {
-				const { columnsProject: projectColumns, dialog } = columnsProject({
-					setIsOpen,
-					setUpdateData,
-					dialogOpen,
-					setDialogOpen,
-					checkHasRelation,
-					hasRelation,
-					selectedProjectId,
-				});
-				return (
-					<>
-						{view === "list" ? (
-							<>
-								<DataTableProjects
-									columns={projectColumns}
-									updateData={updateData}
-									setUpdateData={setUpdateData}
-									isOpen={isOpen}
-									setIsOpen={setIsOpen}
+					{/* Tabs */}
+					<div className="gap-1 ml-4 inline-flex rounded-md bg-muted/5 p-1">
+						<Button title="Grid view" variant={view === "grid" ? "" : "ghost"} onClick={() => setView("grid")}>
+							<Rows3 size={16} />
+						</Button>
+						<Button
+							title="Table view"
+							variant={view === "list" ? "" : "ghost"}
+							onClick={() => {
+								setView("list");
+								setSearchValue("");
+							}}
+						>
+							<Table size={16} />
+						</Button>
+					</div>
+				</div>
+				<Sheet open={isOpen} onOpenChange={setIsOpen} modal={false}>
+					{!projectsLoading && (
+						<div className={`flex w-full my-4 ${view === "grid" ? "justify-between" : "justify-end"}`}>
+							{view === "grid" ? (
+								<Input
+									placeholder={"Search title ..."}
+									value={searchValue}
+									onChange={(event) => setSearchValue(event.target.value)}
+									className="max-w-sm"
 								/>
-								{dialog}
-							</>
-						) : (
-							<>
-								{displayProjects.length > 0 ? (
-									<GridList
-										projects={displayProjects}
-										setIsOpen={setIsOpen}
+							) : (
+								""
+							)}
+
+							<SheetTrigger asChild>
+								<Button variant="">
+									<Plus />
+									Add Project
+								</Button>
+							</SheetTrigger>
+						</div>
+					)}
+					<SheetContent side="right" className="overflow-y-auto w-[400px] sm:w-[540px]">
+						<SheetHeader>
+							<SheetTitle>{updateData?.id ? "Update Project" : "Add Project"}</SheetTitle>
+							<SheetDescription className="sr-only">Navigate through the app using the options below.</SheetDescription>
+						</SheetHeader>
+						<ProjectForm setIsOpen={setIsOpen} updateData={updateData} setUpdateData={setUpdateData} />
+					</SheetContent>
+				</Sheet>
+				{/* Updated table to fix dialog per column issue */}
+				{(() => {
+					const { columnsProject: projectColumns, dialog } = columnsProject({
+						setIsOpen,
+						setUpdateData,
+						dialogOpen,
+						setDialogOpen,
+						checkHasRelation,
+						hasRelation,
+						selectedProjectId,
+					});
+					return (
+						<>
+							{view === "list" ? (
+								<>
+									<DataTableProjects
+										columns={projectColumns}
+										updateData={updateData}
 										setUpdateData={setUpdateData}
-										checkHasRelation={checkHasRelation}
-										dialogOpen={dialogOpen}
-										setDialogOpen={setDialogOpen}
-										hasRelation={hasRelation}
-										// context={context}
-										// contextId={contextId}
+										isOpen={isOpen}
+										setIsOpen={setIsOpen}
 									/>
-								) : searchValue ? (
-									<div className="text-center text-muted-foreground py-8">No projects found matching "{searchValue}"</div>
-								) : (
-									<div className="text-center text-muted-foreground py-8">No projects found</div>
-								)}
-								{dialog}
-							</>
-						)}
-					</>
-				);
-			})()}
+									{dialog}
+								</>
+							) : (
+								<>
+									{displayProjects.length > 0 ? (
+										<GridList
+											projects={displayProjects}
+											setIsOpen={setIsOpen}
+											setUpdateData={setUpdateData}
+											checkHasRelation={checkHasRelation}
+											dialogOpen={dialogOpen}
+											setDialogOpen={setDialogOpen}
+											hasRelation={hasRelation}
+											// context={context}
+											// contextId={contextId}
+										/>
+									) : searchValue ? (
+										<div className="text-center text-muted-foreground py-8">No projects found matching "{searchValue}"</div>
+									) : (
+										<div className="text-center text-muted-foreground py-8">No projects found</div>
+									)}
+									{dialog}
+								</>
+							)}
+						</>
+					);
+				})()}
+			</div>
 		</div>
 	);
 }
