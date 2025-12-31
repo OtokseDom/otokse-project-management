@@ -103,145 +103,153 @@ export default function Tasks() {
 	const { text: taskProgressText, value: taskProgressValue } = getProjectProgress();
 
 	return (
-		<div className="w-screen md:w-full bg-card text-card-foreground border border-border rounded-2xl container p-4 md:p-10 shadow-md">
-			<div
-				className={`fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm z-40 transition-opacity duration-300 pointer-events-none ${
-					isOpen || dialogOpen || deleteDialogOpen
-						? // || deleteDialogOpen
-						  "opacity-100"
-						: "opacity-0"
-				}`}
-				aria-hidden="true"
-			/>
-			<div
-				className={`fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm z-40 transition-opacity duration-300 pointer-events-none ${
-					dialogOpen ? "opacity-100" : "opacity-0"
-				}`}
-				aria-hidden="true"
-			/>
-			<div className="flex items-center justify-between">
-				<div>
-					<h1 className=" font-extrabold text-xl">Tasks</h1>
-					{/* <p>View list of all tasks</p> */}
-				</div>
-				{/* Tabs */}
-				<div className="gap-1 ml-4 inline-flex rounded-md bg-muted/5 p-1">
-					<Button title="Grid view" variant={view === "grid" ? "" : "ghost"} onClick={() => setView("grid")}>
-						<Rows3 size={16} />
-					</Button>
-					<Button title="Table view" variant={view === "list" ? "" : "ghost"} onClick={() => setView("list")}>
-						<Table size={16} />
-					</Button>
-				</div>
-			</div>
-			<div className="w-full justify-between flex items-start my-4 gap-2">
-				<div className="flex flex-col gap-2 justify-between w-[350px] ml-2 md:ml-0">
-					<Select
-						onValueChange={(value) => {
-							setSelectedProject(activeProjects.find((project) => String(project.id) === value));
-						}}
-						value={selectedProject ? String(selectedProject.id) : ""}
-					>
-						<SelectTrigger>
-							<SelectValue placeholder="Select Project" />
-						</SelectTrigger>
-						<SelectContent>
-							{Array.isArray(activeProjects) && activeProjects.length > 0 ? (
-								activeProjects.map((project) => (
-									// <SelectItem key={project.id} value={project.id}>
-									<SelectItem key={project.id} value={String(project.id)}>
-										{project.title}
-									</SelectItem>
-								))
-							) : (
-								<SelectItem disabled>No projects available</SelectItem>
-							)}
-						</SelectContent>
-					</Select>
-
-					{/* Project Progress Bar */}
-					<div className="w-full text-xs text-muted-foreground flex flex-col items-end">
-						<span>{taskProgressText}</span>
-						<Progress value={taskProgressValue} progressColor="bg-primary/50" className="h-2 w-full mt-1" />
+		<div className="w-screen md:w-full px-2 md:px-0">
+			<div className="w-full bg-card text-card-foreground border border-border rounded-2xl p-4 md:p-6 shadow-md">
+				<div
+					className={`fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm z-40 transition-opacity duration-300 pointer-events-none ${
+						isOpen || dialogOpen || deleteDialogOpen
+							? // || deleteDialogOpen
+							  "opacity-100"
+							: "opacity-0"
+					}`}
+					aria-hidden="true"
+				/>
+				<div
+					className={`fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm z-40 transition-opacity duration-300 pointer-events-none ${
+						dialogOpen ? "opacity-100" : "opacity-0"
+					}`}
+					aria-hidden="true"
+				/>
+				<div className="flex items-center justify-between">
+					<div>
+						<h1 className=" font-extrabold text-xl">Tasks</h1>
+						{/* <p>View list of all tasks</p> */}
+					</div>
+					{/* Tabs */}
+					<div className="gap-1 ml-4 inline-flex rounded-md bg-muted/5 p-1">
+						<Button title="Grid view" variant={view === "grid" ? "" : "ghost"} onClick={() => setView("grid")}>
+							<Rows3 size={16} />
+						</Button>
+						<Button title="Table view" variant={view === "list" ? "" : "ghost"} onClick={() => setView("list")}>
+							<Table size={16} />
+						</Button>
 					</div>
 				</div>
-				<Sheet open={isOpen} onOpenChange={setIsOpen} modal={false}>
-					<SheetTrigger asChild>
-						<Button variant="">
-							<Plus />
-							Add Task
-						</Button>
-					</SheetTrigger>
-					<SheetContent side="right" className="overflow-y-auto w-full sm:w-[640px] p-2 md:p-6">
-						<SheetHeader>
-							<SheetTitle>
-								<Tabs loading={tasksLoading} updateData={updateData} activeTab={activeTab} setActiveTab={setActiveTab} parentId={parentId} />
-							</SheetTitle>
-							<SheetDescription className="sr-only">Navigate through the app using the options below.</SheetDescription>
-						</SheetHeader>
-						{activeTab == "history" ? (
-							<History selectedTaskHistory={selectedTaskHistory} />
-						) : activeTab == "relations" ? (
-							<Relations setUpdateData={setUpdateData} setParentId={setParentId} setProjectId={setProjectId} />
-						) : activeTab == "discussions" ? (
-							<TaskDiscussions taskId={updateData?.id} />
-						) : (
-							<TaskForm
-								parentId={parentId}
-								projectId={projectId}
-								isOpen={isOpen}
-								setIsOpen={setIsOpen}
-								updateData={updateData}
-								setUpdateData={setUpdateData}
-							/>
-						)}
-					</SheetContent>
-				</Sheet>
-			</div>
-			{/* Updated table to fix dialog per column issue */}
-			{(() => {
-				const {
-					columnsTask: taskColumns,
-					dialog,
-					bulkDialog,
-				} = columnsTask({
-					dialogOpen,
-					setDialogOpen,
-					setIsOpen,
-					setUpdateData,
-				});
+				<div className="w-full justify-between flex items-start my-4 gap-2">
+					<div className="flex flex-col gap-2 justify-between w-[350px] ml-2 md:ml-0">
+						<Select
+							onValueChange={(value) => {
+								setSelectedProject(activeProjects.find((project) => String(project.id) === value));
+							}}
+							value={selectedProject ? String(selectedProject.id) : ""}
+						>
+							<SelectTrigger>
+								<SelectValue placeholder="Select Project" />
+							</SelectTrigger>
+							<SelectContent>
+								{Array.isArray(activeProjects) && activeProjects.length > 0 ? (
+									activeProjects.map((project) => (
+										// <SelectItem key={project.id} value={project.id}>
+										<SelectItem key={project.id} value={String(project.id)}>
+											{project.title}
+										</SelectItem>
+									))
+								) : (
+									<SelectItem disabled>No projects available</SelectItem>
+								)}
+							</SelectContent>
+						</Select>
 
-				const context = selectedProject ? "project" : "all_projects";
-				const contextId = selectedProject?.id || null;
-
-				return (
-					<>
-						{view === "list" ? (
-							<>
-								<DataTableTasks columns={taskColumns} data={tableData} />
-								{dialog}
-								{bulkDialog}
-							</>
-						) : (
-							<>
-								<GridList
-									tasks={filteredTasks}
+						{/* Project Progress Bar */}
+						<div className="w-full text-xs text-muted-foreground flex flex-col items-end">
+							<span>{taskProgressText}</span>
+							<Progress value={taskProgressValue} progressColor="bg-primary/50" className="h-2 w-full mt-1" />
+						</div>
+					</div>
+					<Sheet open={isOpen} onOpenChange={setIsOpen} modal={false}>
+						<SheetTrigger asChild>
+							<Button variant="">
+								<Plus />
+								Add Task
+							</Button>
+						</SheetTrigger>
+						<SheetContent side="right" className="overflow-y-auto w-full sm:w-[640px] p-2 md:p-6">
+							<SheetHeader>
+								<SheetTitle>
+									<Tabs
+										loading={tasksLoading}
+										updateData={updateData}
+										activeTab={activeTab}
+										setActiveTab={setActiveTab}
+										parentId={parentId}
+									/>
+								</SheetTitle>
+								<SheetDescription className="sr-only">Navigate through the app using the options below.</SheetDescription>
+							</SheetHeader>
+							{activeTab == "history" ? (
+								<History selectedTaskHistory={selectedTaskHistory} />
+							) : activeTab == "relations" ? (
+								<Relations setUpdateData={setUpdateData} setParentId={setParentId} setProjectId={setProjectId} />
+							) : activeTab == "discussions" ? (
+								<TaskDiscussions taskId={updateData?.id} />
+							) : (
+								<TaskForm
+									parentId={parentId}
+									projectId={projectId}
+									isOpen={isOpen}
 									setIsOpen={setIsOpen}
+									updateData={updateData}
 									setUpdateData={setUpdateData}
-									setParentId={setParentId}
-									setProjectId={setProjectId}
-									deleteDialogOpen={deleteDialogOpen}
-									setDeleteDialogOpen={setDeleteDialogOpen}
-									context={context}
-									contextId={contextId}
 								/>
-								{dialog}
-								{bulkDialog}
-							</>
-						)}
-					</>
-				);
-			})()}
+							)}
+						</SheetContent>
+					</Sheet>
+				</div>
+				{/* Updated table to fix dialog per column issue */}
+				{(() => {
+					const {
+						columnsTask: taskColumns,
+						dialog,
+						bulkDialog,
+					} = columnsTask({
+						dialogOpen,
+						setDialogOpen,
+						setIsOpen,
+						setUpdateData,
+					});
+
+					const context = selectedProject ? "project" : "all_projects";
+					const contextId = selectedProject?.id || null;
+
+					return (
+						<>
+							{view === "list" ? (
+								<>
+									<DataTableTasks columns={taskColumns} data={tableData} />
+									{dialog}
+									{bulkDialog}
+								</>
+							) : (
+								<>
+									<GridList
+										tasks={filteredTasks}
+										setIsOpen={setIsOpen}
+										setUpdateData={setUpdateData}
+										setParentId={setParentId}
+										setProjectId={setProjectId}
+										deleteDialogOpen={deleteDialogOpen}
+										setDeleteDialogOpen={setDeleteDialogOpen}
+										context={context}
+										contextId={contextId}
+									/>
+									{dialog}
+									{bulkDialog}
+								</>
+							)}
+						</>
+					);
+				})()}
+			</div>
 		</div>
 	);
 }
