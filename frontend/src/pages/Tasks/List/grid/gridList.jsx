@@ -169,7 +169,7 @@ export default function GridList({ tasks, setIsOpen, setUpdateData, setParentId,
 	}
 
 	return (
-		<div className="w-full h-fit max-h-screen overflow-auto scrollbar-custom mt-10">
+		<div className="w-full h-96 overflow-auto scrollbar-custom mt-10">
 			<Input placeholder={"Search title ..."} value={searchValue} onChange={(event) => setSearchValue(event.target.value)} className="max-w-sm" />
 			<DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={handleDragStart} onDragEnd={debouncedHandleDragEnd}>
 				<SortableContext items={sortableIds} strategy={verticalListSortingStrategy}>
