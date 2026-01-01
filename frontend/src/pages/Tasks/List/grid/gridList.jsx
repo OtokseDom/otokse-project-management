@@ -173,7 +173,7 @@ export default function GridList({ tasks, setIsOpen, setUpdateData, setParentId,
 			<Input placeholder={"Search title ..."} value={searchValue} onChange={(event) => setSearchValue(event.target.value)} className="max-w-sm" />
 			<DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={handleDragStart} onDragEnd={debouncedHandleDragEnd}>
 				<SortableContext items={sortableIds} strategy={verticalListSortingStrategy}>
-					<div className="flex flex-col gap-4 w-full mt-4">
+					<div className="flex flex-col gap-2 w-full mt-4">
 						{displayTasks.length > 0 ? (
 							displayTasks.map((task) => (
 								<TaskGridItem
