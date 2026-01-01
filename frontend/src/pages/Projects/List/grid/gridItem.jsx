@@ -149,7 +149,7 @@ export default function ProjectGridItem({ project, setIsOpen = () => {}, setUpda
 			// 	transition,
 			// 	opacity: isDragging ? 0.5 : 1,
 			// }}
-			className="bg-sidebar text-card-foreground border border-border rounded-lg p-4 flex flex-col shadow-sm w-full"
+			className="bg-sidebar text-card-foreground border border-border rounded-lg p-4 flex flex-col shadow w-full"
 		>
 			{/* Header */}
 			{/* <div
