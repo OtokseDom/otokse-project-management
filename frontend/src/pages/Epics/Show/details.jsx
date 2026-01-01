@@ -12,7 +12,7 @@ export default function EpicDetails() {
 	return (
 		<div className="w-screen md:w-full px-2 md:px-0">
 			{/* Epic Details */}
-			<div className="w-full bg-card text-card-foreground border border-border rounded-2xl p-4 md:p-10">
+			<div className="w-full bg-card text-card-foreground border border-border rounded-2xl p-4 md:p-10 shadow-md">
 				{/* <div className="flex w-full font-bold text-lg mb-4">Details</div> */}
 				{epicLoading ? (
 					<>
