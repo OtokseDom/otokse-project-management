@@ -157,7 +157,7 @@ export default function TaskGridItem({
 				transition,
 				opacity: isDragging ? 0.5 : 1,
 			}}
-			className="bg-sidebar text-card-foreground border border-border rounded-lg p-4 flex flex-col shadow-sm w-full"
+			className="bg-sidebar text-card-foreground border border-border rounded-lg p-4 flex flex-col shadow w-full"
 		>
 			{/* Header */}
 			<div className="w-full py-1 hover:cursor-grab active:cursor-grabbing" {...listeners} {...attributes}>
