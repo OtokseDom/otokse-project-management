@@ -250,7 +250,7 @@ export function AppSidebar() {
 											<SidebarMenuButton isActive={currentPath === item.url || currentPath.startsWith(item.url + "/")} asChild>
 												<span title={item.title}>
 													<item.icon />
-													{item.title}
+													{item.title.length > 15 ? `${item.title.slice(0, 15)}...` : item.title}
 												</span>
 											</SidebarMenuButton>
 										</SidebarMenuItem>
@@ -263,7 +263,7 @@ export function AppSidebar() {
 													<span title={item.title} className="flex flex-row justify-between">
 														<span className="flex items-center gap-2">
 															<item.icon size={16} />
-															{item.title}
+															{item.title.length > 15 ? `${item.title.slice(0, 15)}...` : item.title}
 														</span>
 														<div className="flex gap-2">
 															<span>
@@ -309,7 +309,7 @@ export function AppSidebar() {
 																>
 																	<span>
 																		<subItem.icon />
-																		{subItem.title}
+																		{subItem.title.length > 15 ? `${subItem.title.slice(0, 15)}...` : subItem.title}
 																	</span>
 																</SidebarMenuButton>
 															</SidebarMenuSubItem>
@@ -344,7 +344,7 @@ export function AppSidebar() {
 						<DropdownMenu>
 							<DropdownMenuTrigger asChild>
 								<SidebarMenuButton title={`Profile | ${user?.data?.name}`}>
-									<User2 /> {user?.data?.name}
+									<User2 /> {user?.data?.name?.length > 15 ? `${user?.data?.name?.slice(0, 15)}...` : user?.data?.name}
 									<ChevronUp className="ml-auto" />
 								</SidebarMenuButton>
 							</DropdownMenuTrigger>
