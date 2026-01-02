@@ -8,8 +8,10 @@ import { useEpicsStore } from "@/store/epics/epicsStore";
 import { API } from "@/constants/api";
 import axiosClient from "@/axios.client";
 import { useToast } from "@/contexts/ToastContextProvider";
+import { useNavigate } from "react-router-dom";
 
 export default function DeleteDialog({ dialogOpen, setDialogOpen, hasRelation, selectedEpicId }) {
+	const navigate = useNavigate();
 	const { epicsLoading, removeEpic, removeSelectedEpic, setEpicsLoading } = useEpicsStore([]);
 	// const { removeEpicFilter } = useDashboardStore();
 	// const { removeKanbanColumnByEpic } = useKanbanColumnsStore();
@@ -24,6 +26,7 @@ export default function DeleteDialog({ dialogOpen, setDialogOpen, hasRelation, s
 			// removeEpicFilter(id);
 			removeSelectedEpic();
 			showToast("Success!", "Epic deleted.", 3000);
+			navigate("/epics");
 		} catch (e) {
 			showToast("Failed!", e.response?.data?.message, 3000, "fail");
 			if (e.message !== "Request aborted") console.error("Error fetching data:", e.message);
