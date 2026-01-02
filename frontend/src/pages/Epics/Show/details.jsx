@@ -1,16 +1,27 @@
 "use client";
-import { CalendarDaysIcon, Flag, User } from "lucide-react";
+import { CalendarDaysIcon, Edit, Flag, Trash2, User } from "lucide-react";
 import { Skeleton } from "../../../components/ui/skeleton";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { useEpicStore } from "@/store/epic/epicStore";
 import { priorityColors, statusColors } from "@/utils/taskHelpers";
-import { Link } from "react-router-dom";
 import { format } from "date-fns";
+import { Button } from "@/components/ui/button";
+import { useEpicHelpers } from "@/utils/epicHelpers";
+import EpicForm from "../form";
+import DeleteDialog from "../List/deleteDialog";
 
 export default function EpicDetails() {
-	const { epic, epicLoading } = useEpicStore();
+	const { epic, epicLoading, isOpen, setIsOpen, updateData, dialogOpen, setDialogOpen, hasRelation, selectedEpicId } = useEpicStore();
+	const { checkHasRelation, handleUpdateEpic } = useEpicHelpers();
 
 	return (
 		<div className="w-screen md:w-full px-2 md:px-0">
+			<div
+				className={`fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm z-40 transition-opacity duration-300 pointer-events-none ${
+					isOpen ? "opacity-100" : "opacity-0"
+				}`}
+				aria-hidden="true"
+			/>
 			{/* Epic Details */}
 			<div className="w-full bg-card text-card-foreground border border-border rounded-2xl p-4 md:p-10 shadow-md">
 				{/* <div className="flex w-full font-bold text-lg mb-4">Details</div> */}
@@ -45,6 +56,31 @@ export default function EpicDetails() {
 					</>
 				) : (
 					<>
+						{/* Actions */}
+						<div className="flex w-full justify-end">
+							<Sheet open={isOpen} onOpenChange={setIsOpen} modal={false}>
+								<SheetContent side="right" className="overflow-y-auto w-[400px] sm:w-[540px]">
+									<SheetHeader>
+										<SheetTitle>{updateData?.id ? "Update Epic" : "Add Epic"}</SheetTitle>
+										<SheetDescription className="sr-only">Navigate through the app using the options below.</SheetDescription>
+									</SheetHeader>
+									<EpicForm />
+								</SheetContent>
+							</Sheet>
+							<Button variant="ghost" size="sm" title="Edit" onClick={() => handleUpdateEpic(epic)}>
+								<Edit size={12} />
+							</Button>
+							<Button
+								variant="ghost"
+								size="sm"
+								title="Delete"
+								onClick={() => {
+									checkHasRelation(epic);
+								}}
+							>
+								<Trash2 size={12} className="text-destructive" />
+							</Button>
+						</div>
 						<div className="mb-4">{epic?.description}</div>
 						<div className="grid grid-cols-2 md:grid-cols-12 justify-evenly mb-4 gap-2">
 							<div className="col-span-1 md:col-span-6 flex flex-col items-start gap-1">
@@ -105,6 +141,7 @@ export default function EpicDetails() {
 					</>
 				)}
 			</div>
+			<DeleteDialog dialogOpen={dialogOpen} setDialogOpen={setDialogOpen} hasRelation={hasRelation} selectedEpicId={selectedEpicId} />
 		</div>
 	);
 }
