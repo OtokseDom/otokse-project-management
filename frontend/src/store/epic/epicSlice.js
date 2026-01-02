@@ -34,4 +34,10 @@ export const createEpicSlice = (set) => ({
 	setEpicLoaded: (loaded) => set({ epicLoaded: loaded }),
 	epicLoading: false,
 	setEpicLoading: (loading) => set({ epicLoading: loading }),
+
+	// Update Form
+	isOpen: false,
+	setIsOpen: (isOpen) => set({ isOpen }),
+	updateData: {},
+	setUpdateData: (updateData) => set({ updateData }),
 });

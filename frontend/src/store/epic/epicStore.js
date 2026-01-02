@@ -18,5 +18,9 @@ export const useEpicStore = () => {
 		setEpicLoaded: useAppStore((state) => state.setEpicLoaded),
 		epicLoading: useAppStore((state) => state.epicLoading),
 		setEpicLoading: useAppStore((state) => state.setEpicLoading),
+		isOpen: useAppStore((state) => state.isOpen),
+		setIsOpen: useAppStore((state) => state.setIsOpen),
+		updateData: useAppStore((state) => state.updateData),
+		setUpdateData: useAppStore((state) => state.setUpdateData),
 	};
 };
