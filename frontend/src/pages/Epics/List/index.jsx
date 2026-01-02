@@ -14,27 +14,25 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTr
 import EpicForm from "../form";
 import { Input } from "@/components/ui/input";
 import { useUsersStore } from "@/store/users/usersStore";
+import { useEpicHelpers } from "@/utils/epicHelpers";
+import { useEpicStore } from "@/store/epic/epicStore";
 
-// TODO: Epic dashboard
 export default function Epics() {
 	const { epics, epicsLoaded, epicsLoading, setEpicsLoading } = useEpicsStore([]);
+	const { isOpen, setIsOpen, updateData, setUpdateData } = useEpicStore();
 	const { taskStatuses } = useTaskStatusesStore();
 	const { users } = useUsersStore();
-	const { fetchEpics, fetchTaskStatuses, fetchUsers } = useTaskHelpers();
+	const { fetchTaskStatuses, fetchUsers } = useTaskHelpers();
+	const { fetchEpics } = useEpicHelpers();
 
 	const [view, setView] = useState(() => "grid");
 	const showToast = useToast();
-	const [isOpen, setIsOpen] = useState(false);
-	const [updateData, setUpdateData] = useState({});
 	const [dialogOpen, setDialogOpen] = useState(false);
 	const [selectedEpicId, setSelectedEpicId] = useState(null);
 	const [hasRelation, setHasRelation] = useState(false);
 	const [searchValue, setSearchValue] = useState("");
 	const [searchEpics, setSearchEpics] = useState([]);
 
-	useEffect(() => {
-		if (!isOpen) setUpdateData({});
-	}, [isOpen]);
 	useEffect(() => {
 		document.title = "Task Management | Epics";
 		if (!taskStatuses || taskStatuses.length === 0) fetchTaskStatuses();
@@ -130,14 +128,14 @@ export default function Epics() {
 						<SheetTitle>{updateData?.id ? "Update Epic" : "Add Epic"}</SheetTitle>
 						<SheetDescription className="sr-only">Navigate through the app using the options below.</SheetDescription>
 					</SheetHeader>
-					<EpicForm setIsOpen={setIsOpen} updateData={updateData} setUpdateData={setUpdateData} />
+					<EpicForm />
 				</SheetContent>
 			</Sheet>
 			{/* Updated table to fix dialog per column issue */}
 			{(() => {
 				const { columnsEpic: epicColumns, dialog } = columnsEpic({
-					setIsOpen,
-					setUpdateData,
+					// setIsOpen,
+					// setUpdateData,
 					dialogOpen,
 					setDialogOpen,
 					checkHasRelation,
@@ -150,10 +148,10 @@ export default function Epics() {
 							<>
 								<DataTableEpics
 									columns={epicColumns}
-									updateData={updateData}
-									setUpdateData={setUpdateData}
-									isOpen={isOpen}
-									setIsOpen={setIsOpen}
+									// updateData={updateData}
+									// setUpdateData={setUpdateData}
+									// isOpen={isOpen}
+									// setIsOpen={setIsOpen}
 								/>
 								{dialog}
 							</>
@@ -162,8 +160,6 @@ export default function Epics() {
 								{displayEpics.length > 0 ? (
 									<GridList
 										epics={displayEpics}
-										setIsOpen={setIsOpen}
-										setUpdateData={setUpdateData}
 										checkHasRelation={checkHasRelation}
 										dialogOpen={dialogOpen}
 										setDialogOpen={setDialogOpen}

@@ -9,7 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import EpicGridItem from "./gridItem";
 import { useEpicsStore } from "@/store/epics/epicsStore";
 
-export default function GridList({ epics, setIsOpen, setUpdateData, checkHasRelation, setDialogOpen, dialogOpen, hasRelation }) {
+export default function GridList({ epics, checkHasRelation, setDialogOpen, dialogOpen, hasRelation }) {
 	// const { tasksLoading, setTaskPositions, updateTaskPositionLocal, getSortedTasks, positionsLoaded, setPositionsLoaded } = useTasksStore();
 	const { epicsLoading } = useEpicsStore();
 
@@ -165,8 +165,6 @@ export default function GridList({ epics, setIsOpen, setUpdateData, checkHasRela
 					<EpicGridItem
 						key={epic.id}
 						epic={epic}
-						setIsOpen={setIsOpen}
-						setUpdateData={setUpdateData}
 						checkHasRelation={checkHasRelation}
 						dialogOpen={dialogOpen}
 						setDialogOpen={setDialogOpen}

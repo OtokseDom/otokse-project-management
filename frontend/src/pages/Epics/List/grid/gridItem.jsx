@@ -30,9 +30,12 @@ import { useTaskDiscussionsStore } from "@/store/taskDiscussions/taskDiscussions
 import { useTaskStatusesStore } from "@/store/taskStatuses/taskStatusesStore";
 import { useEpicsStore } from "@/store/epics/epicsStore";
 import { Link } from "react-router-dom";
+import { useEpicStore } from "@/store/epic/epicStore";
 
-export default function EpicGridItem({ epic, setIsOpen = () => {}, setUpdateData = () => {}, checkHasRelation = () => {} }) {
+export default function EpicGridItem({ epic, checkHasRelation = () => {} }) {
 	const { epics, setSelectedEpic } = useEpicsStore();
+	const { setIsOpen, setUpdateData } = useEpicStore();
+
 	const { taskStatuses } = useTaskStatusesStore();
 	const [open, setOpen] = useState(false);
 	const [selectedEpics, setSelectedEpics] = useState(null);

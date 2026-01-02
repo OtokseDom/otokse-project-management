@@ -21,6 +21,7 @@ import { useTaskStatusesStore } from "@/store/taskStatuses/taskStatusesStore";
 // import { useDashboardStore } from "@/store/dashboard/dashboardStore";
 import { useEpicsStore } from "@/store/epics/epicsStore";
 import { useUsersStore } from "@/store/users/usersStore";
+import { useEpicStore } from "@/store/epic/epicStore";
 
 const slugRegex = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const formSchema = z.object({
@@ -39,10 +40,12 @@ const formSchema = z.object({
 	priority: z.string().optional(),
 });
 
-export default function EpicForm({ setIsOpen, updateData, setUpdateData }) {
+export default function EpicForm() {
 	const { user: user_auth } = useAuthContext();
 	const showToast = useToast();
 	const { addEpic, updateEpic, epicsLoading, setEpicsLoading } = useEpicsStore([]);
+	const { setIsOpen, updateData, setUpdateData } = useEpicStore();
+
 	const { users } = useUsersStore();
 	// const { updateEpicFilter, addEpicFilter } = useDashboardStore();
 	// const { addKanbanColumn } = useKanbanColumnsStore();
