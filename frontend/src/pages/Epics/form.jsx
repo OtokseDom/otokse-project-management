@@ -22,6 +22,7 @@ import { useTaskStatusesStore } from "@/store/taskStatuses/taskStatusesStore";
 import { useEpicsStore } from "@/store/epics/epicsStore";
 import { useUsersStore } from "@/store/users/usersStore";
 import { useEpicStore } from "@/store/epic/epicStore";
+import { useEpicHelpers } from "@/utils/epicHelpers";
 
 const slugRegex = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const formSchema = z.object({
@@ -45,6 +46,7 @@ export default function EpicForm() {
 	const showToast = useToast();
 	const { addEpic, updateEpic, epicsLoading, setEpicsLoading } = useEpicsStore([]);
 	const { setIsOpen, updateData, setUpdateData } = useEpicStore();
+	const { fetchEpic } = useEpicHelpers();
 
 	const { users } = useUsersStore();
 	// const { updateEpicFilter, addEpicFilter } = useDashboardStore();
@@ -101,6 +103,7 @@ export default function EpicForm() {
 			} else {
 				const epicResponse = await axiosClient.put(API().epic(updateData?.id), parsedForm);
 				updateEpic(updateData?.id, epicResponse.data.data);
+				fetchEpic(updateData?.id);
 				// updateEpicFilter(updateData?.id, { label: epicResponse.data.data.title });
 				showToast("Success!", "Epic updated.", 3000);
 			}
