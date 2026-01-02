@@ -19,7 +19,7 @@ import { useEpicStore } from "@/store/epic/epicStore";
 
 export default function Epics() {
 	const { epics, epicsLoaded, epicsLoading, setEpicsLoading } = useEpicsStore([]);
-	const { isOpen, setIsOpen, updateData, dialogOpen, setDialogOpen } = useEpicStore();
+	const { isOpen, setIsOpen, updateData, setUpdateData, dialogOpen, setDialogOpen } = useEpicStore();
 	const { taskStatuses } = useTaskStatusesStore();
 	const { users } = useUsersStore();
 	const { fetchTaskStatuses, fetchUsers } = useTaskHelpers();
@@ -92,7 +92,12 @@ export default function Epics() {
 						)}
 
 						<SheetTrigger asChild>
-							<Button variant="">
+							<Button
+								variant=""
+								onClick={() => {
+									setUpdateData({});
+								}}
+							>
 								<Plus />
 								Add Epic
 							</Button>
