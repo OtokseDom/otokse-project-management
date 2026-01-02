@@ -19,17 +19,13 @@ import { useEpicStore } from "@/store/epic/epicStore";
 
 export default function Epics() {
 	const { epics, epicsLoaded, epicsLoading, setEpicsLoading } = useEpicsStore([]);
-	const { isOpen, setIsOpen, updateData, setUpdateData } = useEpicStore();
+	const { isOpen, setIsOpen, updateData, dialogOpen, setDialogOpen } = useEpicStore();
 	const { taskStatuses } = useTaskStatusesStore();
 	const { users } = useUsersStore();
 	const { fetchTaskStatuses, fetchUsers } = useTaskHelpers();
 	const { fetchEpics } = useEpicHelpers();
 
 	const [view, setView] = useState(() => "grid");
-	const showToast = useToast();
-	const [dialogOpen, setDialogOpen] = useState(false);
-	const [selectedEpicId, setSelectedEpicId] = useState(null);
-	const [hasRelation, setHasRelation] = useState(false);
 	const [searchValue, setSearchValue] = useState("");
 	const [searchEpics, setSearchEpics] = useState([]);
 
@@ -39,26 +35,6 @@ export default function Epics() {
 		if (!users || users.length === 0) fetchUsers();
 		if ((!epics || epics.length === 0) && !epicsLoaded) fetchEpics();
 	}, []);
-
-	const checkHasRelation = async (epic = {}) => {
-		setEpicsLoading(true);
-		setTimeout(() => {
-			setDialogOpen(true);
-		}, 100);
-		setSelectedEpicId(epic.id);
-		try {
-			const hasRelationResponse = await axiosClient.post(API().relation_check("epic", epic.id));
-			setHasRelation(hasRelationResponse?.data?.data?.exists);
-		} catch (e) {
-			showToast("Failed!", e.response?.data?.message, 3000, "fail");
-			if (e.message !== "Request aborted") console.error("Error fetching data:", e.message);
-		} finally {
-			setEpicsLoading(false);
-		}
-	};
-	useEffect(() => {
-		if (!dialogOpen) setHasRelation(false);
-	}, [dialogOpen]);
 
 	const displayEpics = searchValue.trim() ? searchEpics : epics;
 	// Update search results whenever search value or sorted tasks change
@@ -136,11 +112,11 @@ export default function Epics() {
 				const { columnsEpic: epicColumns, dialog } = columnsEpic({
 					// setIsOpen,
 					// setUpdateData,
-					dialogOpen,
-					setDialogOpen,
-					checkHasRelation,
-					hasRelation,
-					selectedEpicId,
+					// dialogOpen,
+					// setDialogOpen,
+					// checkHasRelation,
+					// hasRelation,
+					// selectedEpicId,
 				});
 				return (
 					<>
@@ -160,10 +136,10 @@ export default function Epics() {
 								{displayEpics.length > 0 ? (
 									<GridList
 										epics={displayEpics}
-										checkHasRelation={checkHasRelation}
-										dialogOpen={dialogOpen}
-										setDialogOpen={setDialogOpen}
-										hasRelation={hasRelation}
+										// checkHasRelation={checkHasRelation}
+										// dialogOpen={dialogOpen}
+										// setDialogOpen={setDialogOpen}
+										// hasRelation={hasRelation}
 										// context={context}
 										// contextId={contextId}
 									/>

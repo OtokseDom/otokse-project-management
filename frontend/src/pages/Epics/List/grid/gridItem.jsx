@@ -31,13 +31,15 @@ import { useTaskStatusesStore } from "@/store/taskStatuses/taskStatusesStore";
 import { useEpicsStore } from "@/store/epics/epicsStore";
 import { Link } from "react-router-dom";
 import { useEpicStore } from "@/store/epic/epicStore";
+import { useEpicHelpers } from "@/utils/epicHelpers";
 
-export default function EpicGridItem({ epic, checkHasRelation = () => {} }) {
+export default function EpicGridItem({ epic }) {
 	const { epics, setSelectedEpic } = useEpicsStore();
 	const { setIsOpen, setUpdateData } = useEpicStore();
+	const { checkHasRelation } = useEpicHelpers();
 
-	const { taskStatuses } = useTaskStatusesStore();
-	const [open, setOpen] = useState(false);
+	// const { taskStatuses } = useTaskStatusesStore();
+	// const [open, setOpen] = useState(false);
 	const [selectedEpics, setSelectedEpics] = useState(null);
 
 	// DnD Kit integration

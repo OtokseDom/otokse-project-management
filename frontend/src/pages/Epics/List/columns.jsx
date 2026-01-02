@@ -9,11 +9,13 @@ import { useEpicsStore } from "@/store/epics/epicsStore";
 import { Link } from "react-router-dom";
 import DeleteDialog from "./deleteDialog";
 import { useEpicStore } from "@/store/epic/epicStore";
+import { useEpicHelpers } from "@/utils/epicHelpers";
 
-export const columnsEpic = ({ dialogOpen, setDialogOpen, checkHasRelation, hasRelation, selectedEpicId }) => {
+export const columnsEpic = () => {
 	const { setSelectedEpic, epics } = useEpicsStore();
 	const { user } = useAuthContext(); // Get authenticated user details
-	const { setIsOpen, setUpdateData } = useEpicStore();
+	const { setIsOpen, setUpdateData, dialogOpen, setDialogOpen, hasRelation, selectedEpicId } = useEpicStore();
+	const { checkHasRelation } = useEpicHelpers();
 
 	const handleUpdateEpic = (epic) => {
 		setTimeout(() => {
