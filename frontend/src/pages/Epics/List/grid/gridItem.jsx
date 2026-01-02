@@ -26,17 +26,13 @@ import { Button } from "@/components/ui/button";
 import { useTasksStore } from "@/store/tasks/tasksStore";
 import { Progress } from "@/components/ui/progress";
 import { getSubtaskProgress, priorityColors, statusColors } from "@/utils/taskHelpers";
-import { useTaskDiscussionsStore } from "@/store/taskDiscussions/taskDiscussionsStore";
-import { useTaskStatusesStore } from "@/store/taskStatuses/taskStatusesStore";
 import { useEpicsStore } from "@/store/epics/epicsStore";
 import { Link } from "react-router-dom";
-import { useEpicStore } from "@/store/epic/epicStore";
 import { useEpicHelpers } from "@/utils/epicHelpers";
 
 export default function EpicGridItem({ epic }) {
-	const { epics, setSelectedEpic } = useEpicsStore();
-	const { setIsOpen, setUpdateData } = useEpicStore();
-	const { checkHasRelation } = useEpicHelpers();
+	const { setSelectedEpic } = useEpicsStore();
+	const { checkHasRelation, handleUpdateEpic } = useEpicHelpers();
 
 	// const { taskStatuses } = useTaskStatusesStore();
 	// const [open, setOpen] = useState(false);
@@ -70,12 +66,6 @@ export default function EpicGridItem({ epic }) {
 	const statusClass = statusColors?.[statusKey] ?? "bg-muted/20 text-muted-foreground";
 	const priorityClass = priorityColors?.[priority] ?? "bg-muted/20 text-muted-foreground";
 
-	const handleUpdateEpic = (epic) => {
-		setTimeout(() => {
-			setIsOpen(true);
-			setUpdateData(epic);
-		}, 100);
-	};
 	// const openEdit = (epic) => {
 	// 	setUpdateData(epic);
 	// 	setIsOpen(true);
