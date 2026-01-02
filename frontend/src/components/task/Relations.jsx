@@ -5,7 +5,7 @@ import { Progress } from "../ui/progress";
 import { useTasksStore } from "@/store/tasks/tasksStore";
 import { useTaskStatusesStore } from "@/store/taskStatuses/taskStatusesStore";
 
-export default function Relations({ setUpdateData, setParentId, setProjectId }) {
+export default function Relations({ setUpdateData, setParentId }) {
 	const { relations, setActiveTab, taskHistory, setSelectedTaskHistory } = useTasksStore();
 	const { taskStatuses } = useTaskStatusesStore();
 	const findStatus = (status_id) => {
@@ -83,7 +83,6 @@ export default function Relations({ setUpdateData, setParentId, setProjectId }) 
 						className="w-full rounded-none"
 						onClick={() => {
 							setParentId(relations?.id);
-							setProjectId(relations?.project_id);
 							setUpdateData({});
 							setActiveTab("update");
 						}}
@@ -98,7 +97,6 @@ export default function Relations({ setUpdateData, setParentId, setProjectId }) 
 						className="w-full rounded"
 						onClick={() => {
 							setParentId(relations?.id);
-							setProjectId(relations?.project_id);
 							setUpdateData({});
 							setActiveTab("update");
 						}}

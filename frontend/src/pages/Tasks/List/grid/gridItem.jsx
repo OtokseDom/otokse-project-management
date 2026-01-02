@@ -37,7 +37,6 @@ export default function TaskGridItem({
 	setIsOpen = () => {},
 	setUpdateData = () => {},
 	setParentId = () => {},
-	setProjectId = () => {},
 	deleteDialogOpen = false,
 	setDeleteDialogOpen,
 }) {
@@ -108,26 +107,10 @@ export default function TaskGridItem({
 
 	const handleAddSubtask = (parent) => {
 		setParentId(parent.id);
-		setProjectId(parent.project_id || null);
 		setUpdateData({}); // empty payload for new subtask
 		setIsOpen(true);
 	};
 
-	// const handleDelete = async (t) => {
-	// 	if (!confirm("Delete task? This cannot be undone.")) return;
-	// 	setLoading(true);
-	// 	try {
-	// 		await axiosClient.delete(API().task(t.id));
-	// 		await fetchTasks();
-	// 		await fetchReports();
-	// 		showToast("Success!", "Task deleted.", 3000);
-	// 	} catch (e) {
-	// 		showToast("Failed!", e.response?.data?.message || e.message, 3000, "fail");
-	// 		console.error(e);
-	// 	} finally {
-	// 		setLoading(false);
-	// 	}
-	// };
 	// When bulkAction is "delete", just open the dialog
 	useEffect(() => {
 		if (bulkAction === "delete") {

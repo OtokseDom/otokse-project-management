@@ -10,7 +10,7 @@ import { API } from "@/constants/api";
 import axiosClient from "@/axios.client";
 import { Input } from "@/components/ui/input";
 
-export default function GridList({ tasks, setIsOpen, setUpdateData, setParentId, setProjectId, deleteDialogOpen, setDeleteDialogOpen, context, contextId }) {
+export default function GridList({ tasks, setIsOpen, setUpdateData, setParentId, deleteDialogOpen, setDeleteDialogOpen, context, contextId }) {
 	const { tasksLoading, setTaskPositions, updateTaskPositionLocal, getSortedTasks, positionsLoaded, setPositionsLoaded } = useTasksStore();
 
 	const [activeId, setActiveId] = useState(null);
@@ -182,7 +182,6 @@ export default function GridList({ tasks, setIsOpen, setUpdateData, setParentId,
 									setIsOpen={setIsOpen}
 									setUpdateData={setUpdateData}
 									setParentId={setParentId}
-									setProjectId={setProjectId}
 									deleteDialogOpen={deleteDialogOpen}
 									setDeleteDialogOpen={setDeleteDialogOpen}
 								/>

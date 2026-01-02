@@ -22,7 +22,8 @@ import { useTaskHelpers } from "@/utils/taskHelpers";
 import { useKanbanColumnsStore } from "@/store/kanbanColumns/kanbanColumnsStore";
 import { useDashboardStore } from "@/store/dashboard/dashboardStore";
 import { useEpicsStore } from "@/store/epics/epicsStore";
-
+// TODO: Auto fill epic when available
+// TODO: Auto fill unique slug validating existing slugs
 const formSchema = z.object({
 	epic_id: z.number().optional(),
 	title: z.string().refine((data) => data.trim() !== "", {

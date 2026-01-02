@@ -27,7 +27,7 @@ import { useUserStore } from "@/store/user/userStore";
 import RichTextEditor from "@/components/ui/RichTextEditor";
 import ImageUpload from "@/components/ui/image-upload";
 import TaskAttachments from "@/components/task/Attachment";
-
+// TODO: Auto fill project and epic when available
 const formSchema = z.object({
 	parent_id: z.number().optional(),
 	status_id: z.number().optional(),
@@ -56,13 +56,13 @@ const formSchema = z.object({
 	remarks: z.string().optional(),
 	priority: z.string().optional(),
 });
-export default function TaskForm({ parentId, projectId, isOpen, setIsOpen, updateData, setUpdateData }) {
+export default function TaskForm({ parentId, isOpen, setIsOpen, updateData, setUpdateData }) {
 	const { fetchTasks, fetchReports, fetchUserReports } = useTaskHelpers();
 	const { tasks, relations, setRelations, addRelation, selectedUser, setActiveTab, options, tasksLoading, setTasksLoading } = useTasksStore();
 	const { taskStatuses } = useTaskStatusesStore();
 	const { users } = useUsersStore();
 	const { user } = useUserStore();
-	const { projects } = useProjectsStore();
+	const { projects, selectedProject } = useProjectsStore();
 	const { categories } = useCategoriesStore();
 	const { user: user_auth } = useAuthContext();
 	const showToast = useToast();
@@ -171,7 +171,7 @@ export default function TaskForm({ parentId, projectId, isOpen, setIsOpen, updat
 				title: title || "",
 				description: description || "",
 				parent_id: parent_id || parentId || undefined,
-				project_id: project_id || projectId || undefined,
+				project_id: project_id || selectedProject.id || undefined,
 				category_id: category_id || undefined,
 				// expected_output: expected_output || "",
 				start_date: typeof start_date === "string" ? parseISO(start_date) : start_date || null,

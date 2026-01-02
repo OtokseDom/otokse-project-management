@@ -19,7 +19,7 @@ import Tabs from "@/components/task/Tabs";
 import { TaskDiscussions } from "@/components/task/Discussion";
 import { Progress } from "@/components/ui/progress";
 import { useEpicsStore } from "@/store/epics/epicsStore";
-
+// TODO: Add calendar and kanban view as task view options
 export default function Tasks() {
 	// const { loading, setLoading } = useLoadContext();
 	const inTasks = location.pathname.startsWith("/tasks") ? true : false;
@@ -38,7 +38,6 @@ export default function Tasks() {
 
 	const [updateData, setUpdateData] = useState({});
 	const [parentId, setParentId] = useState(null); //for adding subtasks from relations tab
-	const [projectId, setProjectId] = useState(null); //for adding subtasks from relations tab
 
 	// Set whether Epic projects or all projects are in use
 	const [activeProjects, setActiveProjects] = useState([]);
@@ -55,7 +54,6 @@ export default function Tasks() {
 			setRelations({});
 			setActiveTab("update");
 			setParentId(null);
-			setProjectId(null);
 		}
 	}, [isOpen]);
 
@@ -189,18 +187,11 @@ export default function Tasks() {
 							{activeTab == "history" ? (
 								<History selectedTaskHistory={selectedTaskHistory} />
 							) : activeTab == "relations" ? (
-								<Relations setUpdateData={setUpdateData} setParentId={setParentId} setProjectId={setProjectId} />
+								<Relations setUpdateData={setUpdateData} setParentId={setParentId} />
 							) : activeTab == "discussions" ? (
 								<TaskDiscussions taskId={updateData?.id} />
 							) : (
-								<TaskForm
-									parentId={parentId}
-									projectId={projectId}
-									isOpen={isOpen}
-									setIsOpen={setIsOpen}
-									updateData={updateData}
-									setUpdateData={setUpdateData}
-								/>
+								<TaskForm parentId={parentId} isOpen={isOpen} setIsOpen={setIsOpen} updateData={updateData} setUpdateData={setUpdateData} />
 							)}
 						</SheetContent>
 					</Sheet>
@@ -236,7 +227,6 @@ export default function Tasks() {
 										setIsOpen={setIsOpen}
 										setUpdateData={setUpdateData}
 										setParentId={setParentId}
-										setProjectId={setProjectId}
 										deleteDialogOpen={deleteDialogOpen}
 										setDeleteDialogOpen={setDeleteDialogOpen}
 										context={context}
