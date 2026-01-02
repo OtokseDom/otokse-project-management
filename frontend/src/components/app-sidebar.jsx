@@ -58,7 +58,7 @@ import { useEpicHelpers } from "@/utils/epicHelpers";
 
 export function AppSidebar() {
 	const { fetchEpics } = useEpicHelpers();
-	const { epics, epicsLoaded, setSelectedEpic } = useEpicsStore();
+	const { epics, epicsLoaded } = useEpicsStore();
 
 	useEffect(() => {
 		if ((!epics || epics.length === 0) && !epicsLoaded) fetchEpics();
@@ -294,8 +294,6 @@ export function AppSidebar() {
 															to={item.url + subItem.url}
 															onClick={() => {
 																setCurrentPath(item.url + subItem.url);
-																// If epics (6), set selected epic in store
-																Math.trunc(subItem.id) === 6 && setSelectedEpic(Number(subItem.url.split("/").pop()));
 															}}
 														>
 															<SidebarMenuSubItem>
