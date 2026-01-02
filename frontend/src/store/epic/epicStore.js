@@ -1,3 +1,4 @@
+import { dialog } from "@material-tailwind/react";
 import { useAppStore } from "../appStore";
 
 export const useEpicStore = () => {
@@ -22,5 +23,11 @@ export const useEpicStore = () => {
 		setIsOpen: useAppStore((state) => state.setIsOpen),
 		updateData: useAppStore((state) => state.updateData),
 		setUpdateData: useAppStore((state) => state.setUpdateData),
+		selectedEpicId: useAppStore((state) => state.selectedEpicId),
+		setSelectedEpicId: useAppStore((state) => state.setSelectedEpicId),
+		hasRelation: useAppStore((state) => state.hasRelation),
+		setHasRelation: useAppStore((state) => state.setHasRelation),
+		dialogOpen: useAppStore((state) => state.dialogOpen),
+		setDialogOpen: useAppStore((state) => state.setDialogOpen),
 	};
 };

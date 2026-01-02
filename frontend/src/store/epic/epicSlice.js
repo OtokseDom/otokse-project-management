@@ -1,3 +1,5 @@
+import { dialog, select } from "@material-tailwind/react";
+
 export const createEpicSlice = (set) => ({
 	epic: {},
 	epicReports: {},
@@ -35,9 +37,17 @@ export const createEpicSlice = (set) => ({
 	epicLoading: false,
 	setEpicLoading: (loading) => set({ epicLoading: loading }),
 
-	// Update Form
+	// Update states
 	isOpen: false,
 	setIsOpen: (isOpen) => set({ isOpen }),
 	updateData: {},
 	setUpdateData: (updateData) => set({ updateData }),
+
+	// Delete states
+	selectedEpicId: null,
+	setSelectedEpicId: (selectedEpicId) => set({ selectedEpicId }),
+	hasRelation: false,
+	setHasRelation: (hasRelation) => set({ hasRelation }),
+	dialogOpen: false,
+	setDialogOpen: (dialogOpen) => set({ dialogOpen }),
 });
