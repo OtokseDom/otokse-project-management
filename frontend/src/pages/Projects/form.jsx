@@ -47,7 +47,7 @@ const formSchema = z.object({
 export default function ProjectForm({ setIsOpen, updateData, setUpdateData }) {
 	const { user: user_auth } = useAuthContext();
 	const showToast = useToast();
-	const { epics } = useEpicsStore();
+	const { epics, selectedEpic } = useEpicsStore();
 	const { addProject, updateProject, projectsLoading, setProjectsLoading } = useProjectsStore([]);
 	const { updateProjectFilter, addProjectFilter } = useDashboardStore();
 	const { addKanbanColumn } = useKanbanColumnsStore();
@@ -98,7 +98,7 @@ export default function ProjectForm({ setIsOpen, updateData, setUpdateData }) {
 				status_id,
 			} = updateData;
 			form.reset({
-				epic_id: epic_id || undefined,
+				epic_id: epic_id || selectedEpic || undefined,
 				title: title || "",
 				description: description || "",
 				start_date: start_date ? parseISO(start_date) : null,
