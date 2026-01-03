@@ -89,14 +89,14 @@ export function AppSidebar() {
 			collapsible: false,
 			subItems: [],
 		},
-		{
-			id: 3,
-			title: "Calendar",
-			url: "/calendar",
-			icon: CalendarClock,
-			collapsible: false,
-			subItems: [],
-		},
+		// {
+		// 	id: 3,
+		// 	title: "Calendar",
+		// 	url: "/calendar",
+		// 	icon: CalendarClock,
+		// 	collapsible: false,
+		// 	subItems: [],
+		// },
 		// {
 		// 	id: 4,
 		// 	title: "Tasks",
