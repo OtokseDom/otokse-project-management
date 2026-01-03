@@ -96,10 +96,11 @@ export default function ScheduleCalendar() {
 	return (
 		<div>
 			{/* Header */}
-			<div className="p-4 border-b flex flex-col justify-between items-center gap-4">
+			<div className="pb-4 border-b flex flex-col justify-between items-center gap-4">
 				<div className="flex flex-col justify-start items-start gap-2 mt-2 w-full">
 					{/* <h1 className=" font-extrabold text-3xl">Schedules</h1> */}
 					<span className="w-full md:w-[300px]">
+						<span className="text-muted-foreground font-bold">Assignee</span>
 						<Select
 							onValueChange={(value) => {
 								const selected = users.find((user) => user.id === value);
