@@ -81,14 +81,14 @@ export function AppSidebar() {
 			collapsible: false,
 			subItems: [],
 		},
-		{
-			id: 2,
-			title: "Kanban Board",
-			url: "/kanban",
-			icon: KanbanSquareDashedIcon,
-			collapsible: false,
-			subItems: [],
-		},
+		// {
+		// 	id: 2,
+		// 	title: "Kanban Board",
+		// 	url: "/kanban",
+		// 	icon: KanbanSquareDashedIcon,
+		// 	collapsible: false,
+		// 	subItems: [],
+		// },
 		// {
 		// 	id: 3,
 		// 	title: "Calendar",
