@@ -180,7 +180,8 @@ export default function Tasks() {
 				</div>
 				<div className="w-full justify-between flex items-start my-4 gap-2">
 					<div className="flex flex-col md:flex-row gap-2 justify-between w-full">
-						<div className="w-96 max-w-full">
+						<div className="flex flex-col gap-2 w-96 max-w-full">
+							<span className="text-muted-foreground font-bold">Project</span>
 							<Select
 								onValueChange={(value) => {
 									setSelectedProject(activeProjects.find((project) => String(project.id) === value));
