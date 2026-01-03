@@ -81,11 +81,9 @@ export default function EpicDetails() {
 								<Trash2 size={12} className="text-destructive" />
 							</Button>
 						</div>
-						<div className="grid grid-cols-2 md:grid-cols-12 justify-evenly mb-4 gap-2">
-							<div className="col-span-1 md:col-span-6 flex flex-col items-start gap-1">
-								<span className="text-muted-foreground font-bold">Description</span>
-								<div className="mb-4">{epic?.description}</div>
-							</div>
+						<div className="w-full mb-4">
+							<span className="text-muted-foreground font-bold">Description</span>
+							<div className="mb-4">{epic?.description}</div>
 						</div>
 						<div className="grid grid-cols-2 md:grid-cols-12 justify-evenly mb-4 gap-2">
 							<div className="col-span-1 md:col-span-6 flex flex-col items-start gap-1">
