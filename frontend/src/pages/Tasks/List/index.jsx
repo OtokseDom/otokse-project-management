@@ -20,6 +20,7 @@ import { TaskDiscussions } from "@/components/task/Discussion";
 import { Progress } from "@/components/ui/progress";
 import { useEpicsStore } from "@/store/epics/epicsStore";
 import ScheduleCalendar from "@/pages/Schedules/calendar";
+import KanbanBoard from "@/pages/Kanban/kanban";
 // TODO: Add calendar and kanban view as task view options
 export default function Tasks() {
 	// const { loading, setLoading } = useLoadContext();
@@ -251,10 +252,14 @@ export default function Tasks() {
 									{dialog}
 									{bulkDialog}
 								</>
-							) : (
+							) : view === "calendar" ? (
 								<>
 									<ScheduleCalendar />
 								</>
+							) : (
+								<div className="w-full overflow-auto">
+									<KanbanBoard />
+								</div>
 							)}
 						</>
 					);
