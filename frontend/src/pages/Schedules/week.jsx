@@ -11,11 +11,10 @@ import Tabs from "@/components/task/Tabs";
 import { useTasksStore } from "@/store/tasks/tasksStore";
 import { TaskDiscussions } from "@/components/task/Discussion";
 
-export default function Week({ getWeekDays, getTimeSlots, weekstart_date: weekStartDate, isInTimeSlot }) {
+export default function Week({ weekstart_date }) {
 	const { tasks, taskHistory, selectedTaskHistory, setSelectedTaskHistory, setRelations, activeTab, setActiveTab, selectedUser, tasksLoading } =
 		useTasksStore();
-	const weekDays = getWeekDays(weekStartDate);
-	const timeSlots = getTimeSlots();
+
 	const [openDialogIndex, setOpenDialogIndex] = useState(null);
 	const [updateData, setUpdateData] = useState({});
 	const [parentId, setParentId] = useState(null); //for adding subtasks from relations tab
@@ -37,6 +36,51 @@ export default function Week({ getWeekDays, getTimeSlots, weekstart_date: weekSt
 			});
 		}
 	}, [openDialogIndex]);
+
+	// Get all days for the week view
+	const getWeekDays = (start_date) => {
+		const days = [];
+		const currentDate = new Date(start_date);
+
+		for (let i = 0; i < 7; i++) {
+			days.push(new Date(currentDate));
+			currentDate.setDate(currentDate.getDate() + 1);
+		}
+
+		return days;
+	};
+
+	// Generate time slots for week view
+	const getTimeSlots = () => {
+		const slots = [];
+		for (let hour = 7; hour <= 19; hour++) {
+			slots.push(`${hour.toString().padStart(2, "0")}:00`);
+		}
+		return slots;
+	};
+
+	// Check if a task is within a time slot
+	const isInTimeSlot = (task, time, date) => {
+		const formattedDate = format(date, "yyyy-MM-dd");
+		const [slotHour] = time?.split(":").map(Number);
+		const [startHour] = task.start_time ? task.start_time.split(":").map(Number) : [];
+		const [endHour, endMinutes] = task.end_time ? task.end_time.split(":").map(Number) : [];
+		const taskStartDate = format(new Date(task?.start_date), "yyyy-MM-dd");
+		const taskEndDate = format(new Date(task?.end_date), "yyyy-MM-dd");
+
+		return (
+			Array.isArray(task.assignees) &&
+			task.assignees.some((assignee) => assignee.id === selectedUser?.id) &&
+			formattedDate >= taskStartDate &&
+			formattedDate <= taskEndDate &&
+			startHour <= slotHour &&
+			(endHour > slotHour || (endHour === slotHour && endMinutes > 0))
+		);
+	};
+
+	const weekDays = getWeekDays(weekstart_date);
+	const timeSlots = getTimeSlots();
+
 	return (
 		<div className="overflow-x-auto">
 			<div
