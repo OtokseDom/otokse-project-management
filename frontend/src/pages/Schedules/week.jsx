@@ -10,10 +10,12 @@ import Relations from "@/components/task/Relations";
 import Tabs from "@/components/task/Tabs";
 import { useTasksStore } from "@/store/tasks/tasksStore";
 import { TaskDiscussions } from "@/components/task/Discussion";
+import { useProjectsStore } from "@/store/projects/projectsStore";
 
 export default function Week({ weekstart_date }) {
 	const { tasks, taskHistory, selectedTaskHistory, setSelectedTaskHistory, setRelations, activeTab, setActiveTab, selectedUser, tasksLoading } =
 		useTasksStore();
+	const { selectedProject } = useProjectsStore();
 
 	const [openDialogIndex, setOpenDialogIndex] = useState(null);
 	const [updateData, setUpdateData] = useState({});
@@ -71,6 +73,7 @@ export default function Week({ weekstart_date }) {
 		return (
 			Array.isArray(task.assignees) &&
 			task.assignees.some((assignee) => assignee.id === selectedUser?.id) &&
+			task.project_id === selectedProject?.id &&
 			formattedDate >= taskStartDate &&
 			formattedDate <= taskEndDate &&
 			startHour <= slotHour &&
