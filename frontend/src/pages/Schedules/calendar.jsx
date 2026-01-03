@@ -24,7 +24,7 @@ export default function ScheduleCalendar() {
 	// API Data
 	const { tasks, tasksLoaded, selectedUser, setSelectedUser, tasksLoading } = useTasksStore();
 	const { users } = useUsersStore();
-	const { projects, projectsLoaded } = useProjectsStore();
+	const { projects, selectedProject, projectsLoaded } = useProjectsStore();
 	const { categories } = useCategoriesStore();
 	const { taskStatuses } = useTaskStatusesStore();
 	// Fetch Hooks
@@ -57,19 +57,6 @@ export default function ScheduleCalendar() {
 		day = addDays(day, 1);
 	}
 
-	// Get all days for the week view
-	const getWeekDays = (start_date) => {
-		const days = [];
-		const currentDate = new Date(start_date);
-
-		for (let i = 0; i < 7; i++) {
-			days.push(new Date(currentDate));
-			currentDate.setDate(currentDate.getDate() + 1);
-		}
-
-		return days;
-	};
-
 	// Get tasks for a specific date
 	const getTaskForDate = (date, tasks) => {
 		const formattedDate = format(date, "yyyy-MM-dd");
@@ -79,37 +66,10 @@ export default function ScheduleCalendar() {
 			return (
 				Array.isArray(task.assignees) &&
 				task.assignees.some((assignee) => assignee.id === selectedUser?.id) &&
+				task.project_id === selectedProject?.id &&
 				((start <= formattedDate && end >= formattedDate) || (start === formattedDate && !end) || (!start && end === formattedDate))
 			);
 		});
-	};
-
-	// Generate time slots for week view
-	const getTimeSlots = () => {
-		const slots = [];
-		for (let hour = 7; hour <= 19; hour++) {
-			slots.push(`${hour.toString().padStart(2, "0")}:00`);
-		}
-		return slots;
-	};
-
-	// Check if a task is within a time slot
-	const isInTimeSlot = (task, time, date) => {
-		const formattedDate = format(date, "yyyy-MM-dd");
-		const [slotHour] = time?.split(":").map(Number);
-		const [startHour] = task.start_time ? task.start_time.split(":").map(Number) : [];
-		const [endHour, endMinutes] = task.end_time ? task.end_time.split(":").map(Number) : [];
-		const taskStartDate = format(new Date(task?.start_date), "yyyy-MM-dd");
-		const taskEndDate = format(new Date(task?.end_date), "yyyy-MM-dd");
-
-		return (
-			Array.isArray(task.assignees) &&
-			task.assignees.some((assignee) => assignee.id === selectedUser?.id) &&
-			formattedDate >= taskStartDate &&
-			formattedDate <= taskEndDate &&
-			startHour <= slotHour &&
-			(endHour > slotHour || (endHour === slotHour && endMinutes > 0))
-		);
 	};
 
 	// Navigate to previous/next month or week
@@ -138,7 +98,7 @@ export default function ScheduleCalendar() {
 			{/* Header */}
 			<div className="p-4 border-b flex flex-col justify-between items-center gap-4">
 				<div className="flex flex-col justify-start items-start gap-2 mt-2 w-full">
-					<h1 className=" font-extrabold text-3xl">Schedules</h1>
+					{/* <h1 className=" font-extrabold text-3xl">Schedules</h1> */}
 					<span className="w-full md:w-[300px]">
 						<Select
 							onValueChange={(value) => {
@@ -218,7 +178,7 @@ export default function ScheduleCalendar() {
 				{selectedView === "month" ? (
 					<Month days={days} currentMonth={currentMonth} getTaskForDate={getTaskForDate} />
 				) : (
-					<Week getWeekDays={getWeekDays} getTimeSlots={getTimeSlots} weekstart_date={weekstart_date} isInTimeSlot={isInTimeSlot} />
+					<Week weekstart_date={weekstart_date} />
 				)}
 			</div>
 		</div>
