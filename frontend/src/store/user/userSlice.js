@@ -1,6 +1,7 @@
 export const createUserSlice = (set) => ({
 	user: {},
 	userReports: {},
+	profileEpicFilter: [],
 	profileProjectFilter: [],
 	profileSelectedProjects: [],
 	userReportsLoading: false,
@@ -9,10 +10,12 @@ export const createUserSlice = (set) => ({
 		values: {
 			"Date Range": null,
 			Projects: [],
+			Epics: [],
 		},
 		display: {
 			"Date Range": null,
 			Projects: [],
+			Epics: [],
 		},
 	},
 
@@ -20,6 +23,8 @@ export const createUserSlice = (set) => ({
 	setUserReports: (userReports) => set({ userReports }),
 	setProfileProjectFilter: (profileProjectFilter) => set({ profileProjectFilter }),
 	setProfileSelectedProjects: (profileSelectedProjects) => set({ profileSelectedProjects }),
+	setProfileEpicFilter: (profileEpicFilter) => set({ profileEpicFilter }),
+	setProfileSelectedEpics: (profileSelectedEpics) => set({ profileSelectedEpics }),
 
 	setProfileFilters: (newDisplay) =>
 		set((state) => ({
