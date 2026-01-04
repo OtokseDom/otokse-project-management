@@ -103,10 +103,15 @@ export default function CategoryForm({ setIsOpen, updateData, setUpdateData }) {
 						);
 					}}
 				/>
-				<Button type="submit" disabled={categoriesLoading}>
-					{categoriesLoading && <Loader2 className="animate-spin mr-5 -ml-11 text-background" />}{" "}
-					{Object.keys(updateData).length === 0 ? "Submit" : "Update"}
-				</Button>
+				<div className="flex gap-2 w-full">
+					<Button variant="secondary" type="button" className="w-full" onClick={() => setIsOpen(false)}>
+						Cancel
+					</Button>
+					<Button type="submit" disabled={categoriesLoading} className="w-full">
+						{categoriesLoading && <Loader2 className="animate-spin mr-5 -ml-11 text-background" />}{" "}
+						{Object.keys(updateData).length === 0 ? "Submit" : "Update"}
+					</Button>
+				</div>
 			</form>
 		</Form>
 	);

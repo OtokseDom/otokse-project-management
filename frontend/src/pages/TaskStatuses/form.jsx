@@ -153,10 +153,15 @@ export default function TaskStatusForm({ setIsOpen, updateData, setUpdateData })
 						);
 					}}
 				/>
-				<Button type="submit" disabled={taskStatusesLoading}>
-					{taskStatusesLoading && <Loader2 className="animate-spin mr-5 -ml-11 text-background" />}{" "}
-					{Object.keys(updateData).length === 0 ? "Submit" : "Update"}
-				</Button>
+				<div className="flex gap-2 w-full">
+					<Button variant="secondary" type="button" className="w-full" onClick={() => setIsOpen(false)}>
+						Cancel
+					</Button>
+					<Button type="submit" disabled={taskStatusesLoading} className="w-full">
+						{taskStatusesLoading && <Loader2 className="animate-spin mr-5 -ml-11 text-background" />}{" "}
+						{Object.keys(updateData).length === 0 ? "Submit" : "Update"}
+					</Button>
+				</div>
 			</form>
 		</Form>
 	);

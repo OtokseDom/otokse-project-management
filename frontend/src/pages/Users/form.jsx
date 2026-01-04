@@ -287,10 +287,15 @@ export default function UserForm({ setIsOpen, updateData, userProfileId }) {
 				) : (
 					""
 				)}
-				<Button type="submit" disabled={usersLoading}>
-					{usersLoading && <Loader2 className="animate-spin mr-5 -ml-11 text-background" />}{" "}
-					{Object.keys(updateData).length === 0 ? "Submit" : "Update"}
-				</Button>
+				<div className="flex gap-2 w-full">
+					<Button variant="secondary" type="button" className="w-full" onClick={() => setIsOpen(false)}>
+						Cancel
+					</Button>
+					<Button type="submit" disabled={usersLoading} className="w-full">
+						{usersLoading && <Loader2 className="animate-spin mr-5 -ml-11 text-background" />}{" "}
+						{Object.keys(updateData).length === 0 ? "Submit" : "Update"}
+					</Button>
+				</div>
 			</form>
 		</Form>
 	);

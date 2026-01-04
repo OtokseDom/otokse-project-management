@@ -318,12 +318,17 @@ export default function EpicForm() {
 						);
 					}}
 				/>
-				{isEditable && (
-					<Button type="submit" disabled={epicsLoading}>
-						{epicsLoading && <Loader2 className="animate-spin mr-5 -ml-11 text-background" />}{" "}
-						{Object.keys(updateData).length === 0 ? "Submit" : "Update"}
+				<div className="flex gap-2 w-full">
+					<Button variant="secondary" type="button" className="w-full" onClick={() => setIsOpen(false)}>
+						Cancel
 					</Button>
-				)}
+					{isEditable && (
+						<Button type="submit" disabled={epicsLoading} className="w-full">
+							{epicsLoading && <Loader2 className="animate-spin mr-5 -ml-11 text-background" />}{" "}
+							{Object.keys(updateData).length === 0 ? "Submit" : "Update"}
+						</Button>
+					)}
+				</div>
 			</form>
 		</Form>
 	);

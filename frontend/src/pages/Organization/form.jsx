@@ -97,9 +97,14 @@ export default function OrganizationForm({ setIsOpen }) {
 						);
 					}}
 				/>
-				<Button type="submit" disabled={loading}>
-					{loading && <Loader2 className="animate-spin mr-5 -ml-11 text-background" />} Update
-				</Button>
+				<div className="flex gap-2 w-full">
+					<Button variant="secondary" type="button" className="w-full" onClick={() => setIsOpen(false)}>
+						Cancel
+					</Button>
+					<Button type="submit" disabled={loading} className="w-full">
+						{loading && <Loader2 className="animate-spin mr-5 -ml-11 text-background" />} Update
+					</Button>
+				</div>
 			</form>
 		</Form>
 	);
