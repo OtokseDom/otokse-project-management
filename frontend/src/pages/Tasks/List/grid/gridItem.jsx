@@ -347,7 +347,7 @@ export default function TaskGridItem({
 				<div className="w-full rounded mt-3 ">
 					<hr />
 					{task.children.map((sub) => (
-						<div key={sub.id} className="flex flex-col w-full border-b border-accent gap-4 bg-accent/50 px-3 py-2">
+						<div key={sub.id} className="flex flex-col w-full border-b border-accent gap-4 bg-sidebar-accent px-3 py-2">
 							<div className="flex flex-col md:flex-row justify-between items-start gap-2 min-w-0">
 								<div className={`order-2 md:order-1 flex gap-1 items-start text-sm font-medium`}>{sub.title}</div>
 								{/* Tags */}
