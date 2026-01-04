@@ -21,28 +21,38 @@ import { useDashboardStore } from "@/store/dashboard/dashboardStore";
 import { useProjectsStore } from "@/store/projects/projectsStore";
 import { useTaskHelpers } from "@/utils/taskHelpers";
 import { ChartBarLabel } from "@/components/chart/bar-chart-label";
+import { useEpicHelpers } from "@/utils/epicHelpers";
+import { useEpicsStore } from "@/store/epics/epicsStore";
 
 // TODO: Export report with filter
 // TODO: Notification
 export default function UserProfile() {
 	const { users } = useUsersStore();
 	const { projects, projectsLoaded } = useProjectsStore();
+	const { epics, epicsLoaded } = useEpicsStore();
 	const {
 		reports,
 		setReports,
-		userFilter,
-		projectFilter,
 		filters,
 		setFilters,
-		selectedProjects,
-		setSelectedProjects,
-		selectedUsers,
-		setSelectedUsers,
 		dashboardReportsLoading,
 		setDashboardReportsLoading,
+		// Users
+		userFilter,
+		selectedUsers,
+		setSelectedUsers,
+		// Projects
+		projectFilter,
+		selectedProjects,
+		setSelectedProjects,
+		// Epics
+		epicFilter,
+		selectedEpics,
+		setSelectedEpics,
 	} = useDashboardStore();
 	// Fetch Hooks
 	const { fetchProjects, fetchUsers, fetchReports } = useTaskHelpers();
+	const { fetchEpics } = useEpicHelpers();
 
 	const [isOpen, setIsOpen] = useState(false);
 
@@ -51,6 +61,7 @@ export default function UserProfile() {
 		if (!reports || Object.keys(reports).length === 0) fetchReports();
 		if (!users || users.length === 0) fetchUsers();
 		if ((!projects || projects.length === 0) && !projectsLoaded) fetchProjects();
+		if ((!epics || epics.length === 0) && !epicsLoaded) fetchEpics();
 	}, []);
 
 	const handleRemoveFilter = async (key) => {
@@ -64,12 +75,13 @@ export default function UserProfile() {
 		setFilters(updated);
 		const from = updated.values["Date Range"] ? updated.values["Date Range"]?.split(" to ")[0] : "";
 		const to = updated.values["Date Range"] ? updated.values["Date Range"]?.split(" to ")[1] : "";
+		const epics = updated.values["Epics"] ?? "";
 		const projects = updated.values["Projects"] ?? "";
 		const members = updated.values["Members"] ?? "";
 		setDashboardReportsLoading(true);
 		try {
 			// Fetch all reports in one call
-			const reportsRes = await axiosClient.get(API().dashboard(from, to, members, projects));
+			const reportsRes = await axiosClient.get(API().dashboard(from, to, members, projects, epics));
 			setReports(reportsRes.data.data);
 		} catch (e) {
 			if (e.message !== "Request aborted") console.error("Error fetching data:", e.message);
@@ -126,12 +138,18 @@ export default function UserProfile() {
 									setReports={setReports}
 									filters={filters}
 									setFilters={setFilters}
-									projects={projectFilter}
+									// Users
 									users={userFilter}
-									selectedProjects={selectedProjects}
-									setSelectedProjects={setSelectedProjects}
 									selectedUsers={selectedUsers}
 									setSelectedUsers={setSelectedUsers}
+									// Projects
+									projects={projectFilter}
+									selectedProjects={selectedProjects}
+									setSelectedProjects={setSelectedProjects}
+									// Epics
+									epics={epicFilter}
+									selectedEpics={selectedEpics}
+									setSelectedEpics={setSelectedEpics}
 								/>
 							</DialogContent>
 						</Dialog>
