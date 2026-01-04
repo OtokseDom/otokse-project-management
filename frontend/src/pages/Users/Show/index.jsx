@@ -37,6 +37,8 @@ import Tabs from "@/components/task/Tabs";
 import { TaskDiscussions } from "@/components/task/Discussion";
 import GridList from "@/pages/Tasks/List/grid/gridList";
 import { Progress } from "@/components/ui/progress";
+import { useEpicHelpers } from "@/utils/epicHelpers";
+import { useEpicsStore } from "@/store/epics/epicsStore";
 
 export default function UserProfile() {
 	const { id } = useParams();
@@ -51,17 +53,21 @@ export default function UserProfile() {
 		setProfileFilters,
 		profileSelectedProjects,
 		setProfileSelectedProjects,
+		profileSelectedEpics,
+		setProfileSelectedEpics,
 		userReportsLoading,
 		setUserReportsLoading,
 	} = useUserStore();
-	const { projectFilter } = useDashboardStore();
+	const { projectFilter, epicFilter } = useDashboardStore();
 	const { users } = useUsersStore();
 	const { projects, projectsLoaded } = useProjectsStore();
+	const { epics, epicsLoaded } = useEpicsStore();
 	const { categories } = useCategoriesStore();
 	const { tasks, tasksLoaded, setRelations, selectedTaskHistory, activeTab, setActiveTab, tasksLoading } = useTasksStore();
 	const { taskStatuses } = useTaskStatusesStore();
 	// Helpers
 	const { fetchTasks, fetchProjects, fetchUsers, fetchCategories, fetchTaskStatuses, fetchUserReports } = useTaskHelpers();
+	const { fetchEpics } = useEpicHelpers();
 	// Dialogs and Sheets
 	const [isOpen, setIsOpen] = useState(false);
 	const [isOpenUser, setIsOpenUser] = useState(false);
@@ -115,6 +121,7 @@ export default function UserProfile() {
 		if (!categories || categories.length === 0) fetchCategories();
 		if ((!tasks || tasks.length === 0) && !tasksLoaded) fetchTasks();
 		if ((!projects || projects.length === 0) && !projectsLoaded) fetchProjects();
+		if ((!epics || epics.length === 0) && !epicsLoaded) fetchEpics();
 		setProfileSelectedProjects([]);
 	}, []);
 
@@ -231,9 +238,14 @@ export default function UserProfile() {
 									setReports={setUserReports}
 									filters={profileFilters}
 									setFilters={setProfileFilters}
+									// Projects
 									projects={projectFilter}
 									selectedProjects={profileSelectedProjects}
 									setSelectedProjects={setProfileSelectedProjects}
+									// Epics
+									epics={epicFilter}
+									selectedEpics={profileSelectedEpics}
+									setSelectedEpics={setProfileSelectedEpics}
 									userId={id}
 								/>
 							</DialogContent>
