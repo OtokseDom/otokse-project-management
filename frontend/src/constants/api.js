@@ -10,12 +10,14 @@ export const API = (version = "v1") => ({
 	project: (id = "") => `/${version}/project${id ? `/${id}` : ""}`,
 	category: (id = "") => `/${version}/category${id ? `/${id}` : ""}`,
 	user: (id = "") => `/${version}/user${id ? `/${id}` : ""}`,
-	user_reports: (id = "", from = "", to = "", projects = "") => `/${version}/user/${id}/reports?from=${from}&to=${to}&projects=${projects}`,
+	user_reports: (id = "", from = "", to = "", projects = "", epics = "") =>
+		`/${version}/user/${id}/reports?from=${from}&to=${to}&projects=${projects}&epics=${epics}`,
 	task: (id = "") => `/${version}/task${id ? `/${id}` : ""}`,
 	task_discussion: (id = "") => `/${version}/task-discussion${id ? `/${id}` : ""}`,
 	organization: (id = "") => `/${version}/organization${id ? `/${id}` : ""}`,
 	organization_generate_code: (id) => `/${version}/organization/${id}/generate-code`,
-	dashboard: (from = "", to = "", users = "", projects = "") => `/${version}/dashboard?from=${from}&to=${to}&users=${users}&projects=${projects}`,
+	dashboard: (from = "", to = "", users = "", projects = "", epics = "") =>
+		`/${version}/dashboard?from=${from}&to=${to}&users=${users}&projects=${projects}&epics=${epics}`,
 	kanban_column: (id = "") => `/${version}/kanban-column/${id}`,
 	task_move: (id = "") => `/${version}/tasks/${id}/move`,
 	task_bulk_update: () => `/${version}/tasks/bulk-update`,
