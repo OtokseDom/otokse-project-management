@@ -1256,7 +1256,10 @@ export default function TaskForm({ parentId, isOpen, setIsOpen, updateData, setU
 					</Button>
 				</div>
 				{isEditable ? (
-					<div className="sticky bottom-0 backdrop-blur-sm bg-background/30 backdrop-saturate-150 p-4 mt-auto">
+					<div className="flex gap-2 sticky bottom-0 backdrop-blur-sm bg-background/30 backdrop-saturate-150 p-4 mt-auto">
+						<Button variant="secondary" type="button" className="w-full" onClick={() => setIsOpen(false)}>
+							Cancel
+						</Button>
 						<Button type="submit" disabled={tasksLoading} className="w-full">
 							{tasksLoading && <Loader2 className="animate-spin mr-5 -ml-11 text-background" />}{" "}
 							{Object.keys(updateData).length === 0 || updateData?.calendar_add || updateData?.kanban_add ? "Submit" : "Update"}
