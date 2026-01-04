@@ -535,6 +535,7 @@ export default function UserProfile() {
 							</SheetContent>
 						</Sheet>
 					</div>
+					{/* TODO: Update Task Views */}
 					{(() => {
 						const {
 							columnsTask: taskColumns,
