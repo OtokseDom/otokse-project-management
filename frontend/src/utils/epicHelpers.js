@@ -2,11 +2,15 @@
 import axiosClient from "@/axios.client";
 import { API } from "@/constants/api";
 import { useToast } from "@/contexts/ToastContextProvider";
+import { useDashboardStore } from "@/store/dashboard/dashboardStore";
 import { useEpicStore } from "@/store/epic/epicStore";
 import { useEpicsStore } from "@/store/epics/epicsStore";
+import { useUserStore } from "@/store/user/userStore";
 import { useEffect } from "react";
 
 export const useEpicHelpers = () => {
+	const { epicFilter, setEpicFilter } = useDashboardStore();
+	const { profileEpicFilter, setProfileEpicFilter } = useUserStore();
 	const { setEpics, setSelectedEpic, setEpicsLoading } = useEpicsStore();
 	const { setEpic, setEpicLoading, setIsOpen, setUpdateData, dialogOpen, setDialogOpen, setSelectedEpicId, setHasRelation } = useEpicStore();
 	const showToast = useToast();
@@ -18,13 +22,13 @@ export const useEpicHelpers = () => {
 			setEpics(res?.data?.data?.epics);
 			// setKanbanColumns(res?.data?.data?.kanbanColumns);
 			setSelectedEpic(res?.data?.data?.epics[res?.data?.data?.epics?.length - 1]);
-			// if (res.data.data.epics.length !== epicFilter.length || res.data.data.epics.length !== profileEpicFilter.length) {
-			// 	const mappedEpics = res.data.data.epics.map((epic) => ({ value: epic.id, label: epic.title }));
-			// Used in user profile
-			// setProfileEpicFilter(mappedEpics);
-			// Used in dashboard
-			// 	setEpicFilter(mappedEpics);
-			// }
+			if (res.data.data.epics.length !== epicFilter.length || res.data.data.epics.length !== profileEpicFilter.length) {
+				const mappedEpics = res.data.data.epics.map((epic) => ({ value: epic.id, label: epic.title }));
+				// Used in user profile
+				setProfileEpicFilter(mappedEpics);
+				// Used in dashboard
+				setEpicFilter(mappedEpics);
+			}
 		} catch (e) {
 			if (e.message !== "Request aborted") console.error("Error fetching data:", e.message);
 		} finally {
