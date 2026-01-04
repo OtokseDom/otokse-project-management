@@ -67,6 +67,14 @@ class ReportService
             $query->whereIn('project_id', $projectIds);
         }
 
+        // Epics filter
+        if (isset($filter['epics'])) {
+            $epicIds = explode(',', $filter['epics']);
+            $query->whereHas('project', function ($q) use ($epicIds) {
+                $q->whereIn('epic_id', $epicIds);
+            });
+        }
+
         return $query;
     }
 
