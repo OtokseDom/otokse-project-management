@@ -3,7 +3,6 @@ import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -12,7 +11,7 @@ import { useToast } from "@/contexts/ToastContextProvider";
 import { useEffect, useRef, useState } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { format, parseISO } from "date-fns";
-import { AlarmClock, CalculatorIcon, CalendarDays, Info, Loader2, Sparkles } from "lucide-react";
+import { AlarmClock, CalendarDays, Info, Loader2, Sparkles } from "lucide-react";
 import DateInput from "@/components/form/DateInput";
 import { useAuthContext } from "@/contexts/AuthContextProvider";
 import { API } from "@/constants/api";
@@ -25,7 +24,6 @@ import { MultiSelect } from "@/components/ui/multi-select";
 import { useTaskHelpers } from "@/utils/taskHelpers";
 import { useUserStore } from "@/store/user/userStore";
 import RichTextEditor from "@/components/ui/RichTextEditor";
-import ImageUpload from "@/components/ui/image-upload";
 import TaskAttachments from "@/components/task/Attachment";
 // TODO: Auto fill project and epic when available
 const formSchema = z.object({
@@ -559,79 +557,81 @@ export default function TaskForm({ parentId, isOpen, setIsOpen, updateData, setU
 					attachments={attachments}
 					setAttachments={setAttachments}
 				/>
-				<FormField
-					control={form.control}
-					name="status_id"
-					render={({ field }) => {
-						return (
-							<FormItem>
-								<FormLabel>Status</FormLabel>
-								<Select
-									disabled={!isEditable}
-									onValueChange={(value) => field.onChange(Number(value))}
-									value={field.value ? field.value.toString() : ""}
-								>
-									<FormControl>
-										<SelectTrigger>
-											<SelectValue placeholder="Select a status">
-												{field.value ? taskStatuses?.find((taskStatus) => taskStatus.id == field.value).name : "Select a status"}
-											</SelectValue>
-										</SelectTrigger>
-									</FormControl>
-									<SelectContent>
-										{Array.isArray(taskStatuses) && taskStatuses.length > 0 ? (
-											taskStatuses.map((taskStatus) => (
-												<SelectItem key={taskStatus.id} value={taskStatus.id.toString()}>
-													{taskStatus.name}
-												</SelectItem>
-											))
-										) : (
-											<></>
-										)}
-									</SelectContent>
-								</Select>
-								<FormMessage />
-							</FormItem>
-						);
-					}}
-				/>
-				<FormField
-					control={form.control}
-					name="priority"
-					render={({ field }) => {
-						const priorities = [
-							{ id: 1, name: "Low" },
-							{ id: 2, name: "Medium" },
-							{ id: 3, name: "High" },
-							{ id: 4, name: "Urgent" },
-							{ id: 5, name: "Critical" },
-						];
-						return (
-							<FormItem>
-								<FormLabel>Priority</FormLabel>
-								<Select disabled={!isEditable} onValueChange={field.onChange} defaultValue={updateData?.priority || field.value}>
-									<FormControl>
-										<SelectTrigger>
-											<SelectValue placeholder="Select priority"></SelectValue>
-										</SelectTrigger>
-									</FormControl>
-									<SelectContent>
-										{Array.isArray(priorities) && priorities.length > 0 ? (
-											priorities?.map((priority) => (
-												<SelectItem key={priority?.id} value={priority?.name}>
-													{priority?.name}
-												</SelectItem>
-											))
-										) : (
-											<SelectItem disabled>No priority available</SelectItem>
-										)}
-									</SelectContent>
-								</Select>
-								<FormMessage />
-							</FormItem>
-						);
-					}}
-				/>
+				<div className="flex w-full gap-4">
+					<FormField
+						control={form.control}
+						name="status_id"
+						render={({ field }) => {
+							return (
+								<FormItem className="w-full">
+									<FormLabel>Status</FormLabel>
+									<Select
+										disabled={!isEditable}
+										onValueChange={(value) => field.onChange(Number(value))}
+										value={field.value ? field.value.toString() : ""}
+									>
+										<FormControl>
+											<SelectTrigger>
+												<SelectValue placeholder="Select a status">
+													{field.value ? taskStatuses?.find((taskStatus) => taskStatus.id == field.value).name : "Select a status"}
+												</SelectValue>
+											</SelectTrigger>
+										</FormControl>
+										<SelectContent>
+											{Array.isArray(taskStatuses) && taskStatuses.length > 0 ? (
+												taskStatuses.map((taskStatus) => (
+													<SelectItem key={taskStatus.id} value={taskStatus.id.toString()}>
+														{taskStatus.name}
+													</SelectItem>
+												))
+											) : (
+												<></>
+											)}
+										</SelectContent>
+									</Select>
+									<FormMessage />
+								</FormItem>
+							);
+						}}
+					/>
+					<FormField
+						control={form.control}
+						name="priority"
+						render={({ field }) => {
+							const priorities = [
+								{ id: 1, name: "Low" },
+								{ id: 2, name: "Medium" },
+								{ id: 3, name: "High" },
+								{ id: 4, name: "Urgent" },
+								{ id: 5, name: "Critical" },
+							];
+							return (
+								<FormItem className="w-full">
+									<FormLabel>Priority</FormLabel>
+									<Select disabled={!isEditable} onValueChange={field.onChange} defaultValue={updateData?.priority || field.value}>
+										<FormControl>
+											<SelectTrigger>
+												<SelectValue placeholder="Select priority"></SelectValue>
+											</SelectTrigger>
+										</FormControl>
+										<SelectContent>
+											{Array.isArray(priorities) && priorities.length > 0 ? (
+												priorities?.map((priority) => (
+													<SelectItem key={priority?.id} value={priority?.name}>
+														{priority?.name}
+													</SelectItem>
+												))
+											) : (
+												<SelectItem disabled>No priority available</SelectItem>
+											)}
+										</SelectContent>
+									</Select>
+									<FormMessage />
+								</FormItem>
+							);
+						}}
+					/>
+				</div>
 				<FormField
 					control={form.control}
 					name="assignees"
@@ -652,50 +652,6 @@ export default function TaskForm({ parentId, isOpen, setIsOpen, updateData, setU
 										// maxCount={3}
 									/>
 								</FormControl>
-							</FormItem>
-						);
-					}}
-				/>
-				<FormField
-					control={form.control}
-					name="parent_id"
-					render={({ field }) => {
-						return (
-							<FormItem>
-								<FormLabel>Parent Task</FormLabel>
-								<Select
-									disabled={!isEditable}
-									onValueChange={(value) => field.onChange(Number(value))}
-									value={field.value ? field.value.toString() : ""}
-								>
-									<FormControl>
-										<SelectTrigger>
-											<SelectValue placeholder="Select a parent task">
-												{field.value ? parentTasks()?.find((task) => task.id == field.value)?.title : "Select a task"}
-											</SelectValue>
-										</SelectTrigger>
-									</FormControl>
-									<SelectContent>
-										<SelectItem className="w-full bg-secondary x-auto" value={0}>
-											Clear Selection
-										</SelectItem>
-										{Array.isArray(tasks) && tasks.length > 0 ? (
-											parentTasks()?.map((task) => (
-												<SelectItem key={task.id} value={task.id.toString()}>
-													<div className="flex flex-col">
-														<span> {task.title}</span>
-														<span className="text-muted-foreground opacity-50">
-															{task.project?.title} | {task.status?.name}
-														</span>
-													</div>
-												</SelectItem>
-											))
-										) : (
-											<></>
-										)}
-									</SelectContent>
-								</Select>
-								<FormMessage />
 							</FormItem>
 						);
 					}}
@@ -772,13 +728,57 @@ export default function TaskForm({ parentId, isOpen, setIsOpen, updateData, setU
 						);
 					}}
 				/>
+				<FormField
+					control={form.control}
+					name="parent_id"
+					render={({ field }) => {
+						return (
+							<FormItem>
+								<FormLabel>Parent Task</FormLabel>
+								<Select
+									disabled={!isEditable}
+									onValueChange={(value) => field.onChange(Number(value))}
+									value={field.value ? field.value.toString() : ""}
+								>
+									<FormControl>
+										<SelectTrigger>
+											<SelectValue placeholder="Select a parent task">
+												{field.value ? parentTasks()?.find((task) => task.id == field.value)?.title : "Select a task"}
+											</SelectValue>
+										</SelectTrigger>
+									</FormControl>
+									<SelectContent>
+										<SelectItem className="w-full bg-secondary x-auto" value={0}>
+											Clear Selection
+										</SelectItem>
+										{Array.isArray(tasks) && tasks.length > 0 ? (
+											parentTasks()?.map((task) => (
+												<SelectItem key={task.id} value={task.id.toString()}>
+													<div className="flex flex-col">
+														<span> {task.title}</span>
+														<span className="text-muted-foreground opacity-50">
+															{task.project?.title} | {task.status?.name}
+														</span>
+													</div>
+												</SelectItem>
+											))
+										) : (
+											<></>
+										)}
+									</SelectContent>
+								</Select>
+								<FormMessage />
+							</FormItem>
+						);
+					}}
+				/>
 				{showMore || updateData.calendar_add ? (
 					<>
 						<div className="flex flex-col gap-4 bg-secondary p-4 rounded-lg">
 							<div className="flex flex-row items-center justify-start gap-2 w-full font-medium text-base text-muted-foreground">
 								<CalendarDays size={20} /> Date Details
 							</div>
-							<div className="flex flex-col md:flex-row justify-between gap-4">
+							<div className="flex justify-between gap-4">
 								<FormField
 									control={form.control}
 									name="start_date"
@@ -810,7 +810,7 @@ export default function TaskForm({ parentId, isOpen, setIsOpen, updateData, setU
 									}}
 								/>
 							</div>
-							<div className="flex flex-col md:flex-row justify-between gap-4">
+							<div className="flex  justify-between gap-4">
 								<FormField
 									control={form.control}
 									name="days_estimate"
