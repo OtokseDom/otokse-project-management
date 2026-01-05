@@ -37,7 +37,7 @@ export default function Month({ days, currentMonth, getTaskForDate }) {
 		}
 	}, [openDialogIndex]);
 	return (
-		<div className="grid grid-cols-7 gap-0 md:gap-1">
+		<div className="grid grid-cols-7 gap-0 md:gap-0">
 			<div
 				className={`fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm z-40 transition-opacity duration-300 ${
 					openDialogIndex !== null ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
