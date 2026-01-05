@@ -11,7 +11,7 @@ import { useToast } from "@/contexts/ToastContextProvider";
 import { useEffect, useRef, useState } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { format, parseISO } from "date-fns";
-import { AlarmClock, CalendarDays, Info, Loader2, Sparkles } from "lucide-react";
+import { AlarmClock, CalendarDays, Info, Loader2, Scale, Sparkles } from "lucide-react";
 import DateInput from "@/components/form/DateInput";
 import { useAuthContext } from "@/contexts/AuthContextProvider";
 import { API } from "@/constants/api";
@@ -37,6 +37,9 @@ const formSchema = z.object({
 	}),
 	description: z.string().optional(),
 	// expected_output: z.string().optional(),
+	weight: z.coerce.number().min(1).max(5).optional(),
+	effort_estimate: z.coerce.number().min(1).max(100).optional(),
+	effort_taken: z.coerce.number().min(1).max(100).optional(),
 	start_date: z.date().nullable(),
 	end_date: z.date().nullable(),
 	actual_date: z.date().nullable(),
@@ -109,6 +112,9 @@ export default function TaskForm({ parentId, isOpen, setIsOpen, updateData, setU
 			category: undefined,
 			priority: "",
 			// expected_output: "",
+			weight: "",
+			effort_estimate: "",
+			effort_taken: "",
 			start_date: null,
 			end_date: null,
 			actual_date: null,
@@ -145,6 +151,9 @@ export default function TaskForm({ parentId, isOpen, setIsOpen, updateData, setU
 				project_id,
 				category_id,
 				// expected_output,
+				weight,
+				effort_estimate,
+				effort_taken,
 				start_date,
 				end_date,
 				actual_date,
@@ -172,6 +181,9 @@ export default function TaskForm({ parentId, isOpen, setIsOpen, updateData, setU
 				project_id: project_id || selectedProject?.id || undefined,
 				category_id: category_id || undefined,
 				// expected_output: expected_output || "",
+				weight: weight || "",
+				effort_estimate: effort_estimate || "",
+				effort_taken: effort_taken || "",
 				start_date: typeof start_date === "string" ? parseISO(start_date) : start_date || null,
 				end_date: typeof end_date === "string" ? parseISO(end_date) : end_date || null,
 				actual_date: typeof actual_date === "string" ? parseISO(actual_date) : actual_date || null,
@@ -774,6 +786,74 @@ export default function TaskForm({ parentId, isOpen, setIsOpen, updateData, setU
 				/>
 				{showMore || updateData.calendar_add ? (
 					<>
+						<div className="flex flex-col gap-4 bg-secondary p-4 rounded-lg">
+							<div className="flex flex-row items-center justify-start gap-2 w-full font-medium text-base text-muted-foreground">
+								<Scale size={20} /> Weight and Effort Estimates
+							</div>
+							<FormField
+								control={form.control}
+								name="weight"
+								render={({ field }) => {
+									return (
+										<FormItem className="w-full">
+											<FormLabel>Weight</FormLabel>
+											<FormControl>
+												<Input disabled={!isEditable} type="number" step="any" min={1} max={5} placeholder="Weight" {...field} />
+											</FormControl>
+											<FormMessage />
+										</FormItem>
+									);
+								}}
+							/>
+							<div className="flex  justify-between gap-4">
+								<FormField
+									control={form.control}
+									name="effort_estimate"
+									render={({ field }) => {
+										return (
+											<FormItem className="w-full">
+												<FormLabel>Effort Estimate</FormLabel>
+												<FormControl>
+													<Input
+														disabled={!isEditable}
+														type="number"
+														step="any"
+														min={1}
+														max={100}
+														placeholder="Effort estimate"
+														{...field}
+													/>
+												</FormControl>
+												<FormMessage />
+											</FormItem>
+										);
+									}}
+								/>
+								<FormField
+									control={form.control}
+									name="effort_taken"
+									render={({ field }) => {
+										return (
+											<FormItem className="w-full">
+												<FormLabel>Actual Effort</FormLabel>
+												<FormControl>
+													<Input
+														disabled={!isEditable}
+														type="number"
+														step="any"
+														min={1}
+														max={100}
+														placeholder="Actual effort"
+														{...field}
+													/>
+												</FormControl>
+												<FormMessage />
+											</FormItem>
+										);
+									}}
+								/>
+							</div>
+						</div>
 						<div className="flex flex-col gap-4 bg-secondary p-4 rounded-lg">
 							<div className="flex flex-row items-center justify-start gap-2 w-full font-medium text-base text-muted-foreground">
 								<CalendarDays size={20} /> Date Details
