@@ -171,7 +171,7 @@ export default function TaskForm({ parentId, isOpen, setIsOpen, updateData, setU
 				title: title || "",
 				description: description || "",
 				parent_id: parent_id || parentId || undefined,
-				project_id: project_id || selectedProject.id || undefined,
+				project_id: project_id || selectedProject?.id || undefined,
 				category_id: category_id || undefined,
 				// expected_output: expected_output || "",
 				start_date: typeof start_date === "string" ? parseISO(start_date) : start_date || null,
