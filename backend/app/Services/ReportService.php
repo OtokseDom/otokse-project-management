@@ -34,6 +34,235 @@ class ReportService
         $this->organization_id = Auth::user()->organization_id;
     }
 
+    // ---------------------- NEW HELPERS (AI-READY metadata + rules) ----------------------
+    // 🧠 Build period & comparison_period dynamically based on provided filters or defaults
+    private function buildPeriod($filter = null, $unit = null, $count = null)
+    {
+        // If explicit range provided use it and derive previous period of equal length
+        if (!empty($filter['from']) && !empty($filter['to'])) {
+            $from = Carbon::parse($filter['from'])->startOfDay();
+            $to = Carbon::parse($filter['to'])->endOfDay();
+            $length = $from->diffInSeconds($to);
+            $prevTo = $from->copy()->subSecond();
+            $prevFrom = $prevTo->copy()->subSeconds($length);
+            return [
+                'period' => ['from' => $from->toDateString(), 'to' => $to->toDateString()],
+                'comparison' => ['from' => $prevFrom->toDateString(), 'to' => $prevTo->toDateString()],
+                'aggregation' => $unit ? ($unit === 'days' ? 'day' : ($unit === 'weeks' ? 'week' : 'month')) : null,
+                'is_rolling' => true
+            ];
+        }
+        // If defaults provided (e.g., last 7 days / 6 weeks / 6 months)
+        if ($unit && $count) {
+            $now = now();
+            if ($unit === 'days') {
+                $to = $now->endOfDay();
+                $from = $now->copy()->subDays($count - 1)->startOfDay();
+                $prevTo = $from->copy()->subSecond();
+                $prevFrom = $prevTo->copy()->subDays($count - 1)->startOfDay();
+                return [
+                    'period' => ['from' => $from->toDateString(), 'to' => $to->toDateString()],
+                    'comparison' => ['from' => $prevFrom->toDateString(), 'to' => $prevTo->toDateString()],
+                    'aggregation' => 'day',
+                    'is_rolling' => true
+                ];
+            }
+            if ($unit === 'weeks') {
+                $to = $now->endOfDay();
+                $from = $now->copy()->startOfWeek(Carbon::SUNDAY)->subWeeks($count - 1)->startOfDay();
+                $prevTo = $from->copy()->subSecond();
+                $prevFrom = $prevTo->copy()->startOfWeek(Carbon::SUNDAY)->subWeeks($count - 1)->startOfDay();
+                return [
+                    'period' => ['from' => $from->toDateString(), 'to' => $to->toDateString()],
+                    'comparison' => ['from' => $prevFrom->toDateString(), 'to' => $prevTo->toDateString()],
+                    'aggregation' => 'week',
+                    'is_rolling' => true
+                ];
+            }
+            if ($unit === 'months') {
+                $to = $now->endOfDay();
+                $from = $now->copy()->startOfMonth()->subMonths($count - 1)->startOfDay();
+                $prevTo = $from->copy()->subSecond();
+                $prevFrom = $prevTo->copy()->startOfMonth()->subMonths($count - 1)->startOfDay();
+                return [
+                    'period' => ['from' => $from->toDateString(), 'to' => $to->toDateString()],
+                    'comparison' => ['from' => $prevFrom->toDateString(), 'to' => $prevTo->toDateString()],
+                    'aggregation' => 'month',
+                    'is_rolling' => true
+                ];
+            }
+        }
+        // 🧠 All-time fallback (no fixed window)
+        return [
+            'period' => ['type' => 'all_time'],
+            'comparison' => null,
+            'aggregation' => null,
+            'is_rolling' => false
+        ];
+    }
+
+    // 📊 Parse filters into explicit structure for AI transparency
+    private function parseFilters($filter = null)
+    {
+        return [
+            'assignees' => isset($filter['users']) ? array_values(array_filter(array_map('trim', explode(',', $filter['users'])))) : null,
+            'projects' => isset($filter['projects']) ? array_values(array_filter(array_map('trim', explode(',', $filter['projects'])))) : null,
+            'epics' => isset($filter['epics']) ? array_values(array_filter(array_map('trim', explode(',', $filter['epics'])))) : null,
+        ];
+    }
+
+    // 🔍 Generate deterministic attention items per rule-set
+    private function generateAttentionItems($reportKey, $data, $extra = [])
+    {
+        $items = [];
+
+        // ✅ Tasks Completed rule (uses summary.current_total & previous_total when available)
+        if ($reportKey === 'tasks_completed_last_7_days' || $reportKey === 'tasks_completed_last_6_weeks' || $reportKey === 'tasks_completed_last_6_months' || $reportKey === 'tasks_completed_per_user') {
+            $curr = $data['summary']['current_total'] ?? null;
+            $prev = $data['summary']['previous_total'] ?? null;
+            if (!is_null($curr) && !is_null($prev) && $prev > 0) {
+                if ($curr < $prev * 0.7) {
+                    $drop = ($prev - $curr) / $prev;
+                    $severity = $drop > 0.5 ? 'high' : 'medium';
+                    $items[] = [
+                        'generated_by' => 'rules',
+                        'rule' => 'tasks_completed_drop',
+                        'severity' => $severity,
+                        'reason' => 'Task completion dropped significantly compared to the previous period.',
+                        'current' => $curr,
+                        'previous' => $prev,
+                    ];
+                }
+            }
+        }
+
+        // ✅ Users Task Load rule
+        if ($reportKey === 'users_task_load' && !empty($data['chart_data'])) {
+            $counts = $data['chart_data']->pluck('task')->filter()->all();
+            $avg = count($counts) ? array_sum($counts) / count($counts) : 0;
+            foreach ($data['chart_data'] as $row) {
+                $userTasks = $row->task ?? 0;
+                if ($avg > 0 && $userTasks > $avg * 1.3) {
+                    $ratio = $userTasks / $avg;
+                    $severity = $ratio > 1.5 ? 'high' : 'medium';
+                    $items[] = [
+                        'generated_by' => 'rules',
+                        'rule' => 'user_task_load',
+                        'severity' => $severity,
+                        'reason' => 'User workload significantly exceeds team average.',
+                        'user' => $row->user ?? $row->name ?? null,
+                        'user_tasks' => $userTasks,
+                        'team_average' => round($avg, 2)
+                    ];
+                }
+            }
+        }
+
+        // ✅ Estimate vs Actual rule (overrun percent)
+        if (($reportKey === 'estimate_vs_actual' || $reportKey === 'estimate_vs_actual_date') && isset($data['runs'])) {
+            $over = abs($data['runs']['over'] ?? 0);
+            $under = abs($data['runs']['under'] ?? 0);
+            $total = $over + $under;
+            if ($total > 0) {
+                $over_pct = $over / $total;
+                if ($over_pct > 0.2) {
+                    $severity = $over_pct > 0.4 ? 'high' : 'medium';
+                    $items[] = [
+                        'generated_by' => 'rules',
+                        'rule' => 'estimate_vs_actual_overrun',
+                        'severity' => $severity,
+                        'reason' => 'Actual effort consistently exceeds estimates.',
+                        'overrun_percentage' => round($over_pct * 100, 2)
+                    ];
+                }
+            }
+        }
+
+        // ✅ Delay per user rule
+        if ($reportKey === 'delay_per_user' && !empty($data['chart_data'])) {
+            $delays = $data['chart_data']->pluck('delay')->map(fn($v) => (float)$v)->all();
+            $avg = count($delays) ? array_sum($delays) / count($delays) : 0;
+            foreach ($data['chart_data'] as $row) {
+                $userDelay = (float)($row->delay ?? 0);
+                if ($avg > 0 && $userDelay > $avg * 1.25) {
+                    $severity = $userDelay > $avg * 1.5 ? 'high' : 'medium';
+                    $items[] = [
+                        'generated_by' => 'rules',
+                        'rule' => 'delay_per_user',
+                        'severity' => $severity,
+                        'reason' => 'User has consistently higher delays than peers.',
+                        'user' => $row->assignee ?? $row->assignee ?? null,
+                        'user_delay' => $userDelay,
+                        'team_average_delay' => round($avg, 2)
+                    ];
+                }
+            }
+        }
+
+        // ✅ Completion velocity rule
+        if ($reportKey === 'completion_velocity' && isset($data['percentage_difference'])) {
+            $eventPct = $data['percentage_difference']['value'] ?? 0;
+            $isDecrease = ($data['percentage_difference']['event'] ?? '') === 'Decreased';
+            if ($isDecrease && $eventPct > 20) {
+                $severity = $eventPct > 40 ? 'high' : 'medium';
+                $items[] = [
+                    'generated_by' => 'rules',
+                    'rule' => 'completion_velocity_decline',
+                    'severity' => $severity,
+                    'reason' => 'Completion velocity has declined compared to the previous period.',
+                    'percentage_decrease' => $eventPct
+                ];
+            }
+        }
+
+        return [
+            'generated_by' => 'rules',
+            'items' => $items
+        ];
+    }
+
+    // 🧠 Attach metadata (periods, filters, summary, aggregation, attention items)
+    private function attachMetadata(array $data, $filter, $periodMeta, $current_total = null, $previous_total = null)
+    {
+        // 📊 Filters transparency for AI reasoning
+        $data['filters_applied'] = $this->parseFilters($filter);
+
+        // ⚠️ Period definitions required by AI
+        $data['period'] = $periodMeta['period'] ?? ['type' => 'all_time'];
+        $data['comparison_period'] = $periodMeta['comparison'] ?? null;
+
+        // 🧠 Summary block (non-intrusive)
+        $curr = is_null($current_total) && isset($data['data_count']) ? $data['data_count'] : $current_total;
+        $prev = $previous_total;
+        $diff = !is_null($curr) && !is_null($prev) ? ($curr - $prev) : null;
+        $pct = (!is_null($curr) && !is_null($prev) && $prev != 0) ? round((($curr - $prev) / $prev) * 100, 2) : null;
+        $data['summary'] = [
+            'current_total' => $curr,
+            'previous_total' => $prev,
+            'difference' => $diff,
+            'percentage_change' => $pct
+        ];
+
+        // 📊 Aggregation metadata for time-based charts
+        if (isset($periodMeta['aggregation'])) {
+            $data['aggregation'] = $periodMeta['aggregation'];
+            $data['is_rolling'] = $periodMeta['is_rolling'] ?? true;
+        } else {
+            $data['aggregation'] = null;
+            $data['is_rolling'] = false;
+        }
+
+        // 🔍 Attention items (deterministic rules)
+        // pass report key if available (front controllers use keys when assembling reports)
+        $reportKey = $data['__report_key'] ?? null;
+        $data['attention_items'] = $this->generateAttentionItems($reportKey, $data);
+
+        // Remove internal helper key to keep payload clean
+        if (isset($data['__report_key'])) unset($data['__report_key']);
+
+        return $data;
+    }
+
     // Apply common filters to query builder
     private function applyFilters($query, $id, $filter)
     {
@@ -105,6 +334,12 @@ class ReportService
             'progress' => $progress,
             'filters' => $filter
         ];
+
+        // 🧠 Attach AI metadata (all-time unless filter provided)
+        $periodMeta = $this->buildPeriod($filter, null, null);
+        // include internal key for rules to identify report
+        $data['__report_key'] = 'overall_progress';
+        $data = $this->attachMetadata($data, $filter, $periodMeta, $completedTasks, null);
 
         if (empty($data)) {
             return apiResponse(null, 'Failed to fetch progress', false, 404);
@@ -193,6 +428,11 @@ class ReportService
             'filters' => $filter
         ];
 
+        // 🧠 Attach metadata (use filter-derived period or all_time)
+        $periodMeta = $this->buildPeriod($filter, null, null);
+        $data['__report_key'] = 'section_cards';
+        $data = $this->attachMetadata($data, $filter, $periodMeta, $taskCompletionQuery, null);
+
         if (empty(array_filter($data, fn($value) => !is_null($value) && $value !== 'filters'))) {
             return apiResponse(null, 'Failed to fetch active users report', false, 404);
         }
@@ -253,6 +493,12 @@ class ReportService
             'filters' => $filter
         ];
 
+        // 🧠 Attach metadata (period: derived from filter or all_time)
+        $periodMeta = $this->buildPeriod($filter, null, null);
+        $data['__report_key'] = 'tasks_completed_per_user';
+        // current_total = total tasks completed in this context; using data_count if available
+        $data = $this->attachMetadata($data, $filter, $periodMeta, $taskCount, null);
+
         if (empty($data)) {
             return apiResponse(null, 'Failed to fetch tasks completed per user', false, 404);
         }
@@ -263,8 +509,10 @@ class ReportService
     // Tasks completed - Last 7 Days - Bar chart
     public function tasksCompletedLast7Days($id = null, $variant = "", $filter)
     {
-        $endDate = now();
-        $startDate = now()->subDays(6); // includes today, total 7 days
+        // 🧠 Use dynamic period (default last 7 days)
+        $periodMeta = $this->buildPeriod($filter, 'days', 7);
+        $startDate = Carbon::parse($periodMeta['period']['from']);
+        $endDate = Carbon::parse($periodMeta['period']['to']);
 
         $query = $this->task
             ->where('organization_id', $this->organization_id)
@@ -276,7 +524,7 @@ class ReportService
             ->whereHas('status', fn($q) => $q->where('name', 'Completed'))
             ->whereBetween('actual_date', [$startDate->toDateString(), $endDate->toDateString()]);
 
-        // Apply filters
+        // Apply filters (consistent)
         $query = $this->applyFilters($query, ($variant !== 'dashboard' ? $id : null), ($variant === 'dashboard' ? $filter : null));
 
         // Group by date
@@ -305,8 +553,20 @@ class ReportService
         $data = [
             'chart_data' => $chart_data,
             'data_count' => $total,
-            'filters' => $filter,
+            'filters' => $filter
         ];
+
+        // 🧠 Attach metadata & summary (compute previous period total)
+        $prevStart = Carbon::parse($periodMeta['comparison']['from']);
+        $prevEnd = Carbon::parse($periodMeta['comparison']['to']);
+        $prevTotal = (clone $this->task)
+            ->where('organization_id', $this->organization_id)
+            ->whereHas('status', fn($q) => $q->where('name', 'Completed'))
+            ->whereBetween('actual_date', [$prevStart->toDateString(), $prevEnd->toDateString()]);
+        $prevTotal = $this->applyFilters($prevTotal, ($variant !== 'dashboard' ? $id : null), ($variant === 'dashboard' ? $filter : null))->count();
+
+        $data['__report_key'] = 'tasks_completed_last_7_days';
+        $data = $this->attachMetadata($data, $filter, $periodMeta, $total, $prevTotal);
 
         return apiResponse($data, "Tasks completed in the last 7 days fetched successfully");
     }
@@ -314,8 +574,10 @@ class ReportService
     // Tasks completed - Last 8 Weeks - Bar chart
     public function tasksCompletedLast6Weeks($id = null, $variant = "", $filter)
     {
-        $endDate = now();
-        $startDate = now()->startOfWeek(Carbon::SUNDAY)->subWeeks(5);
+        // 🧠 dynamic 6-week window
+        $periodMeta = $this->buildPeriod($filter, 'weeks', 6);
+        $startDate = Carbon::parse($periodMeta['period']['from']);
+        $endDate = Carbon::parse($periodMeta['period']['to']);
 
         $query = $this->task
             ->where('organization_id', $this->organization_id)
@@ -361,14 +623,28 @@ class ReportService
             'filters' => $filter,
         ];
 
+        // previous total
+        $prevStart = Carbon::parse($periodMeta['comparison']['from']);
+        $prevEnd = Carbon::parse($periodMeta['comparison']['to']);
+        $prevTotal = (clone $this->task)
+            ->where('organization_id', $this->organization_id)
+            ->whereHas('status', fn($q) => $q->where('name', 'Completed'))
+            ->whereBetween('actual_date', [$prevStart->toDateString(), $prevEnd->toDateString()]);
+        $prevTotal = $this->applyFilters($prevTotal, ($variant !== 'dashboard' ? $id : null), ($variant === 'dashboard' ? $filter : null))->count();
+
+        $data['__report_key'] = 'tasks_completed_last_6_weeks';
+        $data = $this->attachMetadata($data, $filter, $periodMeta, $total, $prevTotal);
+
         return apiResponse($data, "Tasks completed in the last 8 weeks fetched successfully");
     }
 
     // Tasks completed - Last 6 Months - Bar chart
     public function tasksCompletedLast6Months($id = null, $variant = "", $filter)
     {
-        $endDate = now();
-        $startDate = now()->subMonths(5)->startOfMonth();
+        // 🧠 dynamic 6-month window
+        $periodMeta = $this->buildPeriod($filter, 'months', 6);
+        $startDate = Carbon::parse($periodMeta['period']['from']);
+        $endDate = Carbon::parse($periodMeta['period']['to']);
 
         $query = $this->task
             ->where('organization_id', $this->organization_id)
@@ -414,6 +690,18 @@ class ReportService
             'filters' => $filter,
         ];
 
+        // previous total
+        $prevStart = Carbon::parse($periodMeta['comparison']['from']);
+        $prevEnd = Carbon::parse($periodMeta['comparison']['to']);
+        $prevTotal = (clone $this->task)
+            ->where('organization_id', $this->organization_id)
+            ->whereHas('status', fn($q) => $q->where('name', 'Completed'))
+            ->whereBetween('actual_date', [$prevStart->toDateString(), $prevEnd->toDateString()]);
+        $prevTotal = $this->applyFilters($prevTotal, ($variant !== 'dashboard' ? $id : null), ($variant === 'dashboard' ? $filter : null))->count();
+
+        $data['__report_key'] = 'tasks_completed_last_6_months';
+        $data = $this->attachMetadata($data, $filter, $periodMeta, $total, $prevTotal);
+
         return apiResponse($data, "Tasks completed in the last 6 months fetched successfully");
     }
 
@@ -448,6 +736,11 @@ class ReportService
             'filters' => $filter
         ];
 
+        // 🧠 Attach metadata (period from filter or all_time)
+        $periodMeta = $this->buildPeriod($filter, null, null);
+        $data['__report_key'] = 'tasks_by_status';
+        $data = $this->attachMetadata($data, $filter, $periodMeta, array_sum(array_column($chart_data, 'tasks')), null);
+
         if (empty($data['chart_data'])) {
             return apiResponse(null, 'Failed to fetch task by status report', false, 404);
         }
@@ -459,10 +752,13 @@ class ReportService
     public function performanceRatingTrend($id = null, $variant = "", $filter)
     {
 
+        // 🧠 dynamic last 6 months window (unless filter provides explicit range)
+        $periodMeta = $this->buildPeriod($filter, 'months', 6);
+        // use filter['to'] or period from buildPeriod to construct months array
+        $startDate = isset($filter['to']) ? Carbon::parse($filter['to'])->startOfMonth() : Carbon::parse($periodMeta['period']['from'])->startOfMonth();
+
         // Calculate the last 6 months (including current)
         $months = [];
-        // Use filter['to'] as the starting month, default to current month if not set
-        $startDate = isset($filter['to']) ? \Carbon\Carbon::parse($filter['to'])->startOfMonth() : now()->startOfMonth();
         for ($i = 5; $i >= 0; $i--) {
             $date = $startDate->copy()->subMonths($i);
             $months[] = [
@@ -482,8 +778,6 @@ class ReportService
                         $subQuery->whereNull('parent_id')->whereDoesntHave('children');
                     });
                 })
-                // Use COALESCE(actual_date, end_date, start_date) so tasks are included based on actual_date when present,
-                // otherwise end_date, and finally start_date — and ensure year/month match the resolved date.
                 ->whereRaw('YEAR(COALESCE(actual_date, end_date, start_date)) = ? AND MONTH(COALESCE(actual_date, end_date, start_date)) = ?', [$m['year'], $m['month_num']]);
             $query = $this->applyFilters($query, ($variant !== 'dashboard' ? $id : null), ($variant === 'dashboard' ? $filter : null));
             $rating = $query->select(
@@ -516,6 +810,9 @@ class ReportService
             'filters' => $filter
         ];
 
+        $data['__report_key'] = 'performance_rating_trend';
+        $data = $this->attachMetadata($data, $filter, $periodMeta, $task_count, null);
+
         if (empty($data['chart_data'])) {
             return apiResponse(null, 'Failed to fetch task activity timeline report', false, 404);
         }
@@ -526,9 +823,11 @@ class ReportService
     // Completion Velocity - monthly completion rate for last 6 months
     public function completionVelocityTrend($id = null, $variant = "", $filter)
     {
-        // Determine starting month (use filter 'to' if provided)
+        // 🧠 dynamic last 6 months
+        $periodMeta = $this->buildPeriod($filter, 'months', 6);
+        $startDate = isset($filter['to']) ? Carbon::parse($filter['to'])->startOfMonth() : Carbon::parse($periodMeta['period']['from'])->startOfMonth();
+
         $months = [];
-        $startDate = isset($filter['to']) ? Carbon::parse($filter['to'])->startOfMonth() : now()->startOfMonth();
         for ($i = 5; $i >= 0; $i--) {
             $date = $startDate->copy()->subMonths($i);
             $months[] = [
@@ -553,8 +852,6 @@ class ReportService
                         $subQuery->whereNull('parent_id')->whereDoesntHave('children');
                     });
                 })
-                // Use COALESCE(actual_date, end_date, start_date) so tasks are included based on actual_date when present,
-                // otherwise end_date, and finally start_date — and ensure year/month match the resolved date.
                 ->whereRaw('YEAR(COALESCE(actual_date, end_date, start_date)) = ? AND MONTH(COALESCE(actual_date, end_date, start_date)) = ?', [$m['year'], $m['month_num']]);
 
             // apply the same filters logic used elsewhere
@@ -589,6 +886,9 @@ class ReportService
             'data_count' => $task_count,
             'filters' => $filter,
         ];
+
+        $data['__report_key'] = 'completion_velocity';
+        $data = $this->attachMetadata($data, $filter, $periodMeta, $task_count, null);
 
         if (empty($data['chart_data'])) {
             return apiResponse(null, 'Failed to fetch completion velocity report', false, 404);
@@ -625,13 +925,10 @@ class ReportService
                 DB::raw('ROUND(SUM(CASE WHEN days_taken > 0 AND days_estimate IS NOT NULL AND days_taken < days_estimate THEN days_estimate - days_taken ELSE 0 END), 2) as underrun')
             );
 
-        // if ($id && $variant !== 'dashboard') {
-        //     $query->whereHas('assignees', function ($q) use ($id) {
-        //         $q->where('users.id', $id);
-        //     });
-        // }
-        if ($filter && $filter['from'] && $filter['to']) {
-            $query->whereBetween('start_date', [$filter['from'], $filter['to']]);
+        // 🧠 Use computed period if provided, otherwise respect existing filter semantics
+        $periodMeta = $this->buildPeriod($filter, null, null);
+        if (isset($periodMeta['period']['from']) && isset($periodMeta['period']['to'])) {
+            $query->whereBetween('start_date', [$periodMeta['period']['from'], $periodMeta['period']['to']]);
         }
         if ($filter && isset($filter['projects'])) {
             $projectIds = explode(',', $filter['projects']); // turns "10,9" into [10, 9]
@@ -658,6 +955,9 @@ class ReportService
             'data_count' => $userCount, //data_count is used by the chart
             'filters' => $filter
         ];
+
+        $data['__report_key'] = 'estimate_vs_actual_date';
+        $data = $this->attachMetadata($data, $filter, $periodMeta, $userCount, null);
 
         if (empty($data)) {
             return apiResponse(null, 'Failed to fetch estimate vs actual report', false, 404);
@@ -716,6 +1016,10 @@ class ReportService
             'filters' => $filter ?? null,
         ];
 
+        $periodMeta = $this->buildPeriod($filter, null, null);
+        $data['__report_key'] = 'overrun_underrun_ratio';
+        $data = $this->attachMetadata($data, $filter, $periodMeta, $totalTasks, null);
+
         if (empty($data['chart_data'])) {
             return apiResponse(null, "No data found", 200, false);
         }
@@ -739,7 +1043,6 @@ class ReportService
                     ->where('tasks.status_id', '!=', $cancelled);
             })
             ->where('users.organization_id', $this->organization_id)
-            // ->whereNull('tasks.parent_id')
             ->where(function ($query) {
                 $query->whereNotNull('tasks.parent_id') // include only subtasks
                     ->orWhere(function ($subQuery) {
@@ -752,13 +1055,10 @@ class ReportService
                 DB::raw('SUM(CASE WHEN delay_days > 0 THEN delay_days ELSE 0 END) as delay'),
             );
 
-        // if ($id && $variant !== 'dashboard') {
-        //     $query->whereHas('assignees', function ($q) use ($id) {
-        //         $q->where('users.id', $id);
-        //     });
-        // }
-        if ($filter && $filter['from'] && $filter['to']) {
-            $query->whereBetween('start_date', [$filter['from'], $filter['to']]);
+        // 🧠 Use computed period if provided
+        $periodMeta = $this->buildPeriod($filter, null, null);
+        if (isset($periodMeta['period']['from']) && isset($periodMeta['period']['to'])) {
+            $query->whereBetween('start_date', [$periodMeta['period']['from'], $periodMeta['period']['to']]);
         }
         if ($filter && isset($filter['projects'])) {
             $projectIds = explode(',', $filter['projects']); // turns "10,9" into [10, 9]
@@ -786,6 +1086,9 @@ class ReportService
             'filters' => $filter
         ];
 
+        $data['__report_key'] = 'delay_per_user';
+        $data = $this->attachMetadata($data, $filter, $periodMeta, $chart_data->sum('delay'), null);
+
         if (empty($data)) {
             return apiResponse(null, 'Failed to fetch delay per user report', false, 404);
         }
@@ -797,10 +1100,12 @@ class ReportService
     // User Taskload. Area chart
     public function taskActivityTimeline($id, $filter)
     {
+        // 🧠 dynamic last 6 months (or based on filter)
+        $periodMeta = $this->buildPeriod($filter, 'months', 6);
+        $startDate = isset($filter['to']) ? Carbon::parse($filter['to'])->startOfMonth() : Carbon::parse($periodMeta['period']['from'])->startOfMonth();
+
         // Calculate the last 6 months (including current)
         $months = [];
-        // Use filter['to'] as the starting month, default to current month if not set
-        $startDate = isset($filter['to']) ? \Carbon\Carbon::parse($filter['to'])->startOfMonth() : now()->startOfMonth();
         for ($i = 5; $i >= 0; $i--) {
             $date = $startDate->copy()->subMonths($i);
             $months[] = [
@@ -859,6 +1164,9 @@ class ReportService
             'task_count' => $task_count,
             'filters' => $filter
         ];
+
+        $data['__report_key'] = 'task_activity_timeline';
+        $data = $this->attachMetadata($data, $filter, $periodMeta, $task_count, null);
 
         if (empty($data['chart_data'])) {
             return apiResponse(null, 'Failed to fetch task activity timeline report', false, 404);
@@ -922,6 +1230,11 @@ class ReportService
             "task_count" => $task_count,
             "filters" => $filter
         ];
+
+        $periodMeta = $this->buildPeriod($filter, null, null);
+        $data['__report_key'] = 'rating_per_category';
+        $data = $this->attachMetadata($data, $filter, $periodMeta, $task_count, null);
+
         if (empty($data)) {
             return apiResponse(null, 'Failed to fetch rating per category report', false, 404);
         }
@@ -988,6 +1301,10 @@ class ReportService
             'filters' => $filter
         ];
 
+        $periodMeta = $this->buildPeriod($filter, null, null);
+        $data['__report_key'] = 'estimate_vs_actual';
+        $data = $this->attachMetadata($data, $filter, $periodMeta, $taskCount, null);
+
         if (empty($data)) {
             return apiResponse(null, 'Failed to fetch estimate vs actual report', false, 404);
         }
@@ -1019,12 +1336,13 @@ class ReportService
                     });
             });
 
+        $periodMeta = $this->buildPeriod($filter, null, null);
         if ($filter && isset($filter['users'])) {
             $userIds = explode(',', $filter['users']); // turns "10,9" into [10, 9]
             $query->whereIn('users.id', $userIds);
         }
-        if ($filter && $filter['from'] && $filter['to']) {
-            $query->whereBetween('start_date', [$filter['from'], $filter['to']]);
+        if (isset($periodMeta['period']['from']) && isset($periodMeta['period']['to'])) {
+            $query->whereBetween('start_date', [$periodMeta['period']['from'], $periodMeta['period']['to']]);
         }
         if ($filter && isset($filter['projects'])) {
             $projectIds = explode(',', $filter['projects']); // turns "10,9" into [10, 9]
@@ -1053,6 +1371,9 @@ class ReportService
             'data_count' => $taskCount,
             'filters' => $filter
         ];
+
+        $data['__report_key'] = 'users_task_load';
+        $data = $this->attachMetadata($data, $filter, $periodMeta, $chart_data->sum('task'), null);
 
         if (empty($data)) {
             return apiResponse(null, 'Failed to fetch task activity timeline report', false, 404);
@@ -1083,12 +1404,13 @@ class ReportService
                     });
             });
 
+        $periodMeta = $this->buildPeriod($filter, null, null);
         if ($filter && isset($filter['users'])) {
             $userIds = explode(',', $filter['users']); // turns "10,9" into [10, 9]
             $query->whereIn('users.id', $userIds);
         }
-        if ($filter && $filter['from'] && $filter['to']) {
-            $query->whereBetween('start_date', [$filter['from'], $filter['to']]);
+        if (isset($periodMeta['period']['from']) && isset($periodMeta['period']['to'])) {
+            $query->whereBetween('start_date', [$periodMeta['period']['from'], $periodMeta['period']['to']]);
         }
         if ($filter && isset($filter['projects'])) {
             $projectIds = explode(',', $filter['projects']); // turns "10,9" into [10, 9]
@@ -1110,6 +1432,9 @@ class ReportService
             'data_count' => $taskCount,
             'filters' => $filter
         ];
+
+        $data['__report_key'] = 'performance_leaderboard';
+        $data = $this->attachMetadata($data, $filter, $periodMeta, $chart_data->count(), null);
 
         if (empty($data)) {
             return apiResponse(null, 'Failed to fetch performance leaderboard report', false, 404);
@@ -1139,8 +1464,10 @@ class ReportService
                             ->whereRaw('NOT EXISTS (SELECT 1 FROM tasks t WHERE t.parent_id = tasks.id)');
                     });
             });
-        if ($filter && $filter['from'] && $filter['to']) {
-            $query->whereBetween('start_date', [$filter['from'], $filter['to']]);
+
+        $periodMeta = $this->buildPeriod($filter, null, null);
+        if (isset($periodMeta['period']['from']) && isset($periodMeta['period']['to'])) {
+            $query->whereBetween('start_date', [$periodMeta['period']['from'], $periodMeta['period']['to']]);
         }
         if ($filter && isset($filter['projects'])) {
             $projectIds = explode(',', $filter['projects']); // turns "10,9" into [10, 9]
@@ -1169,6 +1496,9 @@ class ReportService
             'data_count' => $categoryCount,
             'filters' => $filter
         ];
+
+        $data['__report_key'] = 'estimate_vs_actual';
+        $data = $this->attachMetadata($data, $filter, $periodMeta, $categoryCount, null);
 
         if (empty($data)) {
             return apiResponse(null, 'Failed to fetch estimate vs actual report', false, 404);
