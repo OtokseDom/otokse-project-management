@@ -104,10 +104,32 @@ class ReportService
     // 📊 Parse filters into explicit structure for AI transparency
     private function parseFilters($filter = null)
     {
+        if (!$filter || !is_array($filter)) {
+            return [
+                'users' => [],
+                'projects' => [],
+                'epics' => [],
+                'raw' => null,
+            ];
+        }
+
+        $normalizeList = function ($val) {
+            if (is_array($val)) return array_values(array_filter($val, fn($v) => $v !== '' && $v !== null));
+            if (is_string($val)) {
+                $parts = array_values(array_filter(array_map('trim', explode(',', $val)), fn($v) => $v !== '' && $v !== null));
+                // cast numeric strings to int when appropriate
+                return array_map(function ($p) {
+                    return is_numeric($p) ? (int)$p : $p;
+                }, $parts);
+            }
+            return [];
+        };
+
         return [
-            'assignees' => isset($filter['users']) ? array_values(array_filter(array_map('trim', explode(',', $filter['users'])))) : null,
-            'projects' => isset($filter['projects']) ? array_values(array_filter(array_map('trim', explode(',', $filter['projects'])))) : null,
-            'epics' => isset($filter['epics']) ? array_values(array_filter(array_map('trim', explode(',', $filter['epics'])))) : null,
+            'users' => $normalizeList($filter['users'] ?? null),
+            'projects' => $normalizeList($filter['projects'] ?? null),
+            'epics' => $normalizeList($filter['epics'] ?? null),
+            'raw' => $filter,
         ];
     }
 
@@ -131,6 +153,11 @@ class ReportService
                         'reason' => 'Task completion dropped significantly compared to the previous period.',
                         'current' => $curr,
                         'previous' => $prev,
+                        'threshold' => [
+                            'rule' => 'decrease_percentage',
+                            'triggered_when' => 'current < previous * 0.7',
+                            'actual_ratio' => $prev > 0 ? round($curr / $prev, 2) : null,
+                        ],
                     ];
                 }
             }
@@ -152,7 +179,12 @@ class ReportService
                         'reason' => 'User workload significantly exceeds team average.',
                         'user' => $row->user ?? $row->name ?? null,
                         'user_tasks' => $userTasks,
-                        'team_average' => round($avg, 2)
+                        'team_average' => round($avg, 2),
+                        'threshold' => [
+                            'rule' => 'above_team_average',
+                            'triggered_when' => 'user_tasks > team_average * 1.3',
+                            'actual_ratio' => $avg > 0 ? round($userTasks / $avg, 2) : null,
+                        ]
                     ];
                 }
             }
@@ -172,7 +204,12 @@ class ReportService
                         'rule' => 'estimate_vs_actual_overrun',
                         'severity' => $severity,
                         'reason' => 'Actual effort consistently exceeds estimates.',
-                        'overrun_percentage' => round($over_pct * 100, 2)
+                        'overrun_percentage' => round($over_pct * 100, 2),
+                        'threshold' => [
+                            'rule' => 'overrun_ratio',
+                            'triggered_when' => 'over / (over + under) > 0.2',
+                            'actual_ratio' => round($over_pct, 2),
+                        ]
                     ];
                 }
             }
@@ -193,7 +230,12 @@ class ReportService
                         'reason' => 'User has consistently higher delays than peers.',
                         'user' => $row->assignee ?? $row->assignee ?? null,
                         'user_delay' => $userDelay,
-                        'team_average_delay' => round($avg, 2)
+                        'team_average_delay' => round($avg, 2),
+                        'threshold' => [
+                            'rule' => 'delay_above_average',
+                            'triggered_when' => 'user_delay > avg_delay * 1.25',
+                            'actual_ratio' => $avg > 0 ? round($userDelay / $avg, 2) : null,
+                        ]
                     ];
                 }
             }
@@ -210,7 +252,12 @@ class ReportService
                     'rule' => 'completion_velocity_decline',
                     'severity' => $severity,
                     'reason' => 'Completion velocity has declined compared to the previous period.',
-                    'percentage_decrease' => $eventPct
+                    'percentage_decrease' => $eventPct,
+                    'threshold' => [
+                        'rule' => 'velocity_decrease',
+                        'triggered_when' => 'percentage_difference.value > 20 AND event == Decreased',
+                        'actual_ratio' => $eventPct,
+                    ]
                 ];
             }
         }
@@ -232,16 +279,79 @@ class ReportService
         $data['comparison_period'] = $periodMeta['comparison'] ?? null;
 
         // 🧠 Summary block (non-intrusive)
-        $curr = is_null($current_total) && isset($data['data_count']) ? $data['data_count'] : $current_total;
+        // Prefer an explicit metric in payload (e.g. `progress`) when available
+        $curr = null;
+        if (isset($data['progress'])) {
+            $curr = $data['progress'];
+        } elseif (!is_null($current_total)) {
+            $curr = $current_total;
+        } elseif (isset($data['data_count'])) {
+            $curr = $data['data_count'];
+        }
+
         $prev = $previous_total;
+
+        // Determine whether previous total was actually computed by the report
+        if (isset($periodMeta['comparison']) && !is_null($periodMeta['comparison'])) {
+            if (!is_null($prev)) {
+                $previous_computed = true;
+            } else {
+                // comparison supported but previous_total not provided by report
+                // default previous to 0 for safe downstream calculations, but mark as not computed
+                $prev = 0;
+                $previous_computed = false;
+            }
+        } else {
+            // comparison not supported for this report
+            $previous_computed = null;
+            $prev = null;
+        }
+
         $diff = !is_null($curr) && !is_null($prev) ? ($curr - $prev) : null;
         $pct = (!is_null($curr) && !is_null($prev) && $prev != 0) ? round((($curr - $prev) / $prev) * 100, 2) : null;
+
+        // percentage_change_reason clarifies why percentage_change may be null
+        $percentage_change_reason = null;
+        if (is_null($pct)) {
+            if (is_null($data['comparison_period'] ?? null)) {
+                $percentage_change_reason = 'comparison_not_supported';
+            } elseif ($previous_computed === false) {
+                $percentage_change_reason = 'previous_not_computed';
+            } elseif ($prev === 0) {
+                $percentage_change_reason = 'previous_total_zero';
+            } else {
+                $percentage_change_reason = 'insufficient_data';
+            }
+        }
+
+        // Add unit to summary to avoid ambiguous numeric interpretations
+        $unit = 'count';
+        $reportKey = $data['__report_key'] ?? null;
+        if (in_array($reportKey, ['overall_progress', 'completion_velocity', 'tasks_completed_last_7_days', 'tasks_completed_last_6_weeks', 'tasks_completed_last_6_months', 'tasks_completed_per_user', 'tasks_by_status', 'users_task_load', 'estimate_vs_actual', 'estimate_vs_actual_date', 'delay_per_user', 'performance_leaderboard', 'section_cards'])) {
+            // heuristics for percent-like reports
+            if (in_array($reportKey, ['overall_progress', 'completion_velocity', 'section_cards'])) {
+                $unit = 'percent';
+            } else {
+                $unit = 'count';
+            }
+        }
+
         $data['summary'] = [
             'current_total' => $curr,
             'previous_total' => $prev,
             'difference' => $diff,
-            'percentage_change' => $pct
+            'percentage_change' => $pct,
+            'percentage_change_reason' => $percentage_change_reason,
+            'unit' => $unit,
+            'previous_computed' => $previous_computed,
         ];
+
+        // mark composite summaries as non-comparable
+        if (in_array($reportKey, ['section_cards', 'overall_progress'])) {
+            $data['summary']['type'] = 'composite';
+            $data['summary']['comparable'] = false;
+            $data['summary']['reason'] = 'mixed_metrics';
+        }
 
         // 📊 Aggregation metadata for time-based charts
         if (isset($periodMeta['aggregation'])) {
@@ -256,6 +366,32 @@ class ReportService
         // pass report key if available (front controllers use keys when assembling reports)
         $reportKey = $data['__report_key'] ?? null;
         $data['attention_items'] = $this->generateAttentionItems($reportKey, $data);
+
+        // Clarify data_count meaning for AI consumers
+        $records = isset($data['data_count']) ? $data['data_count'] : (isset($data['chart_data']) ? (is_countable($data['chart_data']) ? count($data['chart_data']) : null) : null);
+        // determine records_type per report key
+        $records_type_map = [
+            'tasks_completed_last_7_days' => 'tasks',
+            'tasks_completed_last_6_weeks' => 'tasks',
+            'tasks_completed_last_6_months' => 'tasks',
+            'tasks_completed_per_user' => 'tasks',
+            'tasks_by_status' => 'tasks',
+            'users_task_load' => 'tasks',
+            'estimate_vs_actual_date' => 'users',
+            'estimate_vs_actual' => 'categories',
+            'delay_per_user' => 'users',
+            'performance_leaderboard' => 'users',
+            'rating_per_category' => 'tasks',
+            'completion_velocity' => 'tasks',
+            'performance_rating_trend' => 'tasks',
+            'section_cards' => 'composite',
+            'overall_progress' => 'composite',
+        ];
+        $records_type = $records_type_map[$reportKey] ?? 'records';
+        $data['counts'] = [
+            'records' => $records,
+            'records_type' => $records_type
+        ];
 
         // Remove internal helper key to keep payload clean
         if (isset($data['__report_key'])) unset($data['__report_key']);
@@ -1426,6 +1562,13 @@ class ReportService
             ->orderByDesc('avg_performance_rating')
             ->limit(10)
             ->get();
+
+        // ensure numeric types for avg_performance_rating (avoid numeric strings)
+        foreach ($chart_data as $item) {
+            if (isset($item->avg_performance_rating)) {
+                $item->avg_performance_rating = is_null($item->avg_performance_rating) ? null : (float)$item->avg_performance_rating;
+            }
+        }
 
         $data = [
             'chart_data' => $chart_data,
