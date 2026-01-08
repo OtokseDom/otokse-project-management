@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\v1\AuthController;
 use App\Http\Controllers\Api\v1\CategoryController;
 use App\Http\Controllers\Api\v1\DashboardReportController;
+use App\Http\Controllers\Api\v1\DelayReasonController;
 use App\Http\Controllers\Api\v1\EpicController;
 use App\Http\Controllers\Api\v1\KanbanColumnController;
 use App\Http\Controllers\Api\v1\OrganizationController;
@@ -46,6 +47,7 @@ Route::prefix('v1')->group(function () {
         Route::apiResource('/task', TaskController::class);
         Route::apiResource('/task-history', TaskHistoryController::class);
         Route::apiResource('/task-discussion', TaskDiscussionController::class);
+        Route::apiResource('/delay-reason', DelayReasonController::class);
 
         /* --------------------------------- Reports -------------------------------- */
         Route::get('/user/{id}/reports', [UserReportController::class, 'userReports']);
