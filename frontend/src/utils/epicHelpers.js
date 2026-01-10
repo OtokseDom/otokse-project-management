@@ -21,7 +21,7 @@ export const useEpicHelpers = () => {
 			const res = await axiosClient.get(API().epic());
 			setEpics(res?.data?.data?.epics);
 			// setKanbanColumns(res?.data?.data?.kanbanColumns);
-			setSelectedEpic(res?.data?.data?.epics[res?.data?.data?.epics?.length - 1]);
+			setSelectedEpic(res?.data?.data?.epics[res?.data?.data?.epics?.length - 1]?.id);
 			if (res.data.data.epics.length !== epicFilter.length || res.data.data.epics.length !== profileEpicFilter.length) {
 				const mappedEpics = res.data.data.epics.map((epic) => ({ value: epic.id, label: epic.title }));
 				// Used in user profile
