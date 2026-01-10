@@ -11,6 +11,7 @@ import { createKanbanColumnsSlice } from "./kanbanColumns/kanbanColumnsSlice";
 import { createTaskDiscussionsSlice } from "./taskDiscussions/taskDiscussionsSlice";
 import { createEpicsSlice } from "./epics/epicsSlice";
 import { createEpicSlice } from "./epic/epicSlice";
+import { createScrollSlice } from "./scroll/scrollSlice";
 
 export const useAppStore = create((set, get) => ({
 	...createDashboardSlice(set),
@@ -25,4 +26,5 @@ export const useAppStore = create((set, get) => ({
 	...createCategoriesSlice(set),
 	...createOrganizationSlice(set),
 	...createKanbanColumnsSlice(set),
+	...createScrollSlice(set),
 }));
