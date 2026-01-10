@@ -193,7 +193,7 @@ export const columnsEpic = () => {
 										to="/projects"
 										onClick={(e) => {
 											e.stopPropagation();
-											setSelectedEpic(epic);
+											setSelectedEpic(epic.id);
 										}}
 									>
 										<ListTodo size={20} />

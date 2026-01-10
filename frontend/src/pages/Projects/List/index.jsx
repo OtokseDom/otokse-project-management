@@ -46,7 +46,9 @@ export default function Projects() {
 		if (inProjects) {
 			setFilteredProjects(projects);
 		} else {
-			setFilteredProjects(selectedEpic !== null && selectedEpic !== undefined ? projects.filter((project) => project.epic_id === selectedEpic) : []);
+			setFilteredProjects(
+				selectedEpic !== null && selectedEpic !== undefined ? projects.filter((project) => String(project?.epic_id) === String(selectedEpic)) : []
+			);
 		}
 		// console.log(inProjects);
 	}, [selectedEpic, inProjects, projects]);
