@@ -17,6 +17,7 @@ class ProjectSeeder extends Seeder
             [
                 [
                     'organization_id' => 1,
+                    'epic_id' => 1,
                     'status_id' => 1,
                     'title' => 'Project Alpha',
                     'description' => 'Pioneer Project',
@@ -34,6 +35,7 @@ class ProjectSeeder extends Seeder
                 ],
                 [
                     'organization_id' => 1,
+                    'epic_id' => 1,
                     'status_id' => 2,
                     'title' => 'Project Beta',
                     'description' => 'Pioneer Project',
@@ -51,6 +53,7 @@ class ProjectSeeder extends Seeder
                 ],
                 [
                     'organization_id' => 1,
+                    'epic_id' => 1,
                     'status_id' => 3,
                     'title' => 'Project Charlie',
                     'description' => 'Pioneer Project',
