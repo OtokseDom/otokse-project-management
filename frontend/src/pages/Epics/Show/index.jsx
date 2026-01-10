@@ -1,7 +1,7 @@
 import { Link, useParams } from "react-router-dom";
 import { ArrowLeft, CalendarDaysIcon, Flag, Plus, Rows3, Table, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import axiosClient from "@/axios.client";
 import { columnsTask } from "@/pages/Tasks/List/datatable/columns";
 import { DataTableTasks } from "@/pages/Tasks/List/datatable/data-table";
@@ -45,12 +45,23 @@ import Tasks from "@/pages/Tasks/List";
 import EpicDetails from "./details";
 import { useEpicsStore } from "@/store/epics/epicsStore";
 import Projects from "@/pages/Projects/List";
+import { useScrollStore } from "@/store/scroll/scrollStore";
 
 export default function Epic() {
 	const { id } = useParams();
 	const { epic, epicLoading } = useEpicStore();
 	const { setSelectedEpic } = useEpicsStore();
 	const { fetchEpic } = useEpicHelpers();
+	const targetRef = useRef(null);
+	const { setScrollToTarget } = useScrollStore();
+
+	useEffect(() => {
+		// Register scroll function once
+		setScrollToTarget(() => {
+			targetRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+		});
+	}, [setScrollToTarget]);
+
 	// Fetch user details and reports when ID changes
 	useEffect(() => {
 		document.title = "Task Management | Epic";
@@ -103,7 +114,7 @@ export default function Epic() {
 						<EpicDetails />
 					</div>
 				</div>
-				<div className="col-span-12 h-fit max-h-full">
+				<div ref={targetRef} className="col-span-12 h-fit max-h-full">
 					<Tasks />
 				</div>
 			</div>

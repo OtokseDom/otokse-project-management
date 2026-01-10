@@ -31,6 +31,7 @@ import { useTaskDiscussionsStore } from "@/store/taskDiscussions/taskDiscussions
 import { useTaskStatusesStore } from "@/store/taskStatuses/taskStatusesStore";
 import { useProjectsStore } from "@/store/projects/projectsStore";
 import { Link } from "react-router-dom";
+import { useScrollStore } from "@/store/scroll/scrollStore";
 
 export default function ProjectGridItem({ project, setIsOpen = () => {}, setUpdateData = () => {}, checkHasRelation = () => {} }) {
 	const { tasks, taskHistory, setSelectedTaskHistory, setRelations } = useTasksStore();
@@ -38,6 +39,7 @@ export default function ProjectGridItem({ project, setIsOpen = () => {}, setUpda
 	const { taskStatuses } = useTaskStatusesStore();
 	const [open, setOpen] = useState(false);
 	const [selectedProjects, setSelectedProjects] = useState(null);
+	const { scrollToTarget } = useScrollStore();
 
 	// DnD Kit integration
 	// const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
@@ -247,18 +249,18 @@ export default function ProjectGridItem({ project, setIsOpen = () => {}, setUpda
 							<Edit size={12} />
 							<span className="hidden sm:inline text-xs">Edit</span>
 						</Button>
-						<Link
-							to="/tasks"
+						<Button
+							variant="ghost"
+							title="View tasks"
 							onClick={(e) => {
 								e.stopPropagation();
 								setSelectedProject(project);
+								scrollToTarget();
 							}}
 						>
-							<Button variant="ghost" title="View tasks">
-								<ListTodo />
-								<span className="hidden sm:inline text-xs">View Tasks</span>
-							</Button>
-						</Link>
+							<ListTodo />
+							<span className="hidden sm:inline text-xs">View Tasks</span>
+						</Button>
 						<Button
 							variant="ghost"
 							size="sm"
