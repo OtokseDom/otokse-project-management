@@ -53,6 +53,7 @@ export const columnsDelayReason = ({ setIsOpen, setUpdateData, dialogOpen, setDi
 			setDelayReasonsLoading(false);
 		}
 	};
+	// TODO: Format severity, validity, and status display
 	const baseColumns = useMemo(
 		() => [
 			{
