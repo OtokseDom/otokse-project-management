@@ -21,8 +21,8 @@ class DelayReasonController extends Controller
 
     public function index()
     {
-        $categories = $this->delayReason->getCategories($this->userData->organization_id);
-        return apiResponse($categories, 'Categories fetched successfully');
+        $delayReasons = $this->delayReason->getDelayReasons($this->userData->organization_id);
+        return apiResponse($delayReasons, 'Delay reasons fetched successfully');
     }
 
     public function store(StoreDelayReasonRequest $request)
