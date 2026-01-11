@@ -12,7 +12,7 @@ class DelayReason extends Model
         'organization_id',
         'name',
         'code',
-        'delayReason',
+        'category',
         'impact_level',
         'severity',
         'is_valid',
