@@ -17,6 +17,7 @@ import {
 	ListOrderedIcon,
 	FolderTreeIcon,
 	List,
+	MessageCircleQuestionIcon,
 } from "lucide-react";
 import logo from "../assets/logo.png";
 
@@ -146,6 +147,14 @@ export function AppSidebar() {
 				},
 				{
 					id: 8.2,
+					title: "Task Statuses",
+					url: "/task-statuses",
+					icon: ListCheck,
+					collapsible: false,
+					subItems: [],
+				},
+				{
+					id: 8.3,
 					title: "Categories",
 					url: "/categories",
 					icon: Tag,
@@ -153,10 +162,10 @@ export function AppSidebar() {
 					subItems: [],
 				},
 				{
-					id: 8.3,
-					title: "Task Statuses",
-					url: "/task-statuses",
-					icon: ListCheck,
+					id: 8.4,
+					title: "Delay Reasons",
+					url: "/delay-reasons",
+					icon: MessageCircleQuestionIcon,
 					collapsible: false,
 					subItems: [],
 				},

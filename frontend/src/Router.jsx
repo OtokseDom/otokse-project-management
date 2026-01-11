@@ -18,6 +18,7 @@ import TaskStatuses from "./pages/TaskStatuses/List";
 import Kanban from "./pages/Kanban";
 import Epics from "./pages/Epics/List";
 import Epic from "./pages/Epics/Show";
+import DelayReasons from "./pages/DelayReasons/List";
 
 const router = createBrowserRouter(
 	[
@@ -111,6 +112,14 @@ const router = createBrowserRouter(
 							),
 						},
 						{
+							path: "task-statuses",
+							element: (
+								<ErrorFallback>
+									<TaskStatuses />
+								</ErrorFallback>
+							),
+						},
+						{
 							path: "categories",
 							element: (
 								<ErrorFallback>
@@ -119,10 +128,10 @@ const router = createBrowserRouter(
 							),
 						},
 						{
-							path: "task-statuses",
+							path: "delay-reasons",
 							element: (
 								<ErrorFallback>
-									<TaskStatuses />
+									<DelayReasons />
 								</ErrorFallback>
 							),
 						},
