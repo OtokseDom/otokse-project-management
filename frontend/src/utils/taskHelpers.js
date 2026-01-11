@@ -3,6 +3,7 @@ import axiosClient from "@/axios.client";
 import { API } from "@/constants/api";
 import { useCategoriesStore } from "@/store/categories/categoriesStore";
 import { useDashboardStore } from "@/store/dashboard/dashboardStore";
+import { useDelayReasonsStore } from "@/store/delayReasons/delayReasonsStore";
 import { useKanbanColumnsStore } from "@/store/kanbanColumns/kanbanColumnsStore";
 import { useProjectsStore } from "@/store/projects/projectsStore";
 import { useTaskDiscussionsStore } from "@/store/taskDiscussions/taskDiscussionsStore";
@@ -17,6 +18,7 @@ export const useTaskHelpers = () => {
 	const { setTaskDiscussions, setTaskDiscussionsLoading } = useTaskDiscussionsStore();
 	const { setProjects, setSelectedProject, setProjectsLoading } = useProjectsStore();
 	const { setUsersLoading, setUsers } = useUsersStore();
+	const { setDelayReasons, setDelayReasonsLoading } = useDelayReasonsStore();
 	const { setCategories, setCategoriesLoading } = useCategoriesStore();
 	const { setTaskStatuses, setTaskStatusesLoading } = useTaskStatusesStore();
 	const { profileProjectFilter, setProfileProjectFilter, setUserReports, setUserReportsLoading } = useUserStore();
@@ -90,6 +92,18 @@ export const useTaskHelpers = () => {
 		}
 	};
 
+	const fetchDelayReasons = async () => {
+		setDelayReasonsLoading(true);
+		try {
+			const res = await axiosClient.get(API().delay_reason());
+			setDelayReasons(res?.data?.data);
+		} catch (e) {
+			if (e.message !== "Request aborted") console.error("Error fetching data:", e.message);
+		} finally {
+			setDelayReasonsLoading(false);
+		}
+	};
+
 	const fetchCategories = async () => {
 		setCategoriesLoading(true);
 		try {
@@ -143,6 +157,7 @@ export const useTaskHelpers = () => {
 		fetchTaskDiscussions,
 		fetchProjects,
 		fetchUsers,
+		fetchDelayReasons,
 		fetchCategories,
 		fetchTaskStatuses,
 		fetchReports,
