@@ -12,6 +12,7 @@ import { createTaskDiscussionsSlice } from "./taskDiscussions/taskDiscussionsSli
 import { createEpicsSlice } from "./epics/epicsSlice";
 import { createEpicSlice } from "./epic/epicSlice";
 import { createScrollSlice } from "./scroll/scrollSlice";
+import { createDelayReasonsSlice } from "./delayReasons/delayReasonsSlice";
 
 export const useAppStore = create((set, get) => ({
 	...createDashboardSlice(set),
@@ -27,4 +28,5 @@ export const useAppStore = create((set, get) => ({
 	...createOrganizationSlice(set),
 	...createKanbanColumnsSlice(set),
 	...createScrollSlice(set),
+	...createDelayReasonsSlice(set),
 }));
