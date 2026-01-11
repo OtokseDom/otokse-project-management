@@ -8,6 +8,7 @@ export const API = (version = "v1") => ({
 	task_status: (id = "") => `/${version}/task-status${id ? `/${id}` : ""}`,
 	epic: (id = "") => `/${version}/epic${id ? `/${id}` : ""}`,
 	project: (id = "") => `/${version}/project${id ? `/${id}` : ""}`,
+	delay_reason: (id = "") => `/${version}/delay-reason${id ? `/${id}` : ""}`,
 	category: (id = "") => `/${version}/category${id ? `/${id}` : ""}`,
 	user: (id = "") => `/${version}/user${id ? `/${id}` : ""}`,
 	user_reports: (id = "", from = "", to = "", projects = "", epics = "") =>
