@@ -24,6 +24,11 @@ class RelationCheckerService
         return $this->task->where('status_id', $value)->where('organization_id', $this->organization_id)->exists();
     }
 
+    public function checkTaskReason($value)
+    {
+        return $this->task->where('delay_reason_id', $value)->where('organization_id', $this->organization_id)->exists();
+    }
+
     public function checkTaskCategory($value)
     {
         return $this->task->where('category_id', $value)->where('organization_id', $this->organization_id)->exists();

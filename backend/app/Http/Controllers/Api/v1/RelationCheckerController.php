@@ -18,7 +18,7 @@ class RelationCheckerController extends Controller
     public function check(Request $request)
     {
         $request->validate([
-            'type' => 'required|string|in:status,category,project,epic,assignee,children',
+            'type' => 'required|string|in:status,reason,category,project,epic,assignee,children',
             'value' => 'required|integer',
         ]);
 
