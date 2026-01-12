@@ -21,7 +21,7 @@ import { useProjectsStore } from "@/store/projects/projectsStore";
 import { useCategoriesStore } from "@/store/categories/categoriesStore";
 import { useTaskStatusesStore } from "@/store/taskStatuses/taskStatusesStore";
 import { MultiSelect } from "@/components/ui/multi-select";
-import { useTaskHelpers } from "@/utils/taskHelpers";
+import { priorityColors, statusColors, useTaskHelpers } from "@/utils/taskHelpers";
 import { useUserStore } from "@/store/user/userStore";
 import RichTextEditor from "@/components/ui/RichTextEditor";
 import TaskAttachments from "@/components/task/Attachment";
@@ -574,6 +574,7 @@ export default function TaskForm({ parentId, isOpen, setIsOpen, updateData, setU
 						control={form.control}
 						name="status_id"
 						render={({ field }) => {
+							const selectedStatus = taskStatuses?.find((taskStatus) => taskStatus.id == field.value);
 							return (
 								<FormItem className="w-full">
 									<FormLabel>Status</FormLabel>
@@ -585,7 +586,17 @@ export default function TaskForm({ parentId, isOpen, setIsOpen, updateData, setU
 										<FormControl>
 											<SelectTrigger>
 												<SelectValue placeholder="Select a status">
-													{field.value ? taskStatuses?.find((taskStatus) => taskStatus.id == field.value).name : "Select a status"}
+													{field.value ? (
+														<span
+															className={`px-2 text-center whitespace-nowrap rounded-2xl text-xs ${
+																statusColors[selectedStatus?.color?.toLowerCase()] || ""
+															}`}
+														>
+															{selectedStatus?.name || "-"}
+														</span>
+													) : (
+														"Select a status"
+													)}
 												</SelectValue>
 											</SelectTrigger>
 										</FormControl>
@@ -593,7 +604,13 @@ export default function TaskForm({ parentId, isOpen, setIsOpen, updateData, setU
 											{Array.isArray(taskStatuses) && taskStatuses.length > 0 ? (
 												taskStatuses.map((taskStatus) => (
 													<SelectItem key={taskStatus.id} value={taskStatus.id.toString()}>
-														{taskStatus.name}
+														<span
+															className={`px-2 py-1 text-center whitespace-nowrap rounded-2xl text-xs ${
+																statusColors[taskStatus?.color?.toLowerCase()] || ""
+															}`}
+														>
+															{taskStatus?.name || "-"}
+														</span>
 													</SelectItem>
 												))
 											) : (
@@ -617,20 +634,39 @@ export default function TaskForm({ parentId, isOpen, setIsOpen, updateData, setU
 								{ id: 4, name: "Urgent" },
 								{ id: 5, name: "Critical" },
 							];
+							const selectedPriority = priorities?.find((priority) => priority.name == field.value);
 							return (
 								<FormItem className="w-full">
 									<FormLabel>Priority</FormLabel>
 									<Select disabled={!isEditable} onValueChange={field.onChange} defaultValue={updateData?.priority || field.value}>
 										<FormControl>
 											<SelectTrigger>
-												<SelectValue placeholder="Select priority"></SelectValue>
+												<SelectValue placeholder="Select priority">
+													{field.value ? (
+														<span
+															className={`px-2 w-full text-center rounded text-xs ${
+																priorityColors[selectedPriority?.name] || "bg-gray-200 text-gray-800"
+															}`}
+														>
+															{selectedPriority?.name}
+														</span>
+													) : (
+														"Select priority"
+													)}
+												</SelectValue>
 											</SelectTrigger>
 										</FormControl>
 										<SelectContent>
 											{Array.isArray(priorities) && priorities.length > 0 ? (
 												priorities?.map((priority) => (
 													<SelectItem key={priority?.id} value={priority?.name}>
-														{priority?.name}
+														<span
+															className={`px-2 py-1 w-full text-center rounded text-xs ${
+																priorityColors[priority?.name] || "bg-gray-200 text-gray-800"
+															}`}
+														>
+															{priority?.name?.replace("_", " ")}
+														</span>
 													</SelectItem>
 												))
 											) : (
