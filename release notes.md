@@ -11,3 +11,9 @@
 -   Added Epic filter
 -   Project and Task page removed
 -   WIP AI-ready reports
+
+# Release Version 2.1.0:
+
+-   Feat: Task weight and effort estimates
+-   Feat: Task delay reasons master
+-   Feat: Task form pills
