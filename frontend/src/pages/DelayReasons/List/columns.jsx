@@ -99,6 +99,21 @@ export const columnsDelayReason = ({ setIsOpen, setUpdateData, dialogOpen, setDi
 						</button>
 					);
 				},
+				// Keep raw value for sorting
+				accessorFn: (row) => row.impact_level,
+				// Use cell renderer to format for display
+				cell: ({ row }) => {
+					const impact = row.original.impact_level;
+					return impact === "positive" ? (
+						<span className="px-2 py-1 w-full text-nowrap text-center text-xs text-green-900">🟢 Positive</span>
+					) : impact === "neutral" ? (
+						<span className="px-2 py-1 w-full text-nowrap text-center text-xs text-blue-900">🔵 Neutral</span>
+					) : impact === "negative" ? (
+						<span className="px-2 py-1 w-full text-nowrap text-center text-xs text-red-900">🔴 Negative</span>
+					) : (
+						""
+					);
+				},
 			},
 			{
 				id: "severity",
@@ -110,6 +125,23 @@ export const columnsDelayReason = ({ setIsOpen, setUpdateData, dialogOpen, setDi
 						</button>
 					);
 				},
+				// Keep raw value for sorting
+				accessorFn: (row) => row.severity,
+				// Use cell renderer to format for display
+				cell: ({ row }) => {
+					const severity = row.original.severity;
+					return severity === 1
+						? "Trivial"
+						: severity === 2
+						? "Minor"
+						: severity === 3
+						? "Moderate"
+						: severity === 4
+						? "Major"
+						: severity === 5
+						? "Critical"
+						: "N/A";
+				},
 			},
 			{
 				id: "is_valid",
@@ -119,6 +151,17 @@ export const columnsDelayReason = ({ setIsOpen, setUpdateData, dialogOpen, setDi
 						<button className="flex" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
 							Validity <ArrowUpDown className="ml-2 h-4 w-4" />
 						</button>
+					);
+				},
+				// Keep raw value for sorting
+				accessorFn: (row) => row.is_valid,
+				// Use cell renderer to format for display
+				cell: ({ row }) => {
+					const validity = row.original.is_valid;
+					return validity === 1 ? (
+						<span className="px-2 py-1 w-full text-center rounded-full border border-green-900 text-xs bg-green-100 text-green-900">Valid</span>
+					) : (
+						<span className="px-2 py-1 w-full text-center rounded-full border border-red-900 text-xs bg-red-100 text-red-900">Invalid</span>
 					);
 				},
 			},
@@ -141,6 +184,17 @@ export const columnsDelayReason = ({ setIsOpen, setUpdateData, dialogOpen, setDi
 						<button className="flex" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
 							Status <ArrowUpDown className="ml-2 h-4 w-4" />
 						</button>
+					);
+				},
+				// Keep raw value for sorting
+				accessorFn: (row) => row.is_active,
+				// Use cell renderer to format for display
+				cell: ({ row }) => {
+					const status = row.original.is_active;
+					return status === 1 ? (
+						<span className="px-2 py-1 w-full text-center rounded text-xs bg-blue-100 text-blue-900">Active</span>
+					) : (
+						<span className="px-2 py-1 w-full text-center rounded text-xs bg-gray-300 text-gray-900">Inactive</span>
 					);
 				},
 			},
