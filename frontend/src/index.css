@@ -386,6 +386,14 @@ table > tbody > tr > td {
 	.scrollbar-custom::-webkit-scrollbar-thumb:hover {
 		background: hsl(var(--foreground)); /* Slightly transparent on hover */
 	}
+	/* hide scrollbar but keep scroll */
+	.no-scrollbar {
+		-ms-overflow-style: none; /* IE, Edge */
+		scrollbar-width: none; /* Firefox */
+	}
+	.no-scrollbar::-webkit-scrollbar {
+		display: none; /* Chrome, Safari */
+	}
 }
 
 /* Chart */
