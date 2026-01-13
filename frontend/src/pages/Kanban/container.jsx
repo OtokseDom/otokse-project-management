@@ -46,7 +46,7 @@ const Container = ({ id, children, title, color, onAddItem }) => {
 				transform: CSS.Translate.toString(transform),
 			}}
 			className={clsx(
-				"min-w-[350px] h-fit min-h-[50vh] max-h-[calc(100vh-9rem)] p-2 bg-card border border-accent rounded-xl flex flex-col",
+				"min-w-[350px] h-fit min-h-[50vh] max-h-[calc(100vh-9rem)] p-2 bg-secondary border border-accent rounded-xl flex flex-col",
 				isDragging && "opacity-50"
 			)}
 		>
@@ -76,7 +76,7 @@ const Container = ({ id, children, title, color, onAddItem }) => {
 			<div className="flex-1 overflow-y-auto flex flex-col gap-y-4">{children}</div>
 
 			{/* Fixed bottom button */}
-			<div className="sticky bottom-0 bg-card pt-2">
+			<div className="sticky bottom-0 bg-secondary pt-2">
 				<Sheet open={isOpenDialog} onOpenChange={setIsOpenDialog} modal={false}>
 					<SheetTrigger
 						asChild
@@ -89,7 +89,7 @@ const Container = ({ id, children, title, color, onAddItem }) => {
 							setIsOpenDialog(true);
 						}}
 					>
-						<Button variant="ghost" className="w-full">
+						<Button variant="" className="w-full h-fit">
 							Add Item
 						</Button>
 					</SheetTrigger>
