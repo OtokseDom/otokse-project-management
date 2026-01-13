@@ -53,7 +53,6 @@ export const columnsDelayReason = ({ setIsOpen, setUpdateData, dialogOpen, setDi
 			setDelayReasonsLoading(false);
 		}
 	};
-	// TODO: Format severity, validity, and status display
 	const baseColumns = useMemo(
 		() => [
 			{
@@ -65,6 +64,10 @@ export const columnsDelayReason = ({ setIsOpen, setUpdateData, dialogOpen, setDi
 							Name <ArrowUpDown className="ml-2 h-4 w-4" />
 						</button>
 					);
+				},
+				cell: ({ row }) => {
+					const name = row.original.name;
+					return name ? <span className="font-bold">{name}</span> : "";
 				},
 			},
 			{
@@ -158,7 +161,7 @@ export const columnsDelayReason = ({ setIsOpen, setUpdateData, dialogOpen, setDi
 				// Use cell renderer to format for display
 				cell: ({ row }) => {
 					const validity = row.original.is_valid;
-					return validity === 1 ? (
+					return validity ? (
 						<span className="px-2 py-1 w-full text-center rounded-full border border-green-900 text-xs bg-green-100 text-green-900">Valid</span>
 					) : (
 						<span className="px-2 py-1 w-full text-center rounded-full border border-red-900 text-xs bg-red-100 text-red-900">Invalid</span>
@@ -191,7 +194,7 @@ export const columnsDelayReason = ({ setIsOpen, setUpdateData, dialogOpen, setDi
 				// Use cell renderer to format for display
 				cell: ({ row }) => {
 					const status = row.original.is_active;
-					return status === 1 ? (
+					return status ? (
 						<span className="px-2 py-1 w-full text-center rounded text-xs bg-blue-100 text-blue-900">Active</span>
 					) : (
 						<span className="px-2 py-1 w-full text-center rounded text-xs bg-gray-300 text-gray-900">Inactive</span>
