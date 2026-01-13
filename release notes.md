@@ -12,8 +12,9 @@
 -   Project and Task page removed
 -   WIP AI-ready reports
 
-# Release Version 2.1.0:
+# Release Version 2.1.0 (Jan 13, 2026):
 
 -   Feat: Task weight and effort estimates
 -   Feat: Task delay reasons master
 -   Feat: Task form pills
+-   Feat: Kanban bg color and no-scrollbar
