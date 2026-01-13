@@ -257,7 +257,7 @@ export default function Tasks() {
 									<ScheduleCalendar />
 								</>
 							) : (
-								<div className="w-full overflow-auto">
+								<div className="w-full overflow-auto no-scrollbar">
 									<KanbanBoard />
 								</div>
 							)}
