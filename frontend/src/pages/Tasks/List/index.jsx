@@ -21,6 +21,7 @@ import { Progress } from "@/components/ui/progress";
 import { useEpicsStore } from "@/store/epics/epicsStore";
 import ScheduleCalendar from "@/pages/Schedules/calendar";
 import KanbanBoard from "@/pages/Kanban/kanban";
+import { useDelayReasonsStore } from "@/store/delayReasons/delayReasonsStore";
 // TODO: Add calendar and kanban view as task view options
 export default function Tasks() {
 	// const { loading, setLoading } = useLoadContext();
@@ -32,8 +33,10 @@ export default function Tasks() {
 	const { projects, projectsLoaded, selectedProject, setSelectedProject } = useProjectsStore();
 	const { taskStatuses } = useTaskStatusesStore();
 	const { categories } = useCategoriesStore();
+	const { delayReasons } = useDelayReasonsStore();
+
 	// Fetch Hooks
-	const { fetchTasks, fetchProjects, fetchUsers, fetchCategories, fetchTaskStatuses } = useTaskHelpers();
+	const { fetchTasks, fetchProjects, fetchUsers, fetchCategories, fetchTaskStatuses, fetchDelayReasons } = useTaskHelpers();
 	const [isOpen, setIsOpen] = useState(false);
 	const [dialogOpen, setDialogOpen] = useState(false);
 	const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -64,6 +67,7 @@ export default function Tasks() {
 		if (!taskStatuses || taskStatuses.length === 0) fetchTaskStatuses();
 		if (!users || users.length === 0) fetchUsers();
 		if (!categories || categories.length === 0) fetchCategories();
+		if (!delayReasons || delayReasons.length === 0) fetchDelayReasons();
 		if ((!tasks || tasks.length === 0) && !tasksLoaded) fetchTasks();
 		if ((!projects || projects.length === 0) && !projectsLoaded) fetchProjects();
 	}, []);
