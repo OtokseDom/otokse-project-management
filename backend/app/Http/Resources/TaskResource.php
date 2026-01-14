@@ -21,6 +21,7 @@ class TaskResource extends JsonResource
             'title' => $this->title,
             'project_id' => $this->project_id,
             'category_id' => $this->category_id,
+            'delay_reason_id' => $this->delay_reason_id,
             // 'assignee_id' => $this->assignee_id,
             'parent_id' => $this->parent_id,
             'description' => $this->description,
@@ -72,6 +73,7 @@ class TaskResource extends JsonResource
                 ] : null;
             }),
             'category' => $this->category ? new CategoryResource($this->category) : null,
+            'delayReason' => $this->delayReason ? new DelayReasonResource($this->delayReason) : null,
             'parent' => $this->whenLoaded('parent', function () {
                 return $this->parent ? [
                     'id' => $this->parent->id,

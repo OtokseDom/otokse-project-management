@@ -38,6 +38,7 @@ class UpdateTaskRequest extends FormRequest
             'title' => 'required|string|max:255',
             'project_id' => 'nullable|exists:projects,id',
             'category_id' => 'nullable|exists:categories,id',
+            'delay_reason_id' => 'nullable|exists:delay_reasons,id',
             'parent_id' => [
                 'nullable',
                 'integer',

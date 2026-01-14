@@ -19,6 +19,7 @@ class Task extends Model
         'status_id',
         'project_id',
         'category_id',
+        'delay_reason_id',
         'parent_id',
         'title',
         'description',
@@ -102,6 +103,12 @@ class Task extends Model
     public function category()
     {
         return $this->belongsTo(Category::class);
+    }
+
+    // Relationship with Delay Reason
+    public function delayReason()
+    {
+        return $this->belongsTo(DelayReason::class);
     }
 
     // Relationship with Status
