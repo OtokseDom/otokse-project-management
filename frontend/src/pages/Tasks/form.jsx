@@ -25,6 +25,7 @@ import { priorityColors, statusColors, useTaskHelpers } from "@/utils/taskHelper
 import { useUserStore } from "@/store/user/userStore";
 import RichTextEditor from "@/components/ui/RichTextEditor";
 import TaskAttachments from "@/components/task/Attachment";
+import { useDelayReasonsStore } from "@/store/delayReasons/delayReasonsStore";
 // TODO: Auto fill project and epic when available
 const formSchema = z.object({
 	parent_id: z.number().optional(),
@@ -32,6 +33,7 @@ const formSchema = z.object({
 	// assignee_id: z.number().optional(),
 	project_id: z.number().optional(),
 	category_id: z.number().optional(),
+	delay_reason_id: z.number().optional(),
 	title: z.string().refine((data) => data.trim() !== "", {
 		message: "Title is required.",
 	}),
@@ -61,6 +63,7 @@ export default function TaskForm({ parentId, isOpen, setIsOpen, updateData, setU
 	const { fetchTasks, fetchReports, fetchUserReports } = useTaskHelpers();
 	const { tasks, relations, setRelations, addRelation, selectedUser, setActiveTab, options, tasksLoading, setTasksLoading } = useTasksStore();
 	const { taskStatuses } = useTaskStatusesStore();
+	const { delayReasons } = useDelayReasonsStore();
 	const { users } = useUsersStore();
 	const { user } = useUserStore();
 	const { projects, selectedProject } = useProjectsStore();
@@ -109,7 +112,8 @@ export default function TaskForm({ parentId, isOpen, setIsOpen, updateData, setU
 			description: "",
 			parent_id: undefined,
 			project_id: undefined,
-			category: undefined,
+			category_id: undefined,
+			delay_reason_id: undefined,
 			priority: "",
 			// expected_output: "",
 			weight: "",
@@ -150,6 +154,7 @@ export default function TaskForm({ parentId, isOpen, setIsOpen, updateData, setU
 				parent_id,
 				project_id,
 				category_id,
+				delay_reason_id,
 				// expected_output,
 				weight,
 				effort_estimate,
@@ -180,6 +185,7 @@ export default function TaskForm({ parentId, isOpen, setIsOpen, updateData, setU
 				parent_id: parent_id || parentId || undefined,
 				project_id: project_id || selectedProject?.id || undefined,
 				category_id: category_id || undefined,
+				delay_reason_id: delay_reason_id || undefined,
 				// expected_output: expected_output || "",
 				weight: weight || "",
 				effort_estimate: effort_estimate || "",
@@ -1292,6 +1298,44 @@ export default function TaskForm({ parentId, isOpen, setIsOpen, updateData, setU
 								</FormItem>
 							</div>
 						</div>
+						<FormField
+							control={form.control}
+							name="delay_reason_id"
+							render={({ field }) => {
+								return (
+									<FormItem>
+										<FormLabel>Delay Reason</FormLabel>
+										<Select
+											disabled={!isEditable}
+											onValueChange={(value) => field.onChange(Number(value))}
+											value={field.value ? field.value.toString() : ""}
+										>
+											<FormControl>
+												<SelectTrigger>
+													<SelectValue placeholder="Select a delay reason">
+														{field.value
+															? delayReasons?.find((delayReason) => delayReason.id == field.value)?.name
+															: "Select a delay reason"}
+													</SelectValue>
+												</SelectTrigger>
+											</FormControl>
+											<SelectContent>
+												{Array.isArray(delayReasons) && delayReasons.length > 0 ? (
+													delayReasons.map((delayReason) => (
+														<SelectItem key={delayReason.id} value={delayReason.id.toString()}>
+															{delayReason.name}
+														</SelectItem>
+													))
+												) : (
+													<></>
+												)}
+											</SelectContent>
+										</Select>
+										<FormMessage />
+									</FormItem>
+								);
+							}}
+						/>
 						<FormField
 							control={form.control}
 							name="delay_reason"
