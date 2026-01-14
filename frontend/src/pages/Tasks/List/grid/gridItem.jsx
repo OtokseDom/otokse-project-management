@@ -140,7 +140,7 @@ export default function TaskGridItem({
 				transition,
 				opacity: isDragging ? 0.5 : 1,
 			}}
-			className="bg-sidebar text-card-foreground border border-border rounded-lg p-4 flex flex-col shadow w-full"
+			className="bg-muted text-card-foreground border border-border rounded-lg p-4 flex flex-col shadow w-full"
 		>
 			{/* Header */}
 			<div className="w-full py-1 hover:cursor-grab active:cursor-grabbing" {...listeners} {...attributes}>
@@ -218,7 +218,7 @@ export default function TaskGridItem({
 					</div>
 				</div>
 			</div>
-			<hr className="mt-2" />
+			<hr className="mt-2 border-0.5 border-foreground/20" />
 			{/* Details row */}
 			<div className="flex flex-col mt-3 gap-2 items-start">
 				{/* left column: metadata */}
