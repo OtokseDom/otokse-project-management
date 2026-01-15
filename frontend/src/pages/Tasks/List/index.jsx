@@ -281,38 +281,6 @@ export default function Tasks() {
 								</div>
 							</div>
 						</div>
-						<div className="flex flex-wrap w-full justify-end items-end">
-							{/* Filter Tags */}
-							<FilterTags
-								filters={{
-									"Date Range":
-										taskFilters.dateRange.from && taskFilters.dateRange.to
-											? `${new Date(taskFilters.dateRange.from).toLocaleDateString("en-US", {
-													month: "short",
-													day: "numeric",
-													year: "numeric",
-											  })} to ${new Date(taskFilters.dateRange.to).toLocaleDateString("en-US", {
-													month: "short",
-													day: "numeric",
-													year: "numeric",
-											  })}`
-											: "",
-									Assignees: taskFilters.selectedUsers
-										.map((userId) => {
-											const user = users?.find((u) => u.id === userId);
-											return user?.name || `User ${userId}`;
-										})
-										.join(", "),
-								}}
-								onRemove={(key) => {
-									if (key === "Date Range") {
-										setTaskDateRange(null, null);
-									} else if (key === "Assignees") {
-										setTaskSelectedUsers([]);
-									}
-								}}
-							/>
-						</div>
 					</div>
 				</div>
 				{/* Updated table to fix dialog per column issue */}
