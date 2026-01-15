@@ -52,5 +52,11 @@ export const useTasksStore = () => {
 		positionsLoaded: useAppStore((state) => state.positionsLoaded),
 		setPositionsLoaded: useAppStore((state) => state.setPositionsLoaded),
 		isPositionsLoaded: useAppStore((state) => state.isPositionsLoaded),
+		// Task Filters
+		taskFilters: useAppStore((state) => state.taskFilters),
+		setTaskFilters: useAppStore((state) => state.setTaskFilters),
+		setTaskDateRange: useAppStore((state) => state.setTaskDateRange),
+		setTaskSelectedUsers: useAppStore((state) => state.setTaskSelectedUsers),
+		clearTaskFilters: useAppStore((state) => state.clearTaskFilters),
 	};
 };

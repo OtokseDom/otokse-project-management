@@ -22,7 +22,7 @@ export default function FilterTags({ filters, onRemove }) {
 				// Skip if value is falsy or an empty array
 				if (!value || (Array.isArray(value) && value.length === 0)) return null;
 				return (
-					<div key={key} className="flex items-center gap-1 bg-primary text-background text-sm px-3 py-1 rounded-md">
+					<div key={key} className="flex items-center gap-1 bg-primary/80 text-background text-sm px-3 py-1 rounded-md">
 						<span>
 							{key}: {displayValue}
 						</span>
