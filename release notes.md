@@ -4,7 +4,7 @@
 -   Task views: table, list, calendar, kanban
 -   Dashboard Reports
 
-# Release Version 2.0.0:
+# Release Version 2.0.0 (Jan 13, 2026):
 
 -   Epic introduced
 -   Epic profile with relevant project and tasks
@@ -12,7 +12,7 @@
 -   Project and Task page removed
 -   WIP AI-ready reports
 
-# Release Version 2.1.0 (Jan 13, 2026):
+# Release Version 2.1.0 (Jan 15, 2026):
 
 -   Feat: Task weight and effort estimates
 -   Feat: Task delay reasons master
