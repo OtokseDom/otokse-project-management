@@ -146,7 +146,7 @@ export function DataTableTasks({ columns, data, showLess = true }) {
 		}));
 	}, [table.getSelectedRowModel().rows.length]);
 	return (
-		<div className="w-full scrollbar-custom">
+		<div className="w-full scrollbar-custom mt-4">
 			<div className="flex flex-col md:flex-row justify-between py-4">
 				<div className="flex flex-row gap-4 max-w-sm w-full">
 					<Input
