@@ -23,6 +23,7 @@ import { useTaskHelpers } from "@/utils/taskHelpers";
 import { ChartBarLabel } from "@/components/chart/bar-chart-label";
 import { useEpicHelpers } from "@/utils/epicHelpers";
 import { useEpicsStore } from "@/store/epics/epicsStore";
+import { Filter } from "lucide-react";
 
 // TODO: Export report with filter
 // TODO: Notification
@@ -127,7 +128,13 @@ export default function UserProfile() {
 					</div>
 					<div className="flex flex-row gap-2">
 						<Dialog modal={false} open={isOpen} onOpenChange={setIsOpen}>
-							<DialogTrigger asChild>{!dashboardReportsLoading && <Button variant="default">Filter</Button>}</DialogTrigger>
+							<DialogTrigger asChild>
+								{!dashboardReportsLoading && (
+									<Button variant="default">
+										<Filter /> Filter
+									</Button>
+								)}
+							</DialogTrigger>
 							<DialogContent>
 								<DialogHeader>
 									<DialogTitle>Select filter</DialogTitle>
