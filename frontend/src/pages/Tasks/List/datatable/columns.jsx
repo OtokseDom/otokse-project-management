@@ -102,7 +102,7 @@ export const columnsTask = ({ dialogOpen, setDialogOpen, setIsOpen, setUpdateDat
 						<div className="flex flex-row min-w-52 gap-2" style={{ paddingLeft: depth * 20 }}>
 							<span className="text-primary">{depth == 1 ? <CornerDownRight size={20} /> : ""}</span>
 							<div>
-								{depth != 1 ? <span className="font-extrabold">{title}</span> : title}
+								{depth != 1 ? <span className="font-bold">{title}</span> : title}
 								<br />
 								<span className="flex gap-2">
 									{description && <Text className="text-sm text-gray-500" size={14} />}
