@@ -177,6 +177,7 @@ export function AppSidebar() {
 	const { setTasks, setTasksLoaded } = useTasksStore();
 	const { setUsers } = useUsersStore();
 	const { setProjects, setProjectsLoaded } = useProjectsStore();
+	const { setEpics, setEpicsLoaded } = useEpicsStore();
 	const { setCategories } = useCategoriesStore();
 	const { setTaskStatuses } = useTaskStatusesStore();
 	const { setReports } = useDashboardStore();
@@ -223,12 +224,14 @@ export function AppSidebar() {
 			setTasks([]);
 			setUsers([]);
 			setProjects([]);
+			setEpics([]);
 			setCategories([]);
 			setTaskStatuses([]);
 			setReports([]);
 			setUserReports([]);
 			setTasksLoaded(false);
 			setProjectsLoaded(false);
+			setEpicsLoaded(false);
 			setToken(null);
 		});
 	};
