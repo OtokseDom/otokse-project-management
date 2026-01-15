@@ -211,4 +211,32 @@ export const createTasksSlice = (set, get) => ({
 		const key = `${context}-${contextId ?? "null"}`;
 		return !!get().positionsLoaded[key];
 	},
+
+	// Task Filters
+	taskFilters: {
+		dateRange: { from: null, to: null },
+		selectedUsers: [],
+	},
+	setTaskFilters: (filters) => set({ taskFilters: filters }),
+	setTaskDateRange: (from, to) =>
+		set((state) => ({
+			taskFilters: {
+				...state.taskFilters,
+				dateRange: { from, to },
+			},
+		})),
+	setTaskSelectedUsers: (users) =>
+		set((state) => ({
+			taskFilters: {
+				...state.taskFilters,
+				selectedUsers: users,
+			},
+		})),
+	clearTaskFilters: () =>
+		set({
+			taskFilters: {
+				dateRange: { from: null, to: null },
+				selectedUsers: [],
+			},
+		}),
 });

@@ -12,7 +12,6 @@ import { Button } from "@/components/ui/button";
 import { CalendarDays, Filter, Kanban, Plus, Rows3, Table } from "lucide-react";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import TaskForm from "../form";
 import History from "@/components/task/History";
 import Relations from "@/components/task/Relations";
@@ -23,11 +22,26 @@ import { useEpicsStore } from "@/store/epics/epicsStore";
 import ScheduleCalendar from "@/pages/Schedules/calendar";
 import KanbanBoard from "@/pages/Kanban/kanban";
 import { useDelayReasonsStore } from "@/store/delayReasons/delayReasonsStore";
+import TaskFilterForm from "@/components/form/TaskFilterForm";
+import FilterTags from "@/components/form/FilterTags";
+
 // TODO: Add calendar and kanban view as task view options
 export default function Tasks() {
 	// const { loading, setLoading } = useLoadContext();
 	const inTasks = location.pathname.startsWith("/tasks") ? true : false;
-	const { tasks, tasksLoaded, setRelations, selectedTaskHistory, activeTab, setActiveTab, tasksLoading } = useTasksStore();
+	const {
+		tasks,
+		tasksLoaded,
+		setRelations,
+		selectedTaskHistory,
+		activeTab,
+		setActiveTab,
+		tasksLoading,
+		taskFilters,
+		setTaskDateRange,
+		setTaskSelectedUsers,
+		clearTaskFilters,
+	} = useTasksStore();
 	const [filteredTasks, setFilteredTasks] = useState([]);
 	const { users } = useUsersStore();
 	const { selectedEpic, setSelectedEpic } = useEpicsStore();
@@ -39,6 +53,7 @@ export default function Tasks() {
 	// Fetch Hooks
 	const { fetchTasks, fetchProjects, fetchUsers, fetchCategories, fetchTaskStatuses, fetchDelayReasons } = useTaskHelpers();
 	const [isOpen, setIsOpen] = useState(false);
+	const [isOpenFilter, setIsOpenFilter] = useState(false);
 	const [dialogOpen, setDialogOpen] = useState(false);
 	const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
@@ -94,16 +109,48 @@ export default function Tasks() {
 		}
 	}, [projects, selectedEpic, inTasks]);
 
+	// Apply filters to tasks
 	useEffect(() => {
 		if (selectedProject) {
-			const filtered = tasks.filter((task) => task.project_id === selectedProject.id);
+			let filtered = tasks.filter((task) => task.project_id === selectedProject.id);
+
+			// Apply date range filter
+			if (taskFilters.dateRange.from && taskFilters.dateRange.to) {
+				const fromDate = new Date(taskFilters.dateRange.from);
+				const toDate = new Date(taskFilters.dateRange.to);
+				fromDate.setHours(0, 0, 0, 0);
+				toDate.setHours(23, 59, 59, 999);
+
+				filtered = filtered.filter((task) => {
+					const startDate = task.start_date ? new Date(task.start_date) : null;
+					const endDate = task.end_date ? new Date(task.end_date) : null;
+					const actualDate = task.actual_date ? new Date(task.actual_date) : null;
+
+					// Check if any date falls within the range
+					const isInRange =
+						(startDate && startDate >= fromDate && startDate <= toDate) ||
+						(endDate && endDate >= fromDate && endDate <= toDate) ||
+						(actualDate && actualDate >= fromDate && actualDate <= toDate) ||
+						(startDate && endDate && startDate <= fromDate && endDate >= toDate);
+
+					return isInRange;
+				});
+			}
+
+			// Apply user filter
+			if (Array.isArray(taskFilters.selectedUsers) && taskFilters.selectedUsers.length > 0) {
+				filtered = filtered.filter((task) => {
+					return Array.isArray(task.assignees) && task.assignees.some((assignee) => taskFilters.selectedUsers.includes(assignee.id));
+				});
+			}
+
 			if (filtered !== null) setTableData(flattenTasks(filtered));
 			setFilteredTasks(filtered);
 		} else {
 			setTableData([]);
 			setFilteredTasks([]);
 		}
-	}, [tasks, selectedProject]);
+	}, [tasks, selectedProject, taskFilters]);
 
 	const { text: taskProgressText, value: taskProgressValue } = getProjectProgress();
 
@@ -112,16 +159,7 @@ export default function Tasks() {
 			<div className="w-full bg-card text-card-foreground border border-border rounded-2xl p-4 md:p-6 shadow-md">
 				<div
 					className={`fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm z-40 transition-opacity duration-300 pointer-events-none ${
-						isOpen || dialogOpen || deleteDialogOpen
-							? // || deleteDialogOpen
-							  "opacity-100"
-							: "opacity-0"
-					}`}
-					aria-hidden="true"
-				/>
-				<div
-					className={`fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm z-40 transition-opacity duration-300 pointer-events-none ${
-						dialogOpen ? "opacity-100" : "opacity-0"
+						isOpen || isOpenFilter || dialogOpen || deleteDialogOpen ? "opacity-100" : "opacity-0"
 					}`}
 					aria-hidden="true"
 				/>
@@ -153,29 +191,24 @@ export default function Tasks() {
 							</div>
 							<div className="flex flex-col w-fit max-w-full justify-end items-end gap-4">
 								<div className="flex flex-col gap-2 w-96 max-w-full items-end">
-									{/* <span className="text-muted-foreground font-bold">Project</span> */}
-									<Select
-										onValueChange={(value) => {
-											setSelectedProject(activeProjects.find((project) => String(project.id) === value));
-										}}
-										value={selectedProject ? String(selectedProject.id) : ""}
-									>
-										<SelectTrigger>
-											<SelectValue placeholder="Select Project" />
-										</SelectTrigger>
-										<SelectContent>
-											{Array.isArray(activeProjects) && activeProjects.length > 0 ? (
-												activeProjects.map((project) => (
-													// <SelectItem key={project.id} value={project.id}>
-													<SelectItem key={project.id} value={String(project.id)}>
-														{project.title}
-													</SelectItem>
-												))
-											) : (
-												<SelectItem disabled>No projects available</SelectItem>
-											)}
-										</SelectContent>
-									</Select>
+									<div className="flex flex-row gap-2">
+										<Dialog modal={false} open={isOpenFilter} onOpenChange={setIsOpenFilter}>
+											<DialogTrigger asChild>
+												{!tasksLoading && (
+													<Button variant="default">
+														<Filter /> Filter
+													</Button>
+												)}
+											</DialogTrigger>
+											<DialogContent>
+												<DialogHeader>
+													<DialogTitle>Filter Tasks</DialogTitle>
+													<DialogDescription>Filter tasks by date range and assignees</DialogDescription>
+												</DialogHeader>
+												<TaskFilterForm setIsOpen={setIsOpenFilter} users={users} showUserFilter={true} />
+											</DialogContent>
+										</Dialog>
+									</div>
 								</div>
 								<Sheet open={isOpen} onOpenChange={setIsOpen} modal={false}>
 									<SheetTrigger asChild>
@@ -215,6 +248,38 @@ export default function Tasks() {
 									</SheetContent>
 								</Sheet>
 							</div>
+						</div>
+						<div className="flex flex-wrap w-full justify-end items-end">
+							{/* Filter Tags */}
+							<FilterTags
+								filters={{
+									"Date Range":
+										taskFilters.dateRange.from && taskFilters.dateRange.to
+											? `${new Date(taskFilters.dateRange.from).toLocaleDateString("en-US", {
+													month: "short",
+													day: "numeric",
+													year: "numeric",
+											  })} to ${new Date(taskFilters.dateRange.to).toLocaleDateString("en-US", {
+													month: "short",
+													day: "numeric",
+													year: "numeric",
+											  })}`
+											: "",
+									Assignees: taskFilters.selectedUsers
+										.map((userId) => {
+											const user = users?.find((u) => u.id === userId);
+											return user?.name || `User ${userId}`;
+										})
+										.join(", "),
+								}}
+								onRemove={(key) => {
+									if (key === "Date Range") {
+										setTaskDateRange(null, null);
+									} else if (key === "Assignees") {
+										setTaskSelectedUsers([]);
+									}
+								}}
+							/>
 						</div>
 					</div>
 				</div>

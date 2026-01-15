@@ -18,3 +18,4 @@
 -   Feat: Task delay reasons master
 -   Feat: Task form pills
 -   Feat: Kanban bg color and no-scrollbar
+-   Feat: Date and user filter for task list
