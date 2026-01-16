@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { CalendarDays, Filter, Kanban, Plus, Rows3, Table } from "lucide-react";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import TaskForm from "../form";
 import History from "@/components/task/History";
 import Relations from "@/components/task/Relations";
@@ -25,7 +26,6 @@ import { useDelayReasonsStore } from "@/store/delayReasons/delayReasonsStore";
 import TaskFilterForm from "@/components/form/TaskFilterForm";
 import FilterTags from "@/components/form/FilterTags";
 
-// TODO: Add calendar and kanban view as task view options
 export default function Tasks() {
 	// const { loading, setLoading } = useLoadContext();
 	const inTasks = location.pathname.startsWith("/tasks") ? true : false;
@@ -183,10 +183,35 @@ export default function Tasks() {
 										<Kanban size={16} /> Kanban Board
 									</Button>
 								</div>
-								{/* Project Progress Bar */}
-								<div className="w-96 max-w-full text-xs text-muted-foreground flex flex-col items-end">
-									<span>{taskProgressText}</span>
-									<Progress value={taskProgressValue} progressColor="bg-primary/50" className="h-2 w-full mt-1" />
+								<div className="flex flex-col gap-2 w-96 max-w-full items-start">
+									<span className="text-muted-foreground font-bold">Project</span>
+									<Select
+										onValueChange={(value) => {
+											setSelectedProject(activeProjects.find((project) => String(project.id) === value));
+										}}
+										value={selectedProject ? String(selectedProject.id) : ""}
+									>
+										<SelectTrigger>
+											<SelectValue placeholder="Select Project" />
+										</SelectTrigger>
+										<SelectContent>
+											{Array.isArray(activeProjects) && activeProjects.length > 0 ? (
+												activeProjects.map((project) => (
+													// <SelectItem key={project.id} value={project.id}>
+													<SelectItem key={project.id} value={String(project.id)}>
+														{project.title}
+													</SelectItem>
+												))
+											) : (
+												<SelectItem disabled>No projects available</SelectItem>
+											)}
+										</SelectContent>
+									</Select>
+									{/* Project Progress Bar */}
+									<div className="w-96 max-w-full text-xs text-muted-foreground flex flex-col items-end">
+										<Progress value={taskProgressValue} progressColor="bg-primary/50" className="h-2 w-full mt-1" />
+										<span>{taskProgressText}</span>
+									</div>
 								</div>
 							</div>
 							<div className="flex flex-col w-full justify-end items-end gap-4">
