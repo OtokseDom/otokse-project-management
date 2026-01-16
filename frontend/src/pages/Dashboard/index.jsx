@@ -66,6 +66,13 @@ export default function UserProfile() {
 	}, []);
 
 	const handleRemoveFilter = async (key) => {
+		// onRemove={(key) => {
+		// 	if (key === "Date Range") {
+		// 		setTaskDateRange(null, null);
+		// 	} else if (key === "Assignees") {
+		// 		setTaskSelectedUsers([]);
+		// 	}
+		// }}
 		// Deep copy filters to avoid mutating state directly
 		const updated = {
 			values: { ...filters.values },
@@ -74,6 +81,10 @@ export default function UserProfile() {
 		updated.values[key] = "";
 		updated.display[key] = "";
 		setFilters(updated);
+		setSelectedUsers([]);
+		setSelectedProjects([]);
+		setSelectedEpics([]);
+		// Fetch reports with updated filters
 		const from = updated.values["Date Range"] ? updated.values["Date Range"]?.split(" to ")[0] : "";
 		const to = updated.values["Date Range"] ? updated.values["Date Range"]?.split(" to ")[1] : "";
 		const epics = updated.values["Epics"] ?? "";
