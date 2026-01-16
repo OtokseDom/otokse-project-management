@@ -320,6 +320,11 @@ class Task extends Model
                         $val  = optional(Category::find($value))->name;
                         if ($orig !== $val) $changes[$key] = ['from' => $orig, 'to' => $val];
                         break;
+                    case 'delay_reason_id':
+                        $orig = optional(DelayReason::find($original[$key] ?? null))->name;
+                        $val  = optional(DelayReason::find($value))->name;
+                        if ($orig !== $val) $changes[$key] = ['from' => $orig, 'to' => $val];
+                        break;
                     case 'assignees':
                         $valUserIds = is_array($value) ? $value : [];
                         if (array_diff($origUserIds, $valUserIds) || array_diff($valUserIds, $origUserIds)) {
