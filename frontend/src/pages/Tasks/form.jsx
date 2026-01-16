@@ -26,6 +26,7 @@ import { useUserStore } from "@/store/user/userStore";
 import RichTextEditor from "@/components/ui/RichTextEditor";
 import TaskAttachments from "@/components/task/Attachment";
 import { useDelayReasonsStore } from "@/store/delayReasons/delayReasonsStore";
+import { useEpicStore } from "@/store/epic/epicStore";
 
 const formSchema = z.object({
 	parent_id: z.number().optional(),
@@ -62,6 +63,7 @@ const formSchema = z.object({
 export default function TaskForm({ parentId, isOpen, setIsOpen, updateData, setUpdateData }) {
 	const { fetchTasks, fetchReports, fetchUserReports } = useTaskHelpers();
 	const { tasks, relations, setRelations, addRelation, selectedUser, setActiveTab, options, tasksLoading, setTasksLoading } = useTasksStore();
+	const { selectedEpicId } = useEpicStore();
 	const { taskStatuses } = useTaskStatusesStore();
 	const { delayReasons } = useDelayReasonsStore();
 	const { users } = useUsersStore();
@@ -71,10 +73,16 @@ export default function TaskForm({ parentId, isOpen, setIsOpen, updateData, setU
 	const { user: user_auth } = useAuthContext();
 	const showToast = useToast();
 	const [showMore, setShowMore] = useState(true);
-	const parentTasks = () => {
-		return tasks.filter((task) => task.parent_id == null && task.id !== updateData?.id) || [];
+	const relevantProjects = () => {
+		if (selectedEpicId == null) return projects;
+		return projects.filter((project) => Number(project.epic_id) === Number(selectedEpicId));
 	};
-	// const [taskImages, setTaskImages] = useState([]);
+	const parentTasks = () => {
+		// use Set for better performance instead of []. Set can do has() in O(1) time complexity
+		const projectIds = new Set(relevantProjects().map((p) => p.id));
+
+		return tasks.filter((task) => task.parent_id == null && task.id !== updateData?.id && projectIds.has(task.project_id));
+	};
 	const [attachments, setAttachments] = useState([]);
 	const [existingAttachments, setExistingAttachments] = useState([]);
 
@@ -137,12 +145,14 @@ export default function TaskForm({ parentId, isOpen, setIsOpen, updateData, setU
 		},
 	});
 
+	// Clear task form on close
 	useEffect(() => {
 		if (!isOpen) {
 			setUpdateData({});
 		}
 	}, [isOpen]);
 
+	// Populate task form on load
 	useEffect(() => {
 		if (updateData && projects && users && categories) {
 			const {
@@ -240,6 +250,13 @@ export default function TaskForm({ parentId, isOpen, setIsOpen, updateData, setU
 			}
 		}
 	}, [updateData, form, projects, users, categories]);
+
+	// Filter project and task options to relevent ones
+	useEffect(() => {
+		if (!isOpen) {
+			setUpdateData({});
+		}
+	}, [isOpen]);
 
 	const handleSubmit = async (formData) => {
 		setTasksLoading(true);
@@ -725,13 +742,13 @@ export default function TaskForm({ parentId, isOpen, setIsOpen, updateData, setU
 									<FormControl>
 										<SelectTrigger>
 											<SelectValue placeholder="Select a project">
-												{field.value ? projects?.find((project) => project.id == field.value)?.title : "Select a project"}
+												{field.value ? relevantProjects()?.find((project) => project.id == field.value)?.title : "Select a project"}
 											</SelectValue>
 										</SelectTrigger>
 									</FormControl>
 									<SelectContent>
-										{Array.isArray(projects) && projects.length > 0 ? (
-											projects.map((project) => (
+										{Array.isArray(relevantProjects()) && relevantProjects().length > 0 ? (
+											relevantProjects().map((project) => (
 												<SelectItem key={project.id} value={project.id.toString()}>
 													{project.title}
 												</SelectItem>
@@ -810,9 +827,7 @@ export default function TaskForm({ parentId, isOpen, setIsOpen, updateData, setU
 												<SelectItem key={task.id} value={task.id.toString()}>
 													<div className="flex flex-col">
 														<span> {task.title}</span>
-														<span className="text-muted-foreground opacity-50">
-															{task.project?.title} | {task.status?.name}
-														</span>
+														<span className="text-muted-foreground opacity-50">{task.project?.title}</span>
 													</div>
 												</SelectItem>
 											))
