@@ -31,7 +31,8 @@ class UpdateDelayReasonRequest extends FormRequest
                 'string',
                 'max:100',
                 Rule::unique('delay_reasons', 'code')
-                    ->ignore($this->route('delay_reason')->id),
+                    ->where('organization_id', $this->organization_id)
+                    ->ignore($this->delay_reason->id),
             ],
             'category' => 'required|string|max:100',
             'impact_level' => 'required|in:positive,neutral,negative',
