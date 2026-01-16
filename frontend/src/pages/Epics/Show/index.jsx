@@ -12,7 +12,7 @@ import { useScrollStore } from "@/store/scroll/scrollStore";
 
 export default function Epic() {
 	const { id } = useParams();
-	const { epic, epicLoading } = useEpicStore();
+	const { epic, epicLoading, setSelectedEpicId } = useEpicStore();
 	const { setSelectedEpic } = useEpicsStore();
 	const { fetchEpic } = useEpicHelpers();
 	const targetRef = useRef(null);
@@ -29,7 +29,8 @@ export default function Epic() {
 	useEffect(() => {
 		document.title = "Task Management | Epic";
 		if (Object.keys(epic).length === 0 || parseInt(epic.id) !== parseInt(id)) fetchEpic(id);
-		setSelectedEpic(Number(id));
+		setSelectedEpic(Number(id)); //used for kanban filter
+		setSelectedEpicId(Number(id)); //indicates active epic profile
 		// if (!epicReports || epicReports.length === 0 || epic.id != parseInt(id)) fetchEpicReports(id);
 	}, [id]);
 

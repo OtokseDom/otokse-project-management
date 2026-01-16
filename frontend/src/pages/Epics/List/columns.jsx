@@ -14,7 +14,7 @@ import { useEpicHelpers } from "@/utils/epicHelpers";
 export const columnsEpic = () => {
 	const { setSelectedEpic, epics } = useEpicsStore();
 	const { user } = useAuthContext(); // Get authenticated user details
-	const { setIsOpen, setUpdateData, dialogOpen, setDialogOpen, hasRelation, selectedEpicId } = useEpicStore();
+	const { setIsOpen, setUpdateData, dialogOpen, setDialogOpen, hasRelation, selectedEpicId, setSelectedEpicId } = useEpicStore();
 	const { checkHasRelation } = useEpicHelpers();
 
 	const handleUpdateEpic = (epic) => {
@@ -193,7 +193,8 @@ export const columnsEpic = () => {
 										to="/projects"
 										onClick={(e) => {
 											e.stopPropagation();
-											setSelectedEpic(epic.id);
+											setSelectedEpic(epic.id); //used for kanban filter
+											setSelectedEpicId(epic.id); //indicates active epic profile
 										}}
 									>
 										<ListTodo size={20} />

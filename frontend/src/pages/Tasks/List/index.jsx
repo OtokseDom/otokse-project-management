@@ -19,12 +19,12 @@ import Relations from "@/components/task/Relations";
 import Tabs from "@/components/task/Tabs";
 import { TaskDiscussions } from "@/components/task/Discussion";
 import { Progress } from "@/components/ui/progress";
-import { useEpicsStore } from "@/store/epics/epicsStore";
 import ScheduleCalendar from "@/pages/Schedules/calendar";
 import KanbanBoard from "@/pages/Kanban/kanban";
 import { useDelayReasonsStore } from "@/store/delayReasons/delayReasonsStore";
 import TaskFilterForm from "@/components/form/TaskFilterForm";
 import FilterTags from "@/components/form/FilterTags";
+import { useEpicStore } from "@/store/epic/epicStore";
 
 export default function Tasks() {
 	// const { loading, setLoading } = useLoadContext();
@@ -44,7 +44,7 @@ export default function Tasks() {
 	} = useTasksStore();
 	const [filteredTasks, setFilteredTasks] = useState([]);
 	const { users } = useUsersStore();
-	const { selectedEpic, setSelectedEpic } = useEpicsStore();
+	const { selectedEpicId } = useEpicStore();
 	const { projects, projectsLoaded, selectedProject, setSelectedProject } = useProjectsStore();
 	const { taskStatuses } = useTaskStatusesStore();
 	const { categories } = useCategoriesStore();
@@ -99,15 +99,17 @@ export default function Tasks() {
 				setSelectedProject(allProjects.length ? allProjects[0] : null);
 			}
 		} else {
-			// On epics page show only projects belonging to selectedEpic
+			// On epics page show only projects belonging to selectedEpicId
 			const tempEpicProjects =
-				selectedEpic !== null && selectedEpic !== undefined ? allProjects.filter((project) => String(project?.epic_id) === String(selectedEpic)) : [];
+				selectedEpicId !== null && selectedEpicId !== undefined
+					? allProjects.filter((project) => String(project?.epic_id) === String(selectedEpicId))
+					: [];
 			setActiveProjects(tempEpicProjects);
 			if (!selectedProject || !tempEpicProjects.find((p) => p?.id === selectedProject?.id)) {
 				setSelectedProject(tempEpicProjects.length ? tempEpicProjects[0] : null);
 			}
 		}
-	}, [projects, selectedEpic, inTasks]);
+	}, [projects, selectedEpicId, inTasks]);
 
 	// Apply filters to tasks
 	useEffect(() => {

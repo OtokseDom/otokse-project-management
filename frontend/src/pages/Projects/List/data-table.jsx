@@ -10,12 +10,12 @@ import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useProjectsStore } from "@/store/projects/projectsStore";
-import { useEpicsStore } from "@/store/epics/epicsStore";
+import { useEpicStore } from "@/store/epic/epicStore";
 
 // Convert the DataTable component to JavaScript
 export function DataTableProjects({ columns, isOpen, setIsOpen, updateData, setUpdateData }) {
 	const inProjects = location.pathname.startsWith("/projects") ? true : false;
-	const { selectedEpic } = useEpicsStore();
+	const { selectedEpicId } = useEpicStore();
 	const [sorting, setSorting] = useState([]);
 	const [columnFilters, setColumnFilters] = useState([]);
 	const [columnVisibility, setColumnVisibility] = useState({
@@ -30,10 +30,12 @@ export function DataTableProjects({ columns, isOpen, setIsOpen, updateData, setU
 		if (inProjects) {
 			setFilteredProjects(projects);
 		} else {
-			setFilteredProjects(selectedEpic !== null && selectedEpic !== undefined ? projects.filter((project) => project.epic_id === selectedEpic) : []);
+			setFilteredProjects(
+				selectedEpicId !== null && selectedEpicId !== undefined ? projects.filter((project) => project.epic_id === selectedEpicId) : []
+			);
 		}
 		// console.log(inProjects);
-	}, [selectedEpic, inProjects]);
+	}, [selectedEpicId, inProjects]);
 	const table = useReactTable({
 		data: filteredProjects,
 		columns,

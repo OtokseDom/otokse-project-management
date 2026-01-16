@@ -22,6 +22,7 @@ import { useTaskHelpers } from "@/utils/taskHelpers";
 import { useKanbanColumnsStore } from "@/store/kanbanColumns/kanbanColumnsStore";
 import { useDashboardStore } from "@/store/dashboard/dashboardStore";
 import { useEpicsStore } from "@/store/epics/epicsStore";
+import { useEpicStore } from "@/store/epic/epicStore";
 // TODO: Feat - Medium - Auto fill unique slug validating existing slugs
 const formSchema = z.object({
 	epic_id: z.number().optional(),
@@ -46,7 +47,8 @@ const formSchema = z.object({
 export default function ProjectForm({ setIsOpen, updateData, setUpdateData }) {
 	const { user: user_auth } = useAuthContext();
 	const showToast = useToast();
-	const { epics, selectedEpic } = useEpicsStore();
+	const { epics } = useEpicsStore();
+	const { selectedEpicId } = useEpicStore();
 	const { addProject, updateProject, projectsLoading, setProjectsLoading } = useProjectsStore([]);
 	const { updateProjectFilter, addProjectFilter } = useDashboardStore();
 	const { addKanbanColumn } = useKanbanColumnsStore();
@@ -97,7 +99,7 @@ export default function ProjectForm({ setIsOpen, updateData, setUpdateData }) {
 				status_id,
 			} = updateData;
 			form.reset({
-				epic_id: epic_id || selectedEpic || undefined,
+				epic_id: epic_id || selectedEpicId || undefined,
 				title: title || "",
 				description: description || "",
 				start_date: start_date ? parseISO(start_date) : null,

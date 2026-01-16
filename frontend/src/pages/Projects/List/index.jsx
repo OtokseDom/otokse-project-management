@@ -13,12 +13,12 @@ import { Plus, Rows3, Table } from "lucide-react";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import ProjectForm from "../form";
 import { Input } from "@/components/ui/input";
-import { useEpicsStore } from "@/store/epics/epicsStore";
+import { useEpicStore } from "@/store/epic/epicStore";
 
 export default function Projects() {
 	// Determine if in projects page or in epic page
 	const inProjects = location.pathname.startsWith("/projects") ? true : false;
-	const { selectedEpic } = useEpicsStore();
+	const { selectedEpicId } = useEpicStore();
 	const { projects, projectsLoaded, projectsLoading, setProjectsLoading } = useProjectsStore([]);
 	const { taskStatuses } = useTaskStatusesStore();
 	const { fetchProjects, fetchTaskStatuses } = useTaskHelpers();
@@ -47,11 +47,11 @@ export default function Projects() {
 			setFilteredProjects(projects);
 		} else {
 			setFilteredProjects(
-				selectedEpic !== null && selectedEpic !== undefined ? projects.filter((project) => String(project?.epic_id) === String(selectedEpic)) : []
+				selectedEpicId !== null && selectedEpicId !== undefined ? projects.filter((project) => String(project?.epic_id) === String(selectedEpicId)) : []
 			);
 		}
 		// console.log(inProjects);
-	}, [selectedEpic, inProjects, projects]);
+	}, [selectedEpicId, inProjects, projects]);
 
 	const checkHasRelation = async (project = {}) => {
 		setProjectsLoading(true);

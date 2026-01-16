@@ -29,9 +29,11 @@ import { getSubtaskProgress, priorityColors, statusColors } from "@/utils/taskHe
 import { useEpicsStore } from "@/store/epics/epicsStore";
 import { Link } from "react-router-dom";
 import { useEpicHelpers } from "@/utils/epicHelpers";
+import { useEpicStore } from "@/store/epic/epicStore";
 
 export default function EpicGridItem({ epic }) {
 	const { setSelectedEpic } = useEpicsStore();
+	const { setSelectedEpicId } = useEpicStore();
 	const { checkHasRelation, handleUpdateEpic } = useEpicHelpers();
 
 	// const { taskStatuses } = useTaskStatusesStore();
@@ -232,7 +234,8 @@ export default function EpicGridItem({ epic }) {
 							to={`/epics/${epic.id}`}
 							onClick={(e) => {
 								e.stopPropagation();
-								setSelectedEpic(epic.id);
+								setSelectedEpic(epic.id); //used for kanban filter
+								setSelectedEpicId(epic.id); //indicates active epic profile
 							}}
 						>
 							<Button variant="ghost" title={`View ${epic.title}`}>
