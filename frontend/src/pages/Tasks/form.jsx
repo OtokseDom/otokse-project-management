@@ -11,7 +11,7 @@ import { useToast } from "@/contexts/ToastContextProvider";
 import { useEffect, useRef, useState } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { format, parseISO } from "date-fns";
-import { AlarmClock, CalendarDays, Info, Loader2, Scale, Sparkles } from "lucide-react";
+import { AlarmClock, CalendarDays, Info, Loader2, Scale, Sparkles, X } from "lucide-react";
 import DateInput from "@/components/form/DateInput";
 import { useAuthContext } from "@/contexts/AuthContextProvider";
 import { API } from "@/constants/api";
@@ -525,6 +525,23 @@ export default function TaskForm({ parentId, isOpen, setIsOpen, updateData, setU
 		}
 	};
 
+	// Clear select input
+	const clearSelection = (index, value = "") => {
+		return (
+			<div
+				className="flex items-center w-full bg-muted/50 hover:bg-muted hover:cursor-pointer py-2 px-8 text-start text-sm text-destructive rounded"
+				onClick={() => {
+					setUpdateData((prev) => ({
+						...prev,
+						[index]: value,
+					}));
+				}}
+			>
+				Clear Selection
+			</div>
+		);
+	};
+
 	const isEditable =
 		user_auth?.data?.role === "Superadmin" ||
 		user_auth?.data?.role === "Admin" ||
@@ -624,6 +641,7 @@ export default function TaskForm({ parentId, isOpen, setIsOpen, updateData, setU
 											</SelectTrigger>
 										</FormControl>
 										<SelectContent>
+											{clearSelection("status_id")}
 											{Array.isArray(taskStatuses) && taskStatuses.length > 0 ? (
 												taskStatuses.map((taskStatus) => (
 													<SelectItem key={taskStatus.id} value={taskStatus.id.toString()}>
@@ -661,7 +679,7 @@ export default function TaskForm({ parentId, isOpen, setIsOpen, updateData, setU
 							return (
 								<FormItem className="w-full">
 									<FormLabel>Priority</FormLabel>
-									<Select disabled={!isEditable} onValueChange={field.onChange} defaultValue={updateData?.priority || field.value}>
+									<Select disabled={!isEditable} onValueChange={field.onChange} value={field.value ?? undefined}>
 										<FormControl>
 											<SelectTrigger>
 												<SelectValue placeholder="Select priority">
@@ -680,6 +698,7 @@ export default function TaskForm({ parentId, isOpen, setIsOpen, updateData, setU
 											</SelectTrigger>
 										</FormControl>
 										<SelectContent>
+											{clearSelection("priority", undefined)}
 											{Array.isArray(priorities) && priorities.length > 0 ? (
 												priorities?.map((priority) => (
 													<SelectItem key={priority?.id} value={priority?.name}>
@@ -783,6 +802,7 @@ export default function TaskForm({ parentId, isOpen, setIsOpen, updateData, setU
 										</SelectTrigger>
 									</FormControl>
 									<SelectContent>
+										{clearSelection("category_id")}
 										{Array.isArray(categories) && categories.length > 0 ? (
 											categories.map((category) => (
 												<SelectItem key={category.id} value={category.id.toString()}>
@@ -819,9 +839,7 @@ export default function TaskForm({ parentId, isOpen, setIsOpen, updateData, setU
 										</SelectTrigger>
 									</FormControl>
 									<SelectContent>
-										<SelectItem className="w-full bg-secondary x-auto" value={0}>
-											Clear Selection
-										</SelectItem>
+										{clearSelection("parent_id")}
 										{Array.isArray(tasks) && tasks.length > 0 ? (
 											parentTasks()?.map((task) => (
 												<SelectItem key={task.id} value={task.id.toString()}>
@@ -1335,6 +1353,7 @@ export default function TaskForm({ parentId, isOpen, setIsOpen, updateData, setU
 												</SelectTrigger>
 											</FormControl>
 											<SelectContent>
+												{clearSelection("delay_reason_id")}
 												{Array.isArray(delayReasons) && delayReasons.length > 0 ? (
 													delayReasons.map((delayReason) => (
 														<SelectItem key={delayReason.id} value={delayReason.id.toString()}>
