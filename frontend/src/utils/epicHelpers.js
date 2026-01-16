@@ -6,6 +6,7 @@ import { useDashboardStore } from "@/store/dashboard/dashboardStore";
 import { useEpicStore } from "@/store/epic/epicStore";
 import { useEpicsStore } from "@/store/epics/epicsStore";
 import { useUserStore } from "@/store/user/userStore";
+import { select } from "@material-tailwind/react";
 import { useEffect } from "react";
 
 export const useEpicHelpers = () => {
@@ -21,7 +22,6 @@ export const useEpicHelpers = () => {
 			const res = await axiosClient.get(API().epic());
 			setEpics(res?.data?.data?.epics);
 			// setKanbanColumns(res?.data?.data?.kanbanColumns);
-			setSelectedEpic(res?.data?.data?.epics[res?.data?.data?.epics?.length - 1]?.id);
 			if (res.data.data.epics.length !== epicFilter.length || res.data.data.epics.length !== profileEpicFilter.length) {
 				const mappedEpics = res.data.data.epics.map((epic) => ({ value: epic.id, label: epic.title }));
 				// Used in user profile
