@@ -26,7 +26,7 @@ import { useUserStore } from "@/store/user/userStore";
 import RichTextEditor from "@/components/ui/RichTextEditor";
 import TaskAttachments from "@/components/task/Attachment";
 import { useDelayReasonsStore } from "@/store/delayReasons/delayReasonsStore";
-// TODO: Auto fill project and epic when available
+
 const formSchema = z.object({
 	parent_id: z.number().optional(),
 	status_id: z.number().optional(),

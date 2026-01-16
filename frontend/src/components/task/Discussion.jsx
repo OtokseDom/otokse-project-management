@@ -24,9 +24,9 @@ export const TaskDiscussions = ({ taskId }) => {
 	const [newContent, setNewContent] = useState("");
 	const [attachments, setAttachments] = useState([]);
 	const showToast = useToast();
-	// TODO: Edit comments
-	// TODO: Replies
-	// TODO: Mention users
+	// TODO: Feat - Low - Edit comments
+	// TODO: Feat - Low - Replies
+	// TODO: Feat - Low - Mention users
 
 	useEffect(() => {
 		if (!taskDiscussions || taskDiscussions.length === 0) fetchTaskDiscussions();

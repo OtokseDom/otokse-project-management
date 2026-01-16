@@ -25,8 +25,8 @@ import { useEpicHelpers } from "@/utils/epicHelpers";
 import { useEpicsStore } from "@/store/epics/epicsStore";
 import { Filter } from "lucide-react";
 
-// TODO: Export report with filter
-// TODO: Notification
+// TODO: Feat - Low - Export report with filter
+// TODO: Feat - Low - Notification
 export default function UserProfile() {
 	const { users } = useUsersStore();
 	const { projects, projectsLoaded } = useProjectsStore();

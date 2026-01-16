@@ -11,7 +11,7 @@ import { useKanbanColumnsStore } from "@/store/kanbanColumns/kanbanColumnsStore"
 import { API } from "@/constants/api";
 import axiosClient from "@/axios.client";
 
-// TODO: Status menu - sorting options
+// TODO: Feat - Low - Status menu - sorting options
 export default function KanbanBoard() {
 	const { tasks, taskHistory, updateTaskPosition, addTaskHistory, mergeTaskPositions } = useTasksStore();
 	const { taskStatuses } = useTaskStatusesStore();
