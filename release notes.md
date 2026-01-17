@@ -27,3 +27,8 @@
 -   Fix: Delay reason code checks unique on entire table
 -   Fix: Project filter missing in task list
 -   Fix: Dashboard filter tag onRemove does not clear filter multi-select field
+
+# Release Version 2.1.2 (Jan 17, 2026):
+
+-   Fix: Delay reasons unique code constraint
+-   Feat: Delay reasons factory on new organization
