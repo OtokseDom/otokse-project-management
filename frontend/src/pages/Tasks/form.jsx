@@ -102,7 +102,7 @@ export default function TaskForm({ parentId, isOpen, setIsOpen, updateData, setU
 		time_delay: "",
 	});
 	const [selectedUsers, setSelectedUsers] = useState(
-		updateData?.assignees?.map((assignee) => parseInt(assignee.id)) || (updateData.calendar_add ? [selectedUser?.id] : []) || []
+		updateData?.assignees?.map((assignee) => parseInt(assignee.id)) || (updateData.calendar_add ? [selectedUser?.id] : []) || [],
 	);
 	const bottomRef = useRef(null);
 	const scrollToBottom = () => {
@@ -526,15 +526,12 @@ export default function TaskForm({ parentId, isOpen, setIsOpen, updateData, setU
 	};
 
 	// Clear select input
-	const clearSelection = (index, value = "") => {
+	const clearSelection = (fieldName, value = "") => {
 		return (
 			<div
 				className="flex items-center w-full bg-muted/50 hover:bg-muted hover:cursor-pointer py-2 px-8 text-start text-sm text-destructive rounded"
 				onClick={() => {
-					setUpdateData((prev) => ({
-						...prev,
-						[index]: value,
-					}));
+					form.setValue(fieldName, value);
 				}}
 			>
 				Clear Selection
