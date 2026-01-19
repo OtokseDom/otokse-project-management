@@ -33,6 +33,11 @@ class DashboardReportController extends Controller
             'completion_velocity' => $this->report_service->completionVelocityTrend(null, "dashboard", $filter),
             'section_cards' => $this->report_service->sectionCards(null, $filter),
             'overall_progress' => $this->report_service->overallProgress(null, $filter),
+            'delays_by_reason' => $this->report_service->delaysByReason(null, $filter),
+            'delay_reasons_impact_analysis' => $this->report_service->delayReasonsImpactAnalysis(null, $filter),
+            // 'delay_reasons_trend' => $this->report_service->delayReasonsTrend(null, "dashboard", $filter),
+            // 'delay_reasons_distribution' => $this->report_service->delayReasonsDistribution(null, $filter),
+            'top_delay_reasons_comparison' => $this->report_service->topDelayReasonsComparison(null, 10, $filter),
         ];
 
         $data = [];
