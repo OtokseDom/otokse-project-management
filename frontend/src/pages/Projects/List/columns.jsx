@@ -18,7 +18,7 @@ export const columnsProject = ({ setIsOpen, setUpdateData, dialogOpen, setDialog
 			setUpdateData(project);
 		}, 100);
 	};
-
+	// TODO: view tasks button in actions column
 	const baseColumns = useMemo(
 		() => [
 			{
@@ -205,7 +205,7 @@ export const columnsProject = ({ setIsOpen, setUpdateData, dialogOpen, setDialog
 				},
 			},
 		],
-		[projects]
+		[projects],
 	);
 	// Add actions column for Superadmin
 	const columnsWithActions = useMemo(() => {

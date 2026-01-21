@@ -164,9 +164,10 @@ export const columnsEpic = () => {
 				},
 			},
 		],
-		[epics]
+		[epics],
 	);
 	// Add actions column for Superadmin
+	// TODO: View projects under epic
 	const columnsWithActions = useMemo(() => {
 		if (user?.data?.role === "Superadmin" || user?.data?.role === "Admin" || user?.data?.role === "Manager") {
 			return [
