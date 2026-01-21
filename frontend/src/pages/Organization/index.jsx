@@ -60,7 +60,7 @@ export default function Organization() {
 	return (
 		<div className={"flex flex-row items-center h-screen w-screen md:w-[800px] container p-5 md:p-0 sm:text-sm -mt-10"}>
 			<div
-				className={`fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm z-40 transition-opacity duration-300 pointer-events-none ${
+				className={`fixed inset-0 bg-black bg-opacity-60  z-40 transition-opacity duration-300 pointer-events-none ${
 					isOpen ? "opacity-100" : "opacity-0"
 				}`}
 				aria-hidden="true"

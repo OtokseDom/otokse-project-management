@@ -126,7 +126,7 @@ export default function UserProfile() {
 	return (
 		<div className="w-screen md:w-fit container p-5 md:p-0 grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-4 auto-rows-auto ">
 			<div
-				className={`fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm z-40 transition-opacity duration-300 pointer-events-none ${
+				className={`fixed inset-0 bg-black bg-opacity-60 z-40 transition-opacity duration-300 pointer-events-none ${
 					isOpen ? "opacity-100" : "opacity-0"
 				}`}
 				aria-hidden="true"
@@ -438,11 +438,11 @@ export default function UserProfile() {
 									month: "short",
 									day: "numeric",
 									year: "numeric",
-							  })} - ${new Date(reports.performance_leaderboard.filters.to).toLocaleDateString("en-CA", {
+								})} - ${new Date(reports.performance_leaderboard.filters.to).toLocaleDateString("en-CA", {
 									month: "short",
 									day: "numeric",
 									year: "numeric",
-							  })}`
+								})}`
 							: "All Time"}{" "}
 						Top Performers
 					</CardTitle>
@@ -451,8 +451,8 @@ export default function UserProfile() {
 						{reports?.performance_leaderboard?.chart_data?.length == 1
 							? "(Top 1) user"
 							: reports?.performance_leaderboard?.chart_data?.length > 1
-							? "(Top " + reports?.performance_leaderboard?.chart_data?.length + ") users"
-							: ""}
+								? "(Top " + reports?.performance_leaderboard?.chart_data?.length + ") users"
+								: ""}
 					</CardDescription>
 				</CardHeader>
 				{reports?.performance_leaderboard?.data_count ? (

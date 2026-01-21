@@ -47,7 +47,9 @@ export default function Projects() {
 			setFilteredProjects(projects);
 		} else {
 			setFilteredProjects(
-				selectedEpicId !== null && selectedEpicId !== undefined ? projects.filter((project) => String(project?.epic_id) === String(selectedEpicId)) : []
+				selectedEpicId !== null && selectedEpicId !== undefined
+					? projects.filter((project) => String(project?.epic_id) === String(selectedEpicId))
+					: [],
 			);
 		}
 		// console.log(inProjects);
@@ -88,7 +90,7 @@ export default function Projects() {
 		<div className="w-screen md:w-full px-2 md:px-0">
 			<div className="w-full bg-card text-card-foreground border border-border rounded-2xl p-4 md:p-6 shadow-md">
 				<div
-					className={`fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm z-40 transition-opacity duration-300 pointer-events-none ${
+					className={`fixed inset-0 bg-black bg-opacity-60  z-40 transition-opacity duration-300 pointer-events-none ${
 						isOpen ? "opacity-100" : "opacity-0"
 					}`}
 					aria-hidden="true"

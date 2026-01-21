@@ -47,11 +47,11 @@ const Container = ({ id, children, title, color, onAddItem }) => {
 			}}
 			className={clsx(
 				"min-w-[350px] h-fit min-h-[50vh] max-h-[calc(100vh-9rem)] p-2 bg-secondary border border-accent rounded-xl flex flex-col",
-				isDragging && "opacity-50"
+				isDragging && "opacity-50",
 			)}
 		>
 			<div
-				className={`fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm z-40 transition-opacity duration-300 pointer-events-none ${
+				className={`fixed inset-0 bg-black bg-opacity-60  z-40 transition-opacity duration-300 pointer-events-none ${
 					isOpenDialog ? "opacity-100" : "opacity-0"
 				}`}
 				aria-hidden="true"

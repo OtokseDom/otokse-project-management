@@ -85,11 +85,11 @@ const Items = ({ item }) => {
 					}}
 					className={clsx(
 						"p-2 bg-background shadow rounded-md w-full border border-transparent hover:border-foreground cursor-pointer group",
-						isDragging && "opacity-50"
+						isDragging && "opacity-50",
 					)}
 				>
 					<div
-						className={`fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm z-40 transition-opacity duration-300 cursor-default ${
+						className={`fixed inset-0 bg-black bg-opacity-60  z-40 transition-opacity duration-300 cursor-default ${
 							isDialogOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
 						}`}
 						aria-hidden="true"
@@ -131,10 +131,10 @@ const Items = ({ item }) => {
 										endDate && item.status.name === "Completed"
 											? "bg-green-300 text-black"
 											: endDate && isBeforeToday(endDate)
-											? "bg-red-300 text-black" // overdue
-											: endDate && isTodayOrTomorrow(endDate)
-											? "bg-yellow-700 text-black" // near due
-											: ""
+												? "bg-red-300 text-black" // overdue
+												: endDate && isTodayOrTomorrow(endDate)
+													? "bg-yellow-700 text-black" // near due
+													: ""
 									}`}
 								>
 									{endDate && <Clock size={16} />}

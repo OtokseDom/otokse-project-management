@@ -37,7 +37,7 @@ export default function Epic() {
 	return (
 		<div className="flex flex-col w-screen md:w-full items-center justify-center ">
 			{/* <div
-				className={`fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm z-40 transition-opacity duration-300 pointer-events-none ${
+				className={`fixed inset-0 bg-black bg-opacity-60  z-40 transition-opacity duration-300 pointer-events-none ${
 					isOpen || isOpenUser || isOpenFilter || dialogOpen || deleteDialogOpen ? "opacity-100" : "opacity-0"
 				}`}
 				aria-hidden="true"

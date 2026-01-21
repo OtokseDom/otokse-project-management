@@ -160,7 +160,7 @@ export default function Tasks() {
 		<div className="w-screen md:w-full px-2 md:px-0">
 			<div className="w-full bg-card text-card-foreground border border-border rounded-2xl p-4 md:p-6 shadow-md">
 				<div
-					className={`fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm z-40 transition-opacity duration-300 pointer-events-none ${
+					className={`fixed inset-0 bg-black bg-opacity-60 z-40 transition-opacity duration-300 pointer-events-none ${
 						isOpen || isOpenFilter || dialogOpen || deleteDialogOpen ? "opacity-100" : "opacity-0"
 					}`}
 					aria-hidden="true"
@@ -284,11 +284,11 @@ export default function Tasks() {
 															month: "short",
 															day: "numeric",
 															year: "numeric",
-													  })} to ${new Date(taskFilters.dateRange.to).toLocaleDateString("en-US", {
+														})} to ${new Date(taskFilters.dateRange.to).toLocaleDateString("en-US", {
 															month: "short",
 															day: "numeric",
 															year: "numeric",
-													  })}`
+														})}`
 													: "",
 											Assignees: taskFilters.selectedUsers
 												.map((userId) => {

@@ -94,7 +94,7 @@ export default function Signup() {
 					</div>
 
 					{errors && (
-						<div className="bg-red-900/30 backdrop-blur-sm border border-red-500/30 rounded-lg p-3 mb-4">
+						<div className="bg-red-900/30  border border-red-500/30 rounded-lg p-3 mb-4">
 							<div className="text-red-200 text-sm space-y-1">
 								{Object.keys(errors).map((field) => errors[field].map((msg, index) => <p key={`${field}-${index}`}>{msg}</p>))}
 							</div>
@@ -127,7 +127,7 @@ export default function Signup() {
 									ref={orgCodeRef}
 									type="text"
 									placeholder="Enter code to join existing organization"
-									className={`w-full px-4 py-3 backdrop-blur-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all duration-300 ${
+									className={`w-full px-4 py-3  border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all duration-300 ${
 										theme === "dark"
 											? "bg-black/20 border-white/10 text-white placeholder-purple-300"
 											: "bg-white/20 border-gray-300/30 text-gray-800 placeholder-gray-500"
@@ -139,7 +139,7 @@ export default function Signup() {
 									ref={orgNameRef}
 									type="text"
 									placeholder="Enter new organization name"
-									className={`w-full px-4 py-3 backdrop-blur-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all duration-300 ${
+									className={`w-full px-4 py-3  border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all duration-300 ${
 										theme === "dark"
 											? "bg-black/20 border-white/10 text-white placeholder-purple-300"
 											: "bg-white/20 border-gray-300/30 text-gray-800 placeholder-gray-500"
@@ -154,7 +154,7 @@ export default function Signup() {
 								ref={nameRef}
 								type="text"
 								placeholder="Full Name"
-								className={`w-full px-4 py-3 backdrop-blur-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all duration-300 ${
+								className={`w-full px-4 py-3  border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all duration-300 ${
 									theme === "dark"
 										? "bg-black/20 border-white/10 text-white placeholder-purple-300"
 										: "bg-white/20 border-gray-300/30 text-gray-800 placeholder-gray-500"
@@ -165,7 +165,7 @@ export default function Signup() {
 								ref={emailRef}
 								type="email"
 								placeholder="Email Address"
-								className={`w-full px-4 py-3 backdrop-blur-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all duration-300 ${
+								className={`w-full px-4 py-3  border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all duration-300 ${
 									theme === "dark"
 										? "bg-black/20 border-white/10 text-white placeholder-purple-300"
 										: "bg-white/20 border-gray-300/30 text-gray-800 placeholder-gray-500"
@@ -176,7 +176,7 @@ export default function Signup() {
 								ref={positionRef}
 								type="text"
 								placeholder="Job Position"
-								className={`w-full px-4 py-3 backdrop-blur-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all duration-300 ${
+								className={`w-full px-4 py-3  border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all duration-300 ${
 									theme === "dark"
 										? "bg-black/20 border-white/10 text-white placeholder-purple-300"
 										: "bg-white/20 border-gray-300/30 text-gray-800 placeholder-gray-500"
@@ -187,7 +187,7 @@ export default function Signup() {
 								ref={dobRef}
 								type="date"
 								placeholder="Date of Birth"
-								className={`w-full px-4 py-3 backdrop-blur-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all duration-300 ${
+								className={`w-full px-4 py-3  border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all duration-300 ${
 									theme === "dark"
 										? "bg-black/20 border-white/10 text-white placeholder-purple-300"
 										: "bg-white/20 border-gray-300/30 text-gray-800 placeholder-gray-500"
@@ -198,7 +198,7 @@ export default function Signup() {
 								ref={passwordRef}
 								type="password"
 								placeholder="Password"
-								className={`w-full px-4 py-3 backdrop-blur-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all duration-300 ${
+								className={`w-full px-4 py-3  border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all duration-300 ${
 									theme === "dark"
 										? "bg-black/20 border-white/10 text-white placeholder-purple-300"
 										: "bg-white/20 border-gray-300/30 text-gray-800 placeholder-gray-500"
@@ -209,7 +209,7 @@ export default function Signup() {
 								ref={passwordConfiramtionRef}
 								type="password"
 								placeholder="Confirm Password"
-								className={`w-full px-4 py-3 backdrop-blur-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all duration-300 ${
+								className={`w-full px-4 py-3  border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all duration-300 ${
 									theme === "dark"
 										? "bg-black/20 border-white/10 text-white placeholder-purple-300"
 										: "bg-white/20 border-gray-300/30 text-gray-800 placeholder-gray-500"

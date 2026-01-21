@@ -39,7 +39,7 @@ export function DataTableDelayReasons({ columns, isOpen, setIsOpen, updateData, 
 	return (
 		<div className="w-full scrollbar-custom">
 			<div
-				className={`fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm z-40 transition-opacity duration-300 pointer-events-none ${
+				className={`fixed inset-0 bg-black bg-opacity-60  z-40 transition-opacity duration-300 pointer-events-none ${
 					isOpen ? "opacity-100" : "opacity-0"
 				}`}
 				aria-hidden="true"

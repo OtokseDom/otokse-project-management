@@ -100,18 +100,18 @@ export const columns = ({ setIsOpen, setUpdateData }) => {
 							<div className="flex flex-col w-full">
 								{name} {user?.id === id && <span className="text-xs text-yellow-800"> (Me)</span>}
 								<span
-									className={`backdrop-blur-sm px-2 py-1 text-xs w-fit rounded-full ${
+									className={` px-2 py-1 text-xs w-fit rounded-full ${
 										status === "pending"
 											? "text-yellow-100 bg-yellow-900/50"
 											: status === "active"
-											? "text-green-100 bg-green-900/50"
-											: status === "inactive"
-											? "text-gray-100 bg-gray-700/50"
-											: status === "rejected"
-											? "text-red-100 bg-red-900/50"
-											: status === "banned"
-											? "text-purple-100 bg-purple-900/50"
-											: ""
+												? "text-green-100 bg-green-900/50"
+												: status === "inactive"
+													? "text-gray-100 bg-gray-700/50"
+													: status === "rejected"
+														? "text-red-100 bg-red-900/50"
+														: status === "banned"
+															? "text-purple-100 bg-purple-900/50"
+															: ""
 									}`}
 								>
 									{status}
@@ -126,7 +126,7 @@ export const columns = ({ setIsOpen, setUpdateData }) => {
 			{ id: "position", accessorKey: "position", header: createHeader("Position") },
 			// ...existing code...
 		],
-		[users]
+		[users],
 	);
 
 	// Add actions column for Superadmin
@@ -253,9 +253,8 @@ export const columns = ({ setIsOpen, setUpdateData }) => {
 
 const createHeader =
 	(label) =>
-	({ column }) =>
-		(
-			<button className="flex" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
-				{label} <ArrowUpDown className="ml-2 h-4 w-4" />
-			</button>
-		);
+	({ column }) => (
+		<button className="flex" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
+			{label} <ArrowUpDown className="ml-2 h-4 w-4" />
+		</button>
+	);
