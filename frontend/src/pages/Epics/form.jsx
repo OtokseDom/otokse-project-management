@@ -214,22 +214,24 @@ export default function EpicForm() {
 						);
 					}}
 				/>
-				<FormField
-					disabled={!isEditable}
-					control={form.control}
-					name="slug"
-					render={({ field }) => {
-						return (
-							<FormItem>
-								<FormLabel>Slug</FormLabel>
-								<FormControl>
-									<Input placeholder="Epic slug" {...field} />
-								</FormControl>
-								<FormMessage />
-							</FormItem>
-						);
-					}}
-				/>
+				{Object.keys(updateData).length !== 0 && (
+					<FormField
+						disabled={!isEditable}
+						control={form.control}
+						name="slug"
+						render={({ field }) => {
+							return (
+								<FormItem>
+									<FormLabel>Slug</FormLabel>
+									<FormControl>
+										<Input placeholder="Epic slug" {...field} />
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							);
+						}}
+					/>
+				)}
 				<FormField
 					disabled={!isEditable}
 					control={form.control}
