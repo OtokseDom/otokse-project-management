@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreEpicRequest extends FormRequest
 {
@@ -26,7 +27,16 @@ class StoreEpicRequest extends FormRequest
             'status_id' => 'nullable|exists:task_statuses,id',
             'title'           => 'required|string|max:255',
             'owner_id' => 'nullable|exists:users,id',
-            'slug'           => 'nullable|string|max:255',
+            'slug' => [
+                'nullable',
+                'string',
+                'max:255',
+                Rule::unique('epics')
+                    ->where(
+                        fn($q) =>
+                        $q->where('organization_id', $this->organization_id)
+                    ),
+            ],
             'description'     => 'nullable|string',
             'start_date'      => 'nullable|date',
             'end_date'        => 'nullable|date',
