@@ -31,9 +31,14 @@ const formSchema = z.object({
 	title: z.string().refine((data) => data.trim() !== "", {
 		message: "Title is required.",
 	}),
-	slug: z.string().trim().toLowerCase().regex(slugRegex, {
-		message: "Slug must be lowercase, contain only letters, numbers, and hyphens, and have no spaces.",
-	}),
+	slug: z
+		.string()
+		.trim()
+		.transform((v) => (v === "" ? undefined : v))
+		.refine((v) => v === undefined || slugRegex.test(v), {
+			message: "Slug must be lowercase, contain only letters, numbers, and hyphens, and have no spaces.",
+		})
+		.optional(),
 	description: z.string().optional(),
 	start_date: z.date().nullable(),
 	end_date: z.date().nullable(),
