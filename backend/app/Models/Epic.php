@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class Epic extends Model
 {
@@ -69,26 +70,18 @@ class Epic extends Model
         }
         return DB::transaction(function () use ($request, $userData) {
             // Create the new epic
-            $epic = $this->create($request->validated());
-
-            // Fetch all statuses for this organization
-            // $statuses = TaskStatus::where('organization_id', $userData->organization_id)->get();
-
-            // foreach ($statuses as $key => $status) {
-            //     $kanbanColumns[] = KanbanColumn::create([
-            //         'epic_id'      => $epic->id,
-            //         'task_status_id'       => $status->id,
-            //         'position'        => ++$key,
-            //         'organization_id' => $userData->organization_id,
-            //     ]);
-            // }
+            $epicData = $request->validated();
+            if (empty($epicData['slug'])) {
+                $epicData['slug'] = $this->generateUniqueSlug($epicData['title'], $userData->organization_id);
+            }
+            $epic = $this->create($epicData);
 
             $epic->load(['status:id,name,color', 'owner:id,name,email,role,position']);
 
             $data = [
                 "epic" => $epic,
-                // "kanban" => $kanbanColumns,
             ];
+
             return $data;
         });
     }
@@ -134,5 +127,22 @@ class Epic extends Model
 
             return true;
         });
+    }
+
+    public function generateUniqueSlug($title, $organization_id)
+    {
+        $baseSlug = Str::slug($title);
+        $slug = $baseSlug;
+        $counter = 1;
+
+        while ($this
+            ->where('organization_id', $organization_id)
+            ->where('slug', $slug)->exists()
+        ) {
+            $slug = $baseSlug . '-' . $counter;
+            $counter++;
+        }
+
+        return $slug;
     }
 }
