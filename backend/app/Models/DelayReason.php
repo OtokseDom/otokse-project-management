@@ -11,7 +11,6 @@ class DelayReason extends Model
     protected $fillable = [
         'organization_id',
         'name',
-        'code',
         'category',
         'impact_level',
         'severity',

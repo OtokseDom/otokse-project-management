@@ -1658,7 +1658,6 @@ class ReportService
             ->select(
                 'delay_reasons.id',
                 'delay_reasons.name',
-                'delay_reasons.code',
                 'delay_reasons.category',
                 'delay_reasons.impact_level',
                 'delay_reasons.severity',
@@ -1683,7 +1682,6 @@ class ReportService
         $chart_data = $query->groupBy(
             'delay_reasons.id',
             'delay_reasons.name',
-            'delay_reasons.code',
             'delay_reasons.category',
             'delay_reasons.impact_level',
             'delay_reasons.severity'
@@ -1965,7 +1963,6 @@ class ReportService
             ->select(
                 'delay_reasons.id',
                 'delay_reasons.name',
-                'delay_reasons.code',
                 'delay_reasons.category',
                 'delay_reasons.impact_level',
                 'delay_reasons.severity',
@@ -1993,7 +1990,6 @@ class ReportService
         $chart_data = $query->groupBy(
             'delay_reasons.id',
             'delay_reasons.name',
-            'delay_reasons.code',
             'delay_reasons.category',
             'delay_reasons.impact_level',
             'delay_reasons.severity',
@@ -2025,7 +2021,6 @@ class ReportService
             return (object)[
                 'id' => $reason->id,
                 'name' => $reason->name,
-                'code' => $reason->code,
                 'category' => $reason->category,
                 'severity' => $reason->severity,
                 'impact_level' => $reason->impact_level,

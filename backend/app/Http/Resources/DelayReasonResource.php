@@ -19,7 +19,6 @@ class DelayReasonResource extends JsonResource
             'id' => $this->id,
             'organization_id' => $this->organization_id,
             'name' => $this->name,
-            'code' => $this->code,
             'category' => $this->category,
             'impact_level' => $this->impact_level,
             'severity' => $this->severity,

@@ -22,9 +22,6 @@ const formSchema = z.object({
 	name: z.string().refine((data) => data.trim() !== "", {
 		message: "Name is required.",
 	}),
-	code: z.string().refine((data) => data.trim() !== "", {
-		message: "Code is required.",
-	}),
 	category: z.string().refine((data) => data.trim() !== "", {
 		message: "Category is required.",
 	}),
@@ -46,7 +43,6 @@ export default function DelayReasonForm({ setIsOpen, updateData = {}, setUpdateD
 		resolver: zodResolver(formSchema),
 		defaultValues: {
 			name: "",
-			code: "",
 			category: "scope",
 			impact_level: "negative",
 			severity: 3,
@@ -61,7 +57,6 @@ export default function DelayReasonForm({ setIsOpen, updateData = {}, setUpdateD
 			const { name, code, category, impact_level, severity, is_valid, description, is_active } = updateData;
 			form.reset({
 				name: name ?? "",
-				code: code ?? "",
 				category: category ?? "scope",
 				impact_level: impact_level ?? "negative",
 				severity: severity ?? 3,
@@ -107,21 +102,6 @@ export default function DelayReasonForm({ setIsOpen, updateData = {}, setUpdateD
 								<FormLabel>Name</FormLabel>
 								<FormControl>
 									<Input placeholder="Delay reason name" {...field} />
-								</FormControl>
-								<FormMessage />
-							</FormItem>
-						);
-					}}
-				/>
-				<FormField
-					control={form.control}
-					name="code"
-					render={({ field }) => {
-						return (
-							<FormItem>
-								<FormLabel>Code</FormLabel>
-								<FormControl>
-									<Input placeholder="Delay reason code" {...field} />
 								</FormControl>
 								<FormMessage />
 							</FormItem>

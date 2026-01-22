@@ -71,17 +71,6 @@ export const columnsDelayReason = ({ setIsOpen, setUpdateData, dialogOpen, setDi
 				},
 			},
 			{
-				id: "code",
-				accessorKey: "code",
-				header: ({ column }) => {
-					return (
-						<button className="flex" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
-							Code <ArrowUpDown className="ml-2 h-4 w-4" />
-						</button>
-					);
-				},
-			},
-			{
 				id: "category",
 				accessorKey: "category",
 				header: ({ column }) => {
@@ -136,14 +125,14 @@ export const columnsDelayReason = ({ setIsOpen, setUpdateData, dialogOpen, setDi
 					return severity === 1
 						? "Trivial"
 						: severity === 2
-						? "Minor"
-						: severity === 3
-						? "Moderate"
-						: severity === 4
-						? "Major"
-						: severity === 5
-						? "Critical"
-						: "N/A";
+							? "Minor"
+							: severity === 3
+								? "Moderate"
+								: severity === 4
+									? "Major"
+									: severity === 5
+										? "Critical"
+										: "N/A";
 				},
 			},
 			{
@@ -202,7 +191,7 @@ export const columnsDelayReason = ({ setIsOpen, setUpdateData, dialogOpen, setDi
 				},
 			},
 		],
-		[delayReasons]
+		[delayReasons],
 	);
 	// Add actions column for Superadmin
 	if (user?.data?.role === "Superadmin" || user?.data?.role === "Admin" || user?.data?.role === "Manager") {
