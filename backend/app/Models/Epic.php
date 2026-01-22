@@ -67,7 +67,6 @@ class Epic extends Model
         if ($request->organization_id !== $userData->organization_id) {
             return "not found";
         }
-        // TODO: Epic columns
         return DB::transaction(function () use ($request, $userData) {
             // Create the new epic
             $epic = $this->create($request->validated());

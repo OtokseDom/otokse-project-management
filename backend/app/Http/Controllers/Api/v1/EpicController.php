@@ -30,7 +30,6 @@ class EpicController extends Controller
 
     public function store(StoreEpicRequest $request)
     {
-        // TODO: storeEpic model function
         $new = $this->epic->storeEpic($request, $this->userData);
         if ($new === "not found") {
             return apiResponse(null, 'Organization not found.', false, 404);
@@ -46,7 +45,6 @@ class EpicController extends Controller
 
     public function show(Epic $epic)
     {
-        // TODO: showEpic model function
         $details = $this->epic->showEpic($this->userData->organization_id, $epic->id);
         if (!$details) {
             return apiResponse(null, 'Epic not found', false, 404);
@@ -56,7 +54,6 @@ class EpicController extends Controller
 
     public function update(UpdateEpicRequest $request, Epic $epic)
     {
-        // TODO: updateEpic model function
         $updated = $this->epic->updateEpic($request, $epic, $this->userData);
         if ($updated === "not found") {
             return apiResponse(null, 'Epic not found.', false, 404);
@@ -70,7 +67,6 @@ class EpicController extends Controller
 
     public function destroy(Epic $epic)
     {
-        // TODO: deleteEpic model function
         $result = $this->epic->deleteEpic($epic, $this->userData);
         if ($result === "not found") {
             return apiResponse(null, 'Epic not found.', false, 404);

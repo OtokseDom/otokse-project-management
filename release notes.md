@@ -36,3 +36,8 @@
 # Release Version 2.1.3 (Jan 18, 2026):
 
 - Fix: task form clear select fields clearing other fields
+
+# Release Version 2.1.3 (Jan x, 2026):
+
+- Change: remove backdrop blur on dialog open
+- Fix: Project column action view tasks

@@ -8,9 +8,11 @@ import { statusColors, priorityColors } from "@/utils/taskHelpers";
 import { useProjectsStore } from "@/store/projects/projectsStore";
 import { Link } from "react-router-dom";
 import DeleteDialog from "./deleteDialog";
+import { useScrollStore } from "@/store/scroll/scrollStore";
 export const columnsProject = ({ setIsOpen, setUpdateData, dialogOpen, setDialogOpen, checkHasRelation, hasRelation, selectedProjectId }) => {
 	const { setSelectedProject, projects } = useProjectsStore();
 	const { user } = useAuthContext(); // Get authenticated user details
+	const { scrollToTarget } = useScrollStore();
 
 	const handleUpdateProject = (project) => {
 		setTimeout(() => {
@@ -18,7 +20,6 @@ export const columnsProject = ({ setIsOpen, setUpdateData, dialogOpen, setDialog
 			setUpdateData(project);
 		}, 100);
 	};
-	// TODO: view tasks button in actions column
 	const baseColumns = useMemo(
 		() => [
 			{
@@ -229,16 +230,17 @@ export const columnsProject = ({ setIsOpen, setUpdateData, dialogOpen, setDialog
 								>
 									<Edit size={16} />
 								</Button>
-								<Button variant="ghost" title="View tasks" className="h-8 w-8 p-0 cursor-pointer pointer-events-auto">
-									<Link
-										to="/tasks"
-										onClick={(e) => {
-											e.stopPropagation();
-											setSelectedProject(project);
-										}}
-									>
-										<ListTodo size={20} />
-									</Link>
+								<Button
+									variant="ghost"
+									title="View tasks"
+									onClick={(e) => {
+										e.stopPropagation();
+										setSelectedProject(project);
+										scrollToTarget();
+									}}
+									className="h-8 w-8 p-0 cursor-pointer pointer-events-auto"
+								>
+									<ListTodo size={20} />
 								</Button>
 								<Button
 									variant="ghost"
