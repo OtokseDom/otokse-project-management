@@ -41,3 +41,6 @@
 
 - Change: remove backdrop blur on dialog open
 - Fix: Project column action view tasks
+- Feat: Auto generate Epic slug on add
+- Refactor: Delay reasons remove code
+- Feat: Additional Delay metric report
