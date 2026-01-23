@@ -1824,137 +1824,136 @@ class ReportService
         return apiResponse($data, "Delay reasons impact analysis report fetched successfully");
     }
 
-    // TODO: Fix - ❗Urgent - delay reports
     // Delay reasons trending over time - Line chart
-    // public function delayReasonsTrend($id = null, $variant = "", $filter)
-    // {
-    //     $periodMeta = $this->buildPeriod($filter, 'months', 6);
-    //     $aggregation = $periodMeta['aggregation'] ?? 'month';
+    public function delayReasonsTrend($id = null, $variant = "", $filter)
+    {
+        $periodMeta = $this->buildPeriod($filter, 'months', 6);
+        $aggregation = $periodMeta['aggregation'] ?? 'month';
 
-    //     $query = $this->task
-    //         ->select(
-    //             DB::raw('DATE_TRUNC(\'month\', tasks.updated_at) as period'),
-    //             'delay_reasons.id as reason_id',
-    //             'delay_reasons.name as reason_name',
-    //             'delay_reasons.category as reason_category',
-    //             DB::raw('COUNT(tasks.id) as task_count'),
-    //             DB::raw('SUM(tasks.delay_days) as total_delay_days')
-    //         )
-    //         ->leftJoin('delay_reasons', 'tasks.delay_reason_id', '=', 'delay_reasons.id')
-    //         ->where('tasks.organization_id', $this->organization_id)
-    //         ->where('tasks.delay', '=', 1)
-    //         ->whereNotNull('tasks.delay_reason_id');
+        $query = $this->task
+            ->select(
+                DB::raw('DATE_FORMAT(tasks.updated_at, \'%Y-%m\') as period'),
+                'delay_reasons.id as reason_id',
+                'delay_reasons.name as reason_name',
+                'delay_reasons.category as reason_category',
+                DB::raw('COUNT(tasks.id) as task_count'),
+                DB::raw('SUM(tasks.delay_days) as total_delay_days')
+            )
+            ->leftJoin('delay_reasons', 'tasks.delay_reason_id', '=', 'delay_reasons.id')
+            ->where('tasks.organization_id', $this->organization_id)
+            ->where('tasks.delay', '=', 1)
+            ->whereNotNull('tasks.delay_reason_id');
 
-    //     $query = $this->applyFilters($query, ($variant !== 'dashboard' ? $id : null), ($variant === 'dashboard' ? $filter : null));
+        $query = $this->applyFilters($query, ($variant !== 'dashboard' ? $id : null), ($variant === 'dashboard' ? $filter : null));
 
-    //     if (isset($periodMeta['period']['from']) && isset($periodMeta['period']['to'])) {
-    //         $query->whereBetween('tasks.updated_at', [$periodMeta['period']['from'], $periodMeta['period']['to']]);
-    //     }
+        if (isset($periodMeta['period']['from']) && isset($periodMeta['period']['to'])) {
+            $query->whereBetween('tasks.updated_at', [$periodMeta['period']['from'], $periodMeta['period']['to']]);
+        }
 
-    //     $chart_data = $query->groupBy('period', 'delay_reasons.id', 'delay_reasons.name', 'delay_reasons.category')
-    //         ->orderBy('period', 'ASC')
-    //         ->get();
+        $chart_data = $query->groupBy('period', 'delay_reasons.id', 'delay_reasons.name', 'delay_reasons.category')
+            ->orderBy('period', 'ASC')
+            ->get();
 
-    //     // Pivot data for line chart (by reason over time)
-    //     $trendByReason = [];
-    //     $topReasons = $chart_data->pluck('reason_name')->unique()->take(10);
+        // Pivot data for line chart (by reason over time)
+        $trendByReason = [];
+        $topReasons = $chart_data->pluck('reason_name')->unique()->take(10);
 
-    //     foreach ($topReasons as $reason) {
-    //         $reasonData = $chart_data->where('reason_name', $reason)->sortBy('period');
-    //         $trendByReason[] = [
-    //             'name' => $reason,
-    //             'data' => $reasonData->map(fn($d) => [
-    //                 'period' => $d->period,
-    //                 'count' => $d->task_count,
-    //                 'delay_days' => $d->total_delay_days
-    //             ])->toArray()
-    //         ];
-    //     }
+        foreach ($topReasons as $reason) {
+            $reasonData = $chart_data->where('reason_name', $reason)->sortBy('period');
+            $trendByReason[] = [
+                'name' => $reason,
+                'data' => $reasonData->map(fn($d) => [
+                    'period' => $d->period,
+                    'count' => $d->task_count,
+                    'delay_days' => $d->total_delay_days
+                ])->toArray()
+            ];
+        }
 
-    //     $totalTasks = $chart_data->sum('task_count');
-    //     $totalDelayDays = $chart_data->sum('total_delay_days');
+        $totalTasks = $chart_data->sum('task_count');
+        $totalDelayDays = $chart_data->sum('total_delay_days');
 
-    //     $data = [
-    //         'chart_data' => $trendByReason,
-    //         'summary_stats' => [
-    //             'period_total_tasks' => $totalTasks,
-    //             'period_total_delay_days' => round($totalDelayDays, 2),
-    //             'tracked_reasons' => count($trendByReason),
-    //         ],
-    //         'data_count' => count($trendByReason),
-    //     ];
+        $data = [
+            'chart_data' => $trendByReason,
+            'summary_stats' => [
+                'period_total_tasks' => $totalTasks,
+                'period_total_delay_days' => round($totalDelayDays, 2),
+                'tracked_reasons' => count($trendByReason),
+            ],
+            'data_count' => count($trendByReason),
+        ];
 
-    //     $data['__report_key'] = 'delay_reasons_trend';
-    //     $data = $this->attachMetadata($data, $filter, $periodMeta, $totalTasks, null);
+        $data['__report_key'] = 'delay_reasons_trend';
+        $data = $this->attachMetadata($data, $filter, $periodMeta, $totalTasks, null);
 
-    //     if (empty($chart_data)) {
-    //         return apiResponse($data, "No trending data available for selected period");
-    //     }
+        if (empty($chart_data)) {
+            return apiResponse($data, "No trending data available for selected period");
+        }
 
-    //     return apiResponse($data, "Delay reasons trending report fetched successfully");
-    // }
+        return apiResponse($data, "Delay reasons trending report fetched successfully");
+    }
 
     // Delay reasons category distribution - Pie/Donut chart
-    // public function delayReasonsDistribution($id = null, $filter)
-    // {
-    //     $query = $this->task
-    //         ->select(
-    //             'delay_reasons.category',
-    //             DB::raw('COUNT(tasks.id) as task_count'),
-    //             DB::raw('SUM(tasks.delay_days) as total_delay_days'),
-    //             DB::raw('AVG(tasks.delay_days) as avg_delay_days')
-    //         )
-    //         ->leftJoin('delay_reasons', 'tasks.delay_reason_id', '=', 'delay_reasons.id')
-    //         ->where('tasks.organization_id', $this->organization_id)
-    //         ->where('tasks.delay', '=', 1)
-    //         ->whereNotNull('tasks.delay_reason_id')
-    //         ->whereNotNull('delay_reasons.category');
+    public function delayReasonsDistribution($id = null, $filter)
+    {
+        $query = $this->task
+            ->select(
+                'delay_reasons.category',
+                DB::raw('COUNT(tasks.id) as task_count'),
+                DB::raw('SUM(tasks.delay_days) as total_delay_days'),
+                DB::raw('AVG(tasks.delay_days) as avg_delay_days')
+            )
+            ->leftJoin('delay_reasons', 'tasks.delay_reason_id', '=', 'delay_reasons.id')
+            ->where('tasks.organization_id', $this->organization_id)
+            ->where('tasks.delay', '=', 1)
+            ->whereNotNull('tasks.delay_reason_id')
+            ->whereNotNull('delay_reasons.category');
 
-    //     $query = $this->applyFilters($query, $id, $filter);
+        $query = $this->applyFilters($query, $id, $filter);
 
-    //     $periodMeta = $this->buildPeriod($filter, null, null);
-    //     if (isset($periodMeta['period']['from']) && isset($periodMeta['period']['to'])) {
-    //         $query->whereBetween('tasks.updated_at', [$periodMeta['period']['from'], $periodMeta['period']['to']]);
-    //     }
+        $periodMeta = $this->buildPeriod($filter, null, null);
+        if (isset($periodMeta['period']['from']) && isset($periodMeta['period']['to'])) {
+            $query->whereBetween('tasks.updated_at', [$periodMeta['period']['from'], $periodMeta['period']['to']]);
+        }
 
-    //     $chart_data = $query->groupBy('delay_reasons.category')
-    //         ->orderBy('task_count', 'DESC')
-    //         ->get();
+        $chart_data = $query->groupBy('delay_reasons.category')
+            ->orderBy('task_count', 'DESC')
+            ->get();
 
-    //     $totalTasks = $chart_data->sum('task_count');
-    //     $totalDelayDays = $chart_data->sum('total_delay_days');
+        $totalTasks = $chart_data->sum('task_count');
+        $totalDelayDays = $chart_data->sum('total_delay_days');
 
-    //     // Enhance with percentages
-    //     $chart_data = $chart_data->map(function ($item) use ($totalTasks) {
-    //         return (object)[
-    //             'category' => $item->category ?? 'Uncategorized',
-    //             'task_count' => $item->task_count,
-    //             'total_delay_days' => round($item->total_delay_days, 2),
-    //             'avg_delay_days' => round($item->avg_delay_days, 2),
-    //             'percentage' => $totalTasks > 0 ? round(($item->task_count / $totalTasks) * 100, 2) : 0
-    //         ];
-    //     });
+        // Enhance with percentages
+        $chart_data = $chart_data->map(function ($item) use ($totalTasks) {
+            return (object)[
+                'category' => $item->category ?? 'Uncategorized',
+                'task_count' => $item->task_count,
+                'total_delay_days' => round($item->total_delay_days, 2),
+                'avg_delay_days' => round($item->avg_delay_days, 2),
+                'percentage' => $totalTasks > 0 ? round(($item->task_count / $totalTasks) * 100, 2) : 0
+            ];
+        });
 
-    //     $data = [
-    //         'chart_data' => $chart_data,
-    //         'summary_stats' => [
-    //             'total_delayed_tasks' => $totalTasks,
-    //             'total_delay_days' => round($totalDelayDays, 2),
-    //             'categories_count' => $chart_data->count(),
-    //             'average_delay_days' => $totalTasks > 0 ? round($totalDelayDays / $totalTasks, 2) : 0,
-    //         ],
-    //         'data_count' => $chart_data->count(),
-    //     ];
+        $data = [
+            'chart_data' => $chart_data,
+            'summary_stats' => [
+                'total_delayed_tasks' => $totalTasks,
+                'total_delay_days' => round($totalDelayDays, 2),
+                'categories_count' => $chart_data->count(),
+                'average_delay_days' => $totalTasks > 0 ? round($totalDelayDays / $totalTasks, 2) : 0,
+            ],
+            'data_count' => $chart_data->count(),
+        ];
 
-    //     $data['__report_key'] = 'delay_reasons_distribution';
-    //     $data = $this->attachMetadata($data, $filter, $periodMeta, $totalTasks, null);
+        $data['__report_key'] = 'delay_reasons_distribution';
+        $data = $this->attachMetadata($data, $filter, $periodMeta, $totalTasks, null);
 
-    //     if (empty($chart_data)) {
-    //         return apiResponse($data, "No delay reason categories found");
-    //     }
+        if (empty($chart_data)) {
+            return apiResponse($data, "No delay reason categories found");
+        }
 
-    //     return apiResponse($data, "Delay reasons distribution report fetched successfully");
-    // }
+        return apiResponse($data, "Delay reasons distribution report fetched successfully");
+    }
 
     // Top delay reasons comparison - detailed breakdown
     public function topDelayReasonsComparison($id = null, $limit = 10, $filter)

@@ -37,7 +37,10 @@
 
 - Fix: task form clear select fields clearing other fields
 
-# Release Version 2.1.3 (Jan x, 2026):
+# Release Version 2.1.4 (Jan 23, 2026):
 
 - Change: remove backdrop blur on dialog open
 - Fix: Project column action view tasks
+- Feat: Auto generate Epic slug on add
+- Refactor: Delay reasons remove code
+- Feat: Additional Delay metric report
