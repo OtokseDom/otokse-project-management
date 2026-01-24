@@ -80,6 +80,10 @@ export const columnsDelayReason = ({ setIsOpen, setUpdateData, dialogOpen, setDi
 						</button>
 					);
 				},
+				cell: ({ row }) => {
+					const category = row.original.category;
+					return <span className="capitalize">{category}</span>;
+				},
 			},
 			{
 				id: "impact_level",
