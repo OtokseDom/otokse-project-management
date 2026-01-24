@@ -31,7 +31,6 @@ import { useEpicStore } from "@/store/epic/epicStore";
 const formSchema = z.object({
 	parent_id: z.number().optional(),
 	status_id: z.number().optional(),
-	// assignee_id: z.number().optional(),
 	project_id: z.number().optional(),
 	category_id: z.number().optional(),
 	delay_reason_id: z.number().optional(),
@@ -154,7 +153,7 @@ export default function TaskForm({ parentId, isOpen, setIsOpen, updateData, setU
 
 	// Populate task form on load
 	useEffect(() => {
-		if (updateData && projects && users && categories) {
+		if (updateData && projects && users && categories && delayReasons) {
 			const {
 				calendar_add,
 				kanban_add,
@@ -249,7 +248,7 @@ export default function TaskForm({ parentId, isOpen, setIsOpen, updateData, setU
 				setExistingAttachments([]); // Reset for new tasks
 			}
 		}
-	}, [updateData, form, projects, users, categories]);
+	}, [updateData, form, projects, users, categories, delayReasons]);
 
 	// Filter project and task options to relevent ones
 	useEffect(() => {
@@ -309,7 +308,7 @@ export default function TaskForm({ parentId, isOpen, setIsOpen, updateData, setU
 				});
 			}
 
-			// ✅ Append attachment files
+			// Append attachment files
 			if (attachments.length > 0) {
 				attachments.forEach((file) => {
 					formDataToSend.append("attachments[]", file);
@@ -526,7 +525,7 @@ export default function TaskForm({ parentId, isOpen, setIsOpen, updateData, setU
 	};
 
 	// Clear select input
-	const clearSelection = (fieldName, value = "") => {
+	const clearSelection = (fieldName, value = undefined) => {
 		return (
 			<div
 				className="flex items-center w-full bg-muted/50 hover:bg-muted hover:cursor-pointer py-2 px-8 text-start text-sm text-destructive rounded"
@@ -695,7 +694,7 @@ export default function TaskForm({ parentId, isOpen, setIsOpen, updateData, setU
 											</SelectTrigger>
 										</FormControl>
 										<SelectContent>
-											{clearSelection("priority", undefined)}
+											{clearSelection("priority")}
 											{Array.isArray(priorities) && priorities.length > 0 ? (
 												priorities?.map((priority) => (
 													<SelectItem key={priority?.id} value={priority?.name}>
