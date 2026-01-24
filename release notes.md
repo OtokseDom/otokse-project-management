@@ -44,3 +44,8 @@
 - Feat: Auto generate Epic slug on add
 - Refactor: Delay reasons remove code
 - Feat: Additional Delay metric report
+
+# Release Version 2.1.5 (Jan x, 2026):
+
+- Fix: Task form delay reason validation on clear selection
+- Change: Delay reason form severity selection input
