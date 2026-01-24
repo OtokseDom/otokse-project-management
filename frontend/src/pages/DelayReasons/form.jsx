@@ -187,17 +187,34 @@ export default function DelayReasonForm({ setIsOpen, updateData = {}, setUpdateD
 					control={form.control}
 					name="severity"
 					render={({ field }) => {
+						const levels = [
+							{ id: "1", name: "Trivial" },
+							{ id: "2", name: "Minor" },
+							{ id: "3", name: "Moderate" },
+							{ id: "4", name: "Major" },
+							{ id: "5", name: "Critical" },
+						];
 						return (
-							<FormItem>
-								<FormLabel className="flex flex-row items-start gap-2">
-									Severity &#40;1-5&#41;
-									<span title="1 minor, 5 critical">
-										<Info size={16} className="text-muted-foreground" />
-									</span>
-								</FormLabel>
-								<FormControl>
-									<Input type="number" min={1} max={5} step={1} placeholder="Delay reason severity" {...field} />
-								</FormControl>
+							<FormItem className="w-full">
+								<FormLabel>Severity</FormLabel>
+								<Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
+									<FormControl>
+										<SelectTrigger>
+											<SelectValue placeholder="Select severity"></SelectValue>
+										</SelectTrigger>
+									</FormControl>
+									<SelectContent>
+										{Array.isArray(levels) && levels.length > 0 ? (
+											levels.map((level) => (
+												<SelectItem key={level.id} value={level.id}>
+													{level.name}
+												</SelectItem>
+											))
+										) : (
+											<SelectItem disabled>No seveirity available</SelectItem>
+										)}
+									</SelectContent>
+								</Select>
 								<FormMessage />
 							</FormItem>
 						);
