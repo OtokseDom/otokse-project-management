@@ -49,3 +49,7 @@
 
 - Fix: Task form delay reason validation on clear selection
 - Change: Delay reason form severity selection input
+
+# Release Version 2.2.0.0 (Jan x, 2026):
+
+- Feat: Insight evaluator for AI
