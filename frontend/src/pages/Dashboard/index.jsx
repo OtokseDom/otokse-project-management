@@ -192,53 +192,9 @@ export default function UserProfile() {
 				/>
 			</div>
 
-			{/* ========================================== */}
-			{/* 3️⃣ TIMELINESS & DELAY METRICS */}
-			{/* ========================================== */}
-			<SectionTitle icon="⌛">Timeliness & Delay Metrics</SectionTitle>
-
-			<div className="flex flex-col md:flex-row gap-4 md:col-span-12">
-				<SectionCard
-					description="Avg Completion Rate"
-					showBadge={false}
-					tooltip={`% of tasks with status = "Completed"`}
-					value={`${reports?.section_cards?.completion_rate}%`}
-					variant="dashboard"
-				/>
-				<SectionCard
-					description="Avg Delayed Days"
-					showBadge={false}
-					tooltip={`Avg number of "Days Delayed" for tasks with status != "Cancelled"`}
-					value={`${reports?.section_cards?.average_delay_days} days`}
-					variant="dashboard"
-				/>
-				<SectionCard
-					description="Total Delayed Days"
-					showBadge={false}
-					tooltip={`Total number of "Days Delayed" for tasks with status != "Cancelled"`}
-					value={`${reports?.section_cards?.total_delay_days} days`}
-					variant="dashboard"
-				/>
-				<SectionCard
-					description="Delay Frequency %"
-					showBadge={false}
-					tooltip={`Percentage of tasks with "Days Delayed" > 0 and with status != "Cancelled"`}
-					value={`${reports?.section_cards?.delay_frequency_percentage}%`}
-					variant="dashboard"
-				/>
-			</div>
-
-			<div className="md:col-span-4">
-				<PieChartDonut report={reports?.tasks_by_status} variant="dashboard" />
-			</div>
-
-			<div className="md:col-span-4">
-				<ChartBarLabel report={reports?.delay_per_user} variant="delay" />
-			</div>
-
-			<div className="md:col-span-4">
+			{/* <div className="md:col-span-4">
 				<PlaceholderChart title="Projected Delay for Ongoing Tasks" />
-			</div>
+			</div> */}
 
 			{/* ========================================== */}
 			{/* 1️⃣ WORK OUTPUT & VOLUME */}
@@ -307,7 +263,55 @@ export default function UserProfile() {
 			</div>
 
 			<div className="md:col-span-6">
+				<ChartBarHorizontal report={reports?.users_task_load} variant="dashboard" title="User Task Load" />
+			</div>
+
+			{/* <div className="md:col-span-6">
 				<PlaceholderChart title="Completion Velocity Trend" />
+			</div> */}
+
+			{/* ========================================== */}
+			{/* 3️⃣ TIMELINESS & DELAY METRICS */}
+			{/* ========================================== */}
+			<SectionTitle icon="⌛">Timeliness & Delay Metrics</SectionTitle>
+
+			<div className="flex flex-col md:flex-row gap-4 md:col-span-12">
+				<SectionCard
+					description="Avg Completion Rate"
+					showBadge={false}
+					tooltip={`% of tasks with status = "Completed"`}
+					value={`${reports?.section_cards?.completion_rate}%`}
+					variant="dashboard"
+				/>
+				<SectionCard
+					description="Avg Delayed Days"
+					showBadge={false}
+					tooltip={`Avg number of "Days Delayed" for tasks with status != "Cancelled"`}
+					value={`${reports?.section_cards?.average_delay_days} days`}
+					variant="dashboard"
+				/>
+				<SectionCard
+					description="Total Delayed Days"
+					showBadge={false}
+					tooltip={`Total number of "Days Delayed" for tasks with status != "Cancelled"`}
+					value={`${reports?.section_cards?.total_delay_days} days`}
+					variant="dashboard"
+				/>
+				<SectionCard
+					description="Delay Frequency %"
+					showBadge={false}
+					tooltip={`Percentage of tasks with "Days Delayed" > 0 and with status != "Cancelled"`}
+					value={`${reports?.section_cards?.delay_frequency_percentage}%`}
+					variant="dashboard"
+				/>
+			</div>
+
+			<div className="md:col-span-4">
+				<PieChartDonut report={reports?.tasks_by_status} variant="dashboard" />
+			</div>
+
+			<div className="md:col-span-4">
+				<ChartBarLabel report={reports?.delay_per_user} variant="delay" />
 			</div>
 
 			{/* ========================================== */}
@@ -347,14 +351,14 @@ export default function UserProfile() {
 				<ChartPieLabel report={reports?.overrun_underrun_ratio} title={"Overrun / Underrun Ratio"} />
 			</div>
 
-			<div className="md:col-span-6">
+			{/* <div className="md:col-span-6">
 				<PlaceholderChart title="Avg Time per Category/Project" />
-			</div>
+			</div> */}
 
 			{/* ========================================== */}
 			{/* 4️⃣ QUALITY & CONSISTENCY METRICS */}
 			{/* ========================================== */}
-			<SectionTitle icon="💯">Quality & Consistency Metrics</SectionTitle>
+			{/* <SectionTitle icon="💯">Quality & Consistency Metrics</SectionTitle>
 
 			<div className="flex flex-col md:flex-row gap-4 md:col-span-12">
 				<SectionCard
@@ -373,12 +377,12 @@ export default function UserProfile() {
 
 			<div className="md:col-span-6">
 				<ChartLineLabel report={reports?.completion_velocity} variant="dashboard" title="Completion Velocity" metricLabel="Completion Rate (%)" />
-			</div>
+			</div> */}
 
 			{/* ========================================== */}
 			{/* 5️⃣ WORKLOAD & BALANCE METRICS */}
 			{/* ========================================== */}
-			<SectionTitle icon="💪">Workload & Balance Metrics</SectionTitle>
+			{/* <SectionTitle icon="💪">Workload & Balance Metrics</SectionTitle>
 
 			<div className="flex flex-col md:flex-row gap-4 md:col-span-12">
 				<SectionCard description="📊 Avg Estimated Days per User" showBadge={false} value="Coming Soon" variant="dashboard" />
@@ -393,12 +397,12 @@ export default function UserProfile() {
 
 			<div className="md:col-span-6">
 				<PlaceholderChart title="Active Tasks per User" />
-			</div>
+			</div> */}
 
 			{/* ========================================== */}
 			{/* 6️⃣ TREND & PROGRESS METRICS */}
 			{/* ========================================== */}
-			<SectionTitle icon="📈">Trend & Progress Metrics</SectionTitle>
+			{/* <SectionTitle icon="📈">Trend & Progress Metrics</SectionTitle>
 
 			<div className="flex flex-col md:flex-row gap-4 md:col-span-12">
 				<SectionCard description="📊 Productivity Trend (WoW)" showBadge={false} value="Coming Soon" variant="dashboard" />
@@ -411,12 +415,12 @@ export default function UserProfile() {
 
 			<div className="md:col-span-6">
 				<PlaceholderChart title="Velocity Trend per Project/Team" />
-			</div>
+			</div> */}
 
 			{/* ========================================== */}
 			{/* 7️⃣ COMPARATIVE METRICS */}
 			{/* ========================================== */}
-			<SectionTitle icon="📊">Comparative Metrics</SectionTitle>
+			{/* <SectionTitle icon="📊">Comparative Metrics</SectionTitle>
 
 			<div className="flex flex-col md:flex-row gap-4 md:col-span-12">
 				<SectionCard description="📊 Most Improved Users" showBadge={false} value="Coming Soon" variant="dashboard" />
@@ -460,7 +464,7 @@ export default function UserProfile() {
 				) : (
 					<div className="flex items-center justify-center fw-full h-full max-h-44 text-lg text-gray-500">No Tasks Yet</div>
 				)}
-			</div>
+			</div> */}
 		</div>
 	);
 }
