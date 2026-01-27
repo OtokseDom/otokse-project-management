@@ -27,6 +27,7 @@ import { Filter } from "lucide-react";
 
 // TODO: Feat - Low - Export report with filter
 // TODO: Feat - Low - Notification
+// TODO: Urgent - Refactor components to reduce repetition
 export default function UserProfile() {
 	const { users } = useUsersStore();
 	const { projects, projectsLoaded } = useProjectsStore();
