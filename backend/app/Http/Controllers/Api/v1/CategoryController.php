@@ -7,60 +7,73 @@ use App\Models\Category;
 use App\Http\Requests\StoreCategoryRequest;
 use App\Http\Requests\UpdateCategoryRequest;
 use App\Http\Resources\CategoryResource;
+use App\Actions\Categories\GetCategories;
+use App\Actions\Categories\StoreCategory;
+use App\Actions\Categories\ShowCategory;
+use App\Actions\Categories\UpdateCategory;
+use App\Actions\Categories\DeleteCategory;
 use Illuminate\Support\Facades\Auth;
 
 class CategoryController extends Controller
 {
-    protected Category $category;
     protected $userData;
-    public function __construct(Category $category)
+
+    public function __construct()
     {
-        $this->category = $category;
         $this->userData = Auth::user();
     }
 
-    public function index()
+    public function index(GetCategories $getCategories)
     {
-        $categories = $this->category->getCategories($this->userData->organization_id);
+        $categories = $getCategories->execute($this->userData->organization_id);
         return apiResponse($categories, 'Categories fetched successfully');
     }
 
-    public function store(StoreCategoryRequest $request)
+    public function store(StoreCategoryRequest $request, StoreCategory $storeCategory)
     {
-        $category = $this->category->storeCategory($request, $this->userData);
+        $category = $storeCategory->execute($request->validated(), $this->userData->organization_id);
+
         if ($category === "not found") {
             return apiResponse(null, 'Organization not found.', false, 404);
         }
         if (!$category) {
             return apiResponse(null, 'Category creation failed', false, 404);
         }
+
         return apiResponse(new CategoryResource($category), 'Category created successfully', true, 201);
     }
 
-    public function show(Category $category)
+    public function show(Category $category, ShowCategory $showCategory)
     {
-        $details = $this->category->showCategory($this->userData->organization_id, $category->id);
+        $details = $showCategory->execute($category->id, $this->userData->organization_id);
+
         if (!$details) {
             return apiResponse(null, 'Category not found', false, 404);
         }
+
         return apiResponse(new CategoryResource($details), 'Category details fetched successfully');
     }
 
-    public function update(UpdateCategoryRequest $request, Category $category)
+    public function update(UpdateCategoryRequest $request, Category $category, UpdateCategory $updateCategory)
     {
-        $updated = $this->category->updateCategory($request, $category, $this->userData);
+        $updated = $updateCategory->execute($category, $request->validated(), $this->userData->organization_id);
+
         if ($updated === "not found") {
             return apiResponse(null, 'Category not found.', false, 404);
         }
         if (!$updated) {
             return apiResponse(null, 'Failed to update category.', false, 500);
         }
+
+        // Refresh category to get updated data
+        $category->refresh();
         return apiResponse(new CategoryResource($category), 'Category updated successfully');
     }
 
-    public function destroy(Category $category)
+    public function destroy(Category $category, DeleteCategory $deleteCategory)
     {
-        $result = $this->category->deleteCategory($category, $this->userData);
+        $result = $deleteCategory->execute($category, $this->userData->organization_id);
+
         if ($result === "not found") {
             return apiResponse(null, 'Category not found.', false, 404);
         }
@@ -70,6 +83,7 @@ class CategoryController extends Controller
         if ($result === null) {
             return apiResponse(null, 'Failed to delete category.', false, 500);
         }
+
         return apiResponse('', 'Category deleted successfully');
     }
 }
