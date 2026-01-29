@@ -65,8 +65,6 @@ class CategoryController extends Controller
             return apiResponse(null, 'Failed to update category.', false, 500);
         }
 
-        // Refresh category to get updated data
-        $category->refresh();
         return apiResponse(new CategoryResource($category), 'Category updated successfully');
     }
 
