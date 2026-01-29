@@ -2,12 +2,16 @@
 
 namespace App\Http\Controllers\Api\v1;
 
+use App\Actions\Epics\DeleteEpic;
+use App\Actions\Epics\GetEpics;
+use App\Actions\Epics\ShowEpic;
+use App\Actions\Epics\StoreEpic;
+use App\Actions\Epics\UpdateEpic;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreEpicRequest;
 use App\Http\Requests\UpdateEpicRequest;
 use App\Http\Resources\EpicResource;
 use App\Models\Epic;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class EpicController extends Controller
@@ -19,55 +23,55 @@ class EpicController extends Controller
         $this->epic = $epic;
         $this->userData = Auth::user();
     }
-    public function index()
+    public function index(GetEpics $getEpics)
     {
-        $epics = $this->epic->getEpics($this->userData->organization_id);
+        $epics = $getEpics->execute($this->userData->organization_id);
         $data = [
             "epics" => $epics,
         ];
         return apiResponse($data, 'Epics fetched successfully');
     }
 
-    public function store(StoreEpicRequest $request)
+    public function store(StoreEpicRequest $request, StoreEpic $storeEpic)
     {
-        $new = $this->epic->storeEpic($request, $this->userData);
-        if ($new === "not found") {
+        $epic = $storeEpic->execute($request->validated(), $this->userData->organization_id);
+        if ($epic === "not found") {
             return apiResponse(null, 'Organization not found.', false, 404);
         }
-        if (!$new) {
+        if (!$epic) {
             return apiResponse(null, 'Epic creation failed', false, 404);
         }
         $data = [
-            "epic" => new EpicResource($new['epic']),
+            "epic" => new EpicResource($epic),
         ];
         return apiResponse($data, 'Epic created successfully', true, 201);
     }
 
-    public function show(Epic $epic)
+    public function show(Epic $epic, ShowEpic $showEpic)
     {
-        $details = $this->epic->showEpic($this->userData->organization_id, $epic->id);
+        $details = $showEpic->execute($epic->id, $this->userData->organization_id);
         if (!$details) {
             return apiResponse(null, 'Epic not found', false, 404);
         }
         return apiResponse(new EpicResource($details), 'Epic details fetched successfully');
     }
 
-    public function update(UpdateEpicRequest $request, Epic $epic)
+    public function update(UpdateEpicRequest $request, Epic $epic, UpdateEpic $updateEpic)
     {
-        $updated = $this->epic->updateEpic($request, $epic, $this->userData);
+        $updated = $updateEpic->execute($epic, $request->validated(), $this->userData->organization_id);
         if ($updated === "not found") {
             return apiResponse(null, 'Epic not found.', false, 404);
         }
         if (!$updated) {
             return apiResponse(null, 'Failed to update epic.', false, 500);
         }
-        $epic->load(['status:id,name,color']);
-        return apiResponse(new EpicResource($epic), 'Epic updated successfully');
+
+        return apiResponse(new EpicResource($updated), 'Epic updated successfully');
     }
 
-    public function destroy(Epic $epic)
+    public function destroy(Epic $epic, DeleteEpic $deleteEpic)
     {
-        $result = $this->epic->deleteEpic($epic, $this->userData);
+        $result = $deleteEpic->execute($epic, $this->userData->organization_id);
         if ($result === "not found") {
             return apiResponse(null, 'Epic not found.', false, 404);
         }
