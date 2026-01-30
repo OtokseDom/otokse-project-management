@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\v1;
 
+use App\Actions\Kanbans\GetKanbanColumns;
 use App\Actions\Projects\DeleteProject;
 use App\Actions\projects\GetProjects;
 use App\Actions\Projects\ShowProject;
@@ -23,10 +24,10 @@ class ProjectController extends Controller
         $this->project = $project;
         $this->userData = Auth::user();
     }
-    public function index(GetProjects $getProjects)
+    public function index(GetProjects $getProjects, GetKanbanColumns $getKanbanColumns)
     {
         $projects = $getProjects->execute($this->userData->organization_id);
-        $kanbanColumns = $this->project->getKanbanColumns($this->userData->organization_id);
+        $kanbanColumns = $getKanbanColumns->execute($this->userData->organization_id);
         $data = [
             "projects" => $projects,
             "kanbanColumns" => $kanbanColumns
