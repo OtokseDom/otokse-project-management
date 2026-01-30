@@ -2,13 +2,16 @@
 
 namespace App\Http\Controllers\Api\v1;
 
+use App\Actions\Projects\DeleteProject;
+use App\Actions\projects\GetProjects;
+use App\Actions\Projects\ShowProject;
+use App\Actions\Projects\StoreProject;
+use App\Actions\Projects\UpdateProject;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreProjectRequest;
 use App\Http\Requests\UpdateProjectRequest;
 use App\Http\Resources\ProjectResource;
-use App\Models\KanbanColumn;
 use App\Models\Project;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class ProjectController extends Controller
@@ -20,9 +23,9 @@ class ProjectController extends Controller
         $this->project = $project;
         $this->userData = Auth::user();
     }
-    public function index()
+    public function index(GetProjects $getProjects)
     {
-        $projects = $this->project->getProjects($this->userData->organization_id);
+        $projects = $getProjects->execute($this->userData->organization_id);
         $kanbanColumns = $this->project->getKanbanColumns($this->userData->organization_id);
         $data = [
             "projects" => $projects,
@@ -31,9 +34,9 @@ class ProjectController extends Controller
         return apiResponse($data, 'Projects and Kanban Columns fetched successfully');
     }
 
-    public function store(StoreProjectRequest $request)
+    public function store(StoreProjectRequest $request, StoreProject $storeProject)
     {
-        $new = $this->project->storeProject($request, $this->userData);
+        $new = $storeProject->execute($request->validated(), $this->userData->organization_id);
         if ($new === "not found") {
             return apiResponse(null, 'Organization not found.', false, 404);
         }
@@ -47,18 +50,18 @@ class ProjectController extends Controller
         return apiResponse($data, 'Project created successfully', true, 201);
     }
 
-    public function show(Project $project)
+    public function show(Project $project, ShowProject $showProject)
     {
-        $details = $this->project->showProject($this->userData->organization_id, $project->id);
+        $details = $showProject->execute($project->id, $this->userData->organization_id);
         if (!$details) {
             return apiResponse(null, 'Project not found', false, 404);
         }
         return apiResponse(new ProjectResource($details), 'Project details fetched successfully');
     }
 
-    public function update(UpdateProjectRequest $request, Project $project)
+    public function update(UpdateProjectRequest $request, Project $project, UpdateProject $updateProject)
     {
-        $updated = $this->project->updateProject($request, $project, $this->userData);
+        $updated = $updateProject->execute($project, $request->validated(), $this->userData->organization_id);
         if ($updated === "not found") {
             return apiResponse(null, 'Project not found.', false, 404);
         }
@@ -69,9 +72,9 @@ class ProjectController extends Controller
         return apiResponse(new ProjectResource($project), 'Project updated successfully');
     }
 
-    public function destroy(Project $project)
+    public function destroy(Project $project, DeleteProject $deleteProject)
     {
-        $result = $this->project->deleteProject($project, $this->userData);
+        $result = $deleteProject->execute($project, $this->userData->organization_id);
         if ($result === "not found") {
             return apiResponse(null, 'Project not found.', false, 404);
         }
