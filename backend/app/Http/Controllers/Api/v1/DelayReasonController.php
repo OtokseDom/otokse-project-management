@@ -2,6 +2,11 @@
 
 namespace App\Http\Controllers\Api\v1;
 
+use App\Actions\DelayReasons\DeleteDelayReason;
+use App\Actions\DelayReasons\GetDelayReasons;
+use App\Actions\DelayReasons\ShowDelayReason;
+use App\Actions\DelayReasons\StoreDelayReason;
+use App\Actions\DelayReasons\UpdateDelayReason;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreDelayReasonRequest;
 use App\Http\Requests\UpdateDelayReasonRequest;
@@ -19,15 +24,15 @@ class DelayReasonController extends Controller
         $this->userData = Auth::user();
     }
 
-    public function index()
+    public function index(GetDelayReasons $getDelayReasons)
     {
-        $delayReasons = $this->delayReason->getDelayReasons($this->userData->organization_id);
+        $delayReasons = $getDelayReasons->execute($this->userData->organization_id);
         return apiResponse($delayReasons, 'Delay reasons fetched successfully');
     }
 
-    public function store(StoreDelayReasonRequest $request)
+    public function store(StoreDelayReasonRequest $request, StoreDelayReason $storeDelayReason)
     {
-        $delayReason = $this->delayReason->storeDelayReason($request, $this->userData);
+        $delayReason = $storeDelayReason->execute($request->validated(), $this->userData->organization_id);
         if ($delayReason === "not found") {
             return apiResponse(null, 'Organization not found.', false, 404);
         }
@@ -37,18 +42,18 @@ class DelayReasonController extends Controller
         return apiResponse(new DelayReasonResource($delayReason), 'Delay reason created successfully', true, 201);
     }
 
-    public function show(DelayReason $delayReason)
+    public function show(DelayReason $delayReason, ShowDelayReason $showDelayReason)
     {
-        $details = $this->delayReason->showDelayReason($this->userData->organization_id, $delayReason->id);
+        $details = $showDelayReason->execute($delayReason->id, $this->userData->organization_id);
         if (!$details) {
             return apiResponse(null, 'DelayReason not found', false, 404);
         }
         return apiResponse(new DelayReasonResource($details), 'Delay reason details fetched successfully');
     }
 
-    public function update(UpdateDelayReasonRequest $request, DelayReason $delayReason)
+    public function update(UpdateDelayReasonRequest $request, DelayReason $delayReason, UpdateDelayReason $updateDelayReason)
     {
-        $updated = $this->delayReason->updateDelayReason($request, $delayReason, $this->userData);
+        $updated = $updateDelayReason->execute($delayReason, $request->validated(), $this->userData->organization_id);
         if ($updated === "not found") {
             return apiResponse(null, 'Delay reason not found.', false, 404);
         }
@@ -58,9 +63,9 @@ class DelayReasonController extends Controller
         return apiResponse(new DelayReasonResource($delayReason), 'Delay reason updated successfully');
     }
 
-    public function destroy(DelayReason $delayReason)
+    public function destroy(DelayReason $delayReason, DeleteDelayReason $deleteDelayReason)
     {
-        $result = $this->delayReason->deleteDelayReason($delayReason, $this->userData);
+        $result = $deleteDelayReason->execute($delayReason, $this->userData->organization_id);
         if ($result === "not found") {
             return apiResponse(null, 'Delay reason not found.', false, 404);
         }
