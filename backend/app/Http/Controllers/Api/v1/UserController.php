@@ -2,6 +2,11 @@
 
 namespace App\Http\Controllers\Api\v1;
 
+use App\Actions\Users\DeleteUser;
+use App\Actions\Users\GetUsers;
+use App\Actions\Users\ShowUser;
+use App\Actions\Users\StoreUser;
+use App\Actions\Users\UpdateUser;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
@@ -18,15 +23,15 @@ class UserController extends Controller
       $this->user = $user;
       $this->userData = Auth::user();
    }
-   public function index()
+   public function index(GetUsers $getUsers)
    {
-      $users = $this->user->getUsers($this->userData->organization_id);
+      $users = $getUsers->execute($this->userData->organization_id);
       return apiResponse($users, 'Users fetched successfully');
    }
 
-   public function store(StoreUserRequest $request)
+   public function store(StoreUserRequest $request, StoreUser $storeUser)
    {
-      $user = $this->user->storeUser($request, $this->userData);
+      $user = $storeUser->execute($request->validated(), $this->userData->organization_id);
       if ($user === "not found") {
          return apiResponse(null, 'Organization not found.', false, 404);
       }
@@ -36,17 +41,18 @@ class UserController extends Controller
       return apiResponse(new UserResource($user), 'User created successfully', true, 201);
    }
 
-   public function show($id) //changed User $user to $id to prevent laravel from throwing 404 when no user found instantly after the query
+   public function show($id, ShowUser $showUser) //changed User $user to $id to prevent laravel from throwing 404 when no user found instantly after the query
    {
-      $user = $this->user->showUser($id);
-      if (!$user || $user->organization_id !== $this->userData->organization_id)
+      $user = $showUser->execute($id, $this->userData->organization_id);
+      if (!$user) {
          return apiResponse(null, 'User not found within your organization', false, 404);
+      }
       return apiResponse($user, 'User details fetched successfully');
    }
 
-   public function update(UpdateUserRequest $request, User $user)
+   public function update(UpdateUserRequest $request, User $user, UpdateUser $updateUser)
    {
-      $updated = $this->user->updateUser($request, $user, $this->userData);
+      $updated = $updateUser->execute($user, $request->validated(), $this->userData->organization_id);
       if ($updated === "not found") {
          return apiResponse(null, 'User not found.', false, 404);
       }
@@ -56,9 +62,9 @@ class UserController extends Controller
       return apiResponse(new UserResource($user), 'User updated successfully');
    }
 
-   public function destroy(User $user)
+   public function destroy(User $user, DeleteUser $deleteUser)
    {
-      $result = $this->user->deleteUser($user, $this->userData);
+      $result = $deleteUser->execute($user, $this->userData->organization_id);
       if ($result === "not found") {
          return apiResponse(null, 'User not found.', false, 404);
       }
