@@ -1,56 +1,22 @@
 <?php
 
-namespace App\Models;
+namespace App\Actions\TaskPositions;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
+use App\Models\TaskPosition;
 use Illuminate\Support\Facades\DB;
 
-class TaskPosition extends Model
+class AddNewTaskToAllContexts
 {
-    use HasFactory;
-
-    protected $fillable = [
-        'task_id',
-        'context',
-        'context_id',
-        'position',
-        'organization_id',
-    ];
-
-    // Relationship with Task
-    public function task()
+    public function execute(int $taskId, int $organizationId, string|null $contexts = null): bool
     {
-        return $this->belongsTo(Task::class);
-    }
-
-    
-    /* -------------------------------------------------------------------------- */
-    /*                          Controller Logic Functions                         */
-    /* -------------------------------------------------------------------------- */
-
-    // TODO: When task refactor, replace this usage with TaskPosition action
-
-    // New: add a position entry for a newly created task across all contexts
-    /**
-     * Create position entries for a new task across all contexts (or for provided contexts).
-     *
-     * @param int $taskId
-     * @param int $organizationId
-     * @param array|null $contexts Optional array of ['context' => string, 'context_id' => mixed] pairs.
-     *                              If null, distinct contexts for the organization will be derived
-     *                              from existing TaskPosition rows.
-     * @return bool true on success (no-op if no contexts found)
-     */
-    public function addNewTaskToAllContexts($taskId, $organizationId, $contexts = null)
-    {
+        //  Create position entries for a new task across all contexts (or for provided contexts).
         return DB::transaction(function () use ($taskId, $organizationId, $contexts) {
             // If specific contexts provided, use them
             if (is_array($contexts) && count($contexts) > 0) {
                 $pairs = $contexts;
             } else {
                 // Derive distinct context / context_id pairs already present for this organization
-                $pairs = self::where('organization_id', $organizationId)
+                $pairs = TaskPosition::where('organization_id', $organizationId)
                     ->select('context', 'context_id')
                     ->distinct()
                     ->get()
@@ -67,7 +33,7 @@ class TaskPosition extends Model
 
             foreach ($pairs as $p) {
                 // If a position entry already exists for this task in this context, skip it.
-                $existing = self::where('task_id', $taskId)
+                $existing = TaskPosition::where('task_id', $taskId)
                     ->where('context', $p['context'])
                     ->where('context_id', $p['context_id'])
                     ->where('organization_id', $organizationId)
@@ -76,7 +42,7 @@ class TaskPosition extends Model
                 if ($existing) {
                     // Ensure position is set (if missing) — compute max and update if necessary
                     if (empty($existing->position)) {
-                        $maxPosition = self::where('context', $p['context'])
+                        $maxPosition = TaskPosition::where('context', $p['context'])
                             ->where('context_id', $p['context_id'])
                             ->where('organization_id', $organizationId)
                             ->lockForUpdate()
@@ -88,7 +54,7 @@ class TaskPosition extends Model
                 }
 
                 // Compute next position with a lock to avoid races
-                $maxPosition = self::where('context', $p['context'])
+                $maxPosition = TaskPosition::where('context', $p['context'])
                     ->where('context_id', $p['context_id'])
                     ->where('organization_id', $organizationId)
                     ->lockForUpdate()
@@ -98,7 +64,7 @@ class TaskPosition extends Model
 
                 try {
                     // Use updateOrCreate to be safe if another process created it between the check and insert
-                    self::updateOrCreate(
+                    TaskPosition::updateOrCreate(
                         [
                             'task_id' => $taskId,
                             'context' => $p['context'],

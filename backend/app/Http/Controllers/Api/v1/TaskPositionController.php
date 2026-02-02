@@ -2,30 +2,29 @@
 
 namespace App\Http\Controllers\Api\v1;
 
+use App\Actions\TaskPositions\GetContextPositions;
+use App\Actions\TaskPositions\GetContextTaskIds;
+use App\Actions\TaskPositions\UpdateTaskPosition;
 use App\Http\Controllers\Controller;
-use App\Models\TaskPosition;
-use App\Models\Task;
 use App\Http\Requests\UpdateTaskPositionRequest;
 use App\Http\Resources\TaskPositionResource;
 use Illuminate\Support\Facades\Auth;
 
 class TaskPositionController extends Controller
 {
-    protected TaskPosition $taskPosition;
     protected $userData;
 
-    public function __construct(TaskPosition $taskPosition)
+    public function __construct()
     {
-        $this->taskPosition = $taskPosition;
         $this->userData = Auth::user();
     }
 
     /**
      * Get positions for a specific context
      */
-    public function getPositions($context, $contextId = null)
+    public function getPositions(GetContextPositions $getContextPositions, $context, $contextId = null)
     {
-        $positions = $this->taskPosition->getContextPositions(
+        $positions = $getContextPositions->execute(
             $context,
             $contextId,
             $this->userData->organization_id
@@ -40,24 +39,24 @@ class TaskPositionController extends Controller
     /**
      * Update task position
      */
-    public function update(UpdateTaskPositionRequest $request)
+    public function update(GetContextTaskIds $getContextTaskIds, UpdateTaskPosition $updateTaskPosition, UpdateTaskPositionRequest $request)
     {
         $validated = $request->validated();
 
         // Get all task IDs for this context
-        $allTaskIds = $this->getContextTaskIds(
+        $allTaskIds = $getContextTaskIds->execute(
             $validated['context'],
             $validated['context_id'] ?? null,
             $this->userData->organization_id
         );
 
-        $result = $this->taskPosition->updateTaskPosition(
+        $result = $updateTaskPosition->execute(
             $validated['task_id'],
             $validated['context'],
             $validated['context_id'] ?? null,
             $validated['position'],
             $this->userData->organization_id,
-            $allTaskIds
+            $allTaskIds,
         );
 
         // Combine primary and affected tasks
@@ -67,20 +66,5 @@ class TaskPositionController extends Controller
             TaskPositionResource::collection($allUpdated),
             'Task position updated successfully.'
         );
-    }
-
-    /**
-     * Get all task IDs for a context (parent tasks only)
-     */
-    private function getContextTaskIds($context, $contextId, $organizationId)
-    {
-        $query = Task::where('organization_id', $organizationId)
-            ->whereNull('parent_id'); // Only parent tasks
-
-        if ($context === 'project' && $contextId) {
-            $query->where('project_id', $contextId);
-        }
-
-        return $query->orderBy('id', 'ASC')->pluck('id')->toArray();
     }
 }
