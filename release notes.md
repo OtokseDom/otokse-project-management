@@ -49,3 +49,8 @@
 
 - Fix: Task form delay reason validation on clear selection
 - Change: Delay reason form severity selection input
+
+# Release Version 2.1.4.2 (Feb 3, 2026)
+
+- Refactor: Backend separation of concerns
+- Optimize: Dashboard index
