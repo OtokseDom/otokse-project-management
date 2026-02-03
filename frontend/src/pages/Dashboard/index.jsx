@@ -1,14 +1,10 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import axiosClient from "@/axios.client";
 import { SectionCard } from "@/components/chart/section-card";
 import { PieChartDonut } from "@/components/chart/pie-chart-donut";
 import { ChartPieLabel } from "@/components/chart/pie-chart-label";
 import { ChartBarMultiple } from "@/components/chart/bar-chart-multiple";
 import { ChartBarHorizontal } from "@/components/chart/chart-bar-horizontal";
-import { DataTable } from "./data-table";
-import { columns } from "./columns";
-import { CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ChartLineLabel } from "@/components/chart/line-chart-label";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import FilterForm from "../../components/form/filter-form";
@@ -28,7 +24,33 @@ import { Filter } from "lucide-react";
 // TODO: Feat - Low - Export report with filter
 // TODO: Feat - Low - Notification
 // TODO: Urgent - Refactor components to reduce repetition
-export default function UserProfile() {
+const FILTER_KEYS = {
+	DATE_RANGE: "Date Range",
+	MEMBERS: "Members",
+	PROJECTS: "Projects",
+	EPICS: "Epics",
+};
+
+const buildDashboardParams = (filtersValues) => {
+	const dateRange = filtersValues?.[FILTER_KEYS.DATE_RANGE] ?? "";
+	const [from = "", to = ""] = dateRange ? dateRange.split(" to ") : [];
+
+	return {
+		from,
+		to,
+		members: filtersValues?.[FILTER_KEYS.MEMBERS] ?? "",
+		projects: filtersValues?.[FILTER_KEYS.PROJECTS] ?? "",
+		epics: filtersValues?.[FILTER_KEYS.EPICS] ?? "",
+	};
+};
+
+const SectionTitle = ({ children }) => (
+	<div className="md:col-span-12 mt-6 mb-2">
+		<h2 className="text-xl font-bold flex items-center gap-2 text-foreground border-b border-border pb-2">{children}</h2>
+	</div>
+);
+
+export default function Dashboard() {
 	const { users } = useUsersStore();
 	const { projects, projectsLoaded } = useProjectsStore();
 	const { epics, epicsLoaded } = useEpicsStore();
@@ -60,72 +82,58 @@ export default function UserProfile() {
 
 	useEffect(() => {
 		document.title = "Task Management";
+		// Initial load uses the store to avoid redundant API calls.
 		if (!reports || Object.keys(reports).length === 0) fetchReports();
 		if (!users || users.length === 0) fetchUsers();
 		if ((!projects || projects.length === 0) && !projectsLoaded) fetchProjects();
 		if ((!epics || epics.length === 0) && !epicsLoaded) fetchEpics();
-	}, []);
+	}, [epics, epicsLoaded, fetchEpics, fetchProjects, fetchReports, fetchUsers, projects, projectsLoaded, reports, users]);
 
-	const handleRemoveFilter = async (key) => {
-		// onRemove={(key) => {
-		// 	if (key === "Date Range") {
-		// 		setTaskDateRange(null, null);
-		// 	} else if (key === "Assignees") {
-		// 		setTaskSelectedUsers([]);
-		// 	}
-		// }}
-		// Deep copy filters to avoid mutating state directly
-		const updated = {
-			values: { ...filters.values },
-			display: { ...filters.display },
-		};
-		updated.values[key] = "";
-		updated.display[key] = "";
-		setFilters(updated);
-		setSelectedUsers([]);
-		setSelectedProjects([]);
-		setSelectedEpics([]);
-		// Fetch reports with updated filters
-		const from = updated.values["Date Range"] ? updated.values["Date Range"]?.split(" to ")[0] : "";
-		const to = updated.values["Date Range"] ? updated.values["Date Range"]?.split(" to ")[1] : "";
-		const epics = updated.values["Epics"] ?? "";
-		const projects = updated.values["Projects"] ?? "";
-		const members = updated.values["Members"] ?? "";
-		setDashboardReportsLoading(true);
-		try {
-			// Fetch all reports in one call
-			const reportsRes = await axiosClient.get(API().dashboard(from, to, members, projects, epics));
-			setReports(reportsRes.data.data);
-		} catch (e) {
-			if (e.message !== "Request aborted") console.error("Error fetching data:", e.message);
-		} finally {
-			setDashboardReportsLoading(false);
-		}
-	};
-
-	// Section Title Component
-	const SectionTitle = ({ children, icon }) => (
-		<div className="md:col-span-12 mt-6 mb-2">
-			<h2 className="text-xl font-bold flex items-center gap-2 text-foreground border-b border-border pb-2">
-				{icon && <span>{icon}</span>}
-				{children}
-			</h2>
-		</div>
+	const fetchDashboardReports = useCallback(
+		async (filtersValues) => {
+			const { from, to, members, projects, epics } = buildDashboardParams(filtersValues);
+			setDashboardReportsLoading(true);
+			try {
+				// Single backend request for all dashboard metrics.
+				const reportsRes = await axiosClient.get(API().dashboard(from, to, members, projects, epics));
+				setReports(reportsRes.data.data);
+			} catch (e) {
+				if (e.message !== "Request aborted") console.error("Error fetching data:", e.message);
+			} finally {
+				setDashboardReportsLoading(false);
+			}
+		},
+		[setDashboardReportsLoading, setReports]
 	);
 
-	// Placeholder Chart Component
-	const PlaceholderChart = ({ title }) => (
-		<div className="bg-background text-card-foreground border border-border rounded-2xl p-6 shadow-md flex items-center justify-center min-h-[300px]">
-			<div className="text-center">
-				<div className="text-4xl mb-2">📊</div>
-				<div className="text-lg font-semibold text-muted-foreground">{title}</div>
-				<div className="text-sm text-muted-foreground mt-1">Coming Soon</div>
-			</div>
-		</div>
+	const handleRemoveFilter = useCallback(
+		async (key) => {
+			// Deep copy filters to avoid mutating state directly.
+			const updated = {
+				values: { ...filters.values },
+				display: { ...filters.display },
+			};
+			updated.values[key] = "";
+			updated.display[key] = "";
+			setFilters(updated);
+
+			if (key === FILTER_KEYS.MEMBERS) setSelectedUsers([]);
+			if (key === FILTER_KEYS.PROJECTS) setSelectedProjects([]);
+			if (key === FILTER_KEYS.EPICS) setSelectedEpics([]);
+
+			await fetchDashboardReports(updated.values);
+		},
+		[fetchDashboardReports, filters.display, filters.values, setFilters, setSelectedEpics, setSelectedProjects, setSelectedUsers]
 	);
+
+	const overallProgressLabel = useMemo(() => {
+		const reportFilters = reports?.overall_progress?.filters;
+		const hasFilters = reportFilters && !Object.values(reportFilters).every((value) => value === null);
+		return hasFilters ? "Overall Progress (Filtered)" : "Overall Progress (All Time)";
+	}, [reports?.overall_progress?.filters]);
 
 	return (
-		<div className="w-screen md:w-fit container p-5 md:p-0 grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-4 auto-rows-auto ">
+		<div className="w-screen md:w-fit container p-5 md:p-0 grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-4 auto-rows-auto">
 			<div
 				className={`fixed inset-0 bg-black bg-opacity-60 z-40 transition-opacity duration-300 pointer-events-none ${
 					isOpen ? "opacity-100" : "opacity-0"
@@ -134,7 +142,7 @@ export default function UserProfile() {
 			/>
 			<div className="md:col-span-12">
 				<div className="flex flex-col md:flex-row justify-between gap-6 md:items-center">
-					<div className="">
+					<div>
 						<h1 className="font-extrabold text-3xl">Dashboard</h1>
 						<p>Your workspace at a glance</p>
 					</div>
@@ -181,16 +189,7 @@ export default function UserProfile() {
 
 			{/* Overall Progress */}
 			<div className="md:col-span-12 w-full">
-				<GalaxyProgressBar
-					progress={reports?.overall_progress?.progress}
-					label={
-						reports?.overall_progress?.filters && !Object.values(reports.overall_progress.filters).every((value) => value === null)
-							? "Overall Progress (Filtered)"
-							: "Overall Progress (All Time)"
-					}
-					variant="dashboard"
-					className="w-full"
-				/>
+				<GalaxyProgressBar progress={reports?.overall_progress?.progress} label={overallProgressLabel} variant="dashboard" className="w-full" />
 			</div>
 
 			{/* <div className="md:col-span-4">
@@ -198,9 +197,9 @@ export default function UserProfile() {
 			</div> */}
 
 			{/* ========================================== */}
-			{/* 1️⃣ WORK OUTPUT & VOLUME */}
+			{/* 1. WORK OUTPUT & VOLUME */}
 			{/* ========================================== */}
-			<SectionTitle icon="🫙">Work Output & Volume</SectionTitle>
+			<SectionTitle>Work Output & Volume</SectionTitle>
 
 			<div className="flex flex-col md:flex-row gap-4 md:col-span-12">
 				<SectionCard
@@ -213,7 +212,7 @@ export default function UserProfile() {
 				<SectionCard
 					description="Subtasks per Parent Task"
 					showBadge={false}
-					tooltip={`Subtasks/Partent tasks`}
+					tooltip={`Subtasks/Parent tasks`}
 					value={`${reports?.section_cards?.subtasks_per_parent_task} tasks`}
 					variant="dashboard"
 				/>
@@ -272,9 +271,9 @@ export default function UserProfile() {
 			</div> */}
 
 			{/* ========================================== */}
-			{/* 3️⃣ TIMELINESS & DELAY METRICS */}
+			{/* 3. TIMELINESS & DELAY METRICS */}
 			{/* ========================================== */}
-			<SectionTitle icon="⌛">Timeliness & Delay Metrics</SectionTitle>
+			<SectionTitle>Timeliness & Delay Metrics</SectionTitle>
 
 			<div className="flex flex-col md:flex-row gap-4 md:col-span-12">
 				<SectionCard
@@ -316,9 +315,9 @@ export default function UserProfile() {
 			</div>
 
 			{/* ========================================== */}
-			{/* 2️⃣ EFFICIENCY METRICS */}
+			{/* 2. EFFICIENCY METRICS */}
 			{/* ========================================== */}
-			<SectionTitle icon="🌟">Efficiency Metrics</SectionTitle>
+			<SectionTitle>Efficiency Metrics</SectionTitle>
 
 			<div className="flex flex-col md:flex-row gap-4 md:col-span-12">
 				<SectionCard
@@ -354,117 +353,6 @@ export default function UserProfile() {
 
 			{/* <div className="md:col-span-6">
 				<PlaceholderChart title="Avg Time per Category/Project" />
-			</div> */}
-
-			{/* ========================================== */}
-			{/* 4️⃣ QUALITY & CONSISTENCY METRICS */}
-			{/* ========================================== */}
-			{/* <SectionTitle icon="💯">Quality & Consistency Metrics</SectionTitle>
-
-			<div className="flex flex-col md:flex-row gap-4 md:col-span-12">
-				<SectionCard
-					description="Members Avg Performance (5)"
-					showBadge={false}
-					tooltip={`Avg "Performance Rating" of all tasks for all members`}
-					value={reports?.section_cards?.avg_performance}
-					variant="dashboard"
-				/>
-				<SectionCard description="📊 Performance Variance" showBadge={false} value="Coming Soon" variant="dashboard" />
-			</div>
-
-			<div className="md:col-span-6">
-				<ChartLineLabel report={reports?.performance_rating_trend} variant="dashboard" title="Performance Trends" metricLabel="Performance Rating" />
-			</div>
-
-			<div className="md:col-span-6">
-				<ChartLineLabel report={reports?.completion_velocity} variant="dashboard" title="Completion Velocity" metricLabel="Completion Rate (%)" />
-			</div> */}
-
-			{/* ========================================== */}
-			{/* 5️⃣ WORKLOAD & BALANCE METRICS */}
-			{/* ========================================== */}
-			{/* <SectionTitle icon="💪">Workload & Balance Metrics</SectionTitle>
-
-			<div className="flex flex-col md:flex-row gap-4 md:col-span-12">
-				<SectionCard description="📊 Avg Estimated Days per User" showBadge={false} value="Coming Soon" variant="dashboard" />
-				<SectionCard description="📊 Avg Actual Days per User" showBadge={false} value="Coming Soon" variant="dashboard" />
-				<SectionCard description="📊 Workload Balance Index" showBadge={false} value="Coming Soon" variant="dashboard" />
-				<SectionCard description="📊 Utilization Rate" showBadge={false} value="Coming Soon" variant="dashboard" />
-			</div>
-
-			<div className="md:col-span-6">
-				<ChartBarHorizontal report={reports?.users_task_load} variant="dashboard" title="User Task Load" />
-			</div>
-
-			<div className="md:col-span-6">
-				<PlaceholderChart title="Active Tasks per User" />
-			</div> */}
-
-			{/* ========================================== */}
-			{/* 6️⃣ TREND & PROGRESS METRICS */}
-			{/* ========================================== */}
-			{/* <SectionTitle icon="📈">Trend & Progress Metrics</SectionTitle>
-
-			<div className="flex flex-col md:flex-row gap-4 md:col-span-12">
-				<SectionCard description="📊 Productivity Trend (WoW)" showBadge={false} value="Coming Soon" variant="dashboard" />
-				<SectionCard description="📊 Delay Trend Status" showBadge={false} value="Coming Soon" variant="dashboard" />
-			</div>
-
-			<div className="md:col-span-6">
-				<PlaceholderChart title="Performance Trend by Month" />
-			</div>
-
-			<div className="md:col-span-6">
-				<PlaceholderChart title="Velocity Trend per Project/Team" />
-			</div> */}
-
-			{/* ========================================== */}
-			{/* 7️⃣ COMPARATIVE METRICS */}
-			{/* ========================================== */}
-			{/* <SectionTitle icon="📊">Comparative Metrics</SectionTitle>
-
-			<div className="flex flex-col md:flex-row gap-4 md:col-span-12">
-				<SectionCard description="📊 Most Improved Users" showBadge={false} value="Coming Soon" variant="dashboard" />
-			</div>
-
-			<div className="md:col-span-4">
-				<PlaceholderChart title="User Efficiency Ranking" />
-			</div>
-
-			<div className="md:col-span-4">
-				<PlaceholderChart title="Category Efficiency Comparison" />
-			</div>
-
-			<div className="md:col-span-4 max-h-[600px] overflow-auto scrollbar-custom bg-background text-card-foreground border border-border rounded-2xl container px-4 shadow-md">
-				<CardHeader className="text-center">
-					<CardTitle className="text-lg">
-						{reports?.performance_leaderboard?.filters?.from && reports?.performance_leaderboard?.filters?.to
-							? `${new Date(reports.performance_leaderboard.filters.from).toLocaleDateString("en-CA", {
-									month: "short",
-									day: "numeric",
-									year: "numeric",
-								})} - ${new Date(reports.performance_leaderboard.filters.to).toLocaleDateString("en-CA", {
-									month: "short",
-									day: "numeric",
-									year: "numeric",
-								})}`
-							: "All Time"}{" "}
-						Top Performers
-					</CardTitle>
-					<CardDescription>
-						Showing{" "}
-						{reports?.performance_leaderboard?.chart_data?.length == 1
-							? "(Top 1) user"
-							: reports?.performance_leaderboard?.chart_data?.length > 1
-								? "(Top " + reports?.performance_leaderboard?.chart_data?.length + ") users"
-								: ""}
-					</CardDescription>
-				</CardHeader>
-				{reports?.performance_leaderboard?.data_count ? (
-					<DataTable columns={columns} data={reports?.performance_leaderboard?.chart_data} />
-				) : (
-					<div className="flex items-center justify-center fw-full h-full max-h-44 text-lg text-gray-500">No Tasks Yet</div>
-				)}
 			</div> */}
 		</div>
 	);
