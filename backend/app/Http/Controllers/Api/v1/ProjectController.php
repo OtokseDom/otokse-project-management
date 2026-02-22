@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Api\v1;
 
 use App\Actions\Kanbans\GetKanbanColumns;
 use App\Actions\Projects\DeleteProject;
-use App\Actions\projects\GetProjects;
+use App\Actions\Projects\GetProjects;
 use App\Actions\Projects\ShowProject;
 use App\Actions\Projects\StoreProject;
 use App\Actions\Projects\UpdateProject;

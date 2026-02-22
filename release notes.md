@@ -54,3 +54,7 @@
 
 - Refactor: Backend separation of concerns
 - Optimize: Dashboard index
+
+# Release Version 2.1.4.3 (Feb 22, 2026)
+
+- Fix: Project Controller Typo on import
