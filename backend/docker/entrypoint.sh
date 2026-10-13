@@ -10,8 +10,9 @@ DB_HOST="${DB_HOST:-mysql}"
 DB_PORT="${DB_PORT:-3306}"
 
 echo "[entrypoint] waiting for MySQL at ${DB_HOST}:${DB_PORT}..."
+# NOTE: php-mysqli is intentionally NOT installed (pdo_mysql only) — probe via PDO.
 for i in $(seq 1 30); do
-  if php -r "\$c=@new mysqli(getenv('DB_HOST')?:'mysql',getenv('DB_USERNAME')?:'root',getenv('DB_PASSWORD')?:'', '', (int)(getenv('DB_PORT')?:3306)); exit(\$c->connect_errno?1:0);" 2>/dev/null; then
+  if php -r "try { new PDO('mysql:host='.(getenv('DB_HOST') ?: 'project_mysql').';port='.(int)(getenv('DB_PORT') ?: 3306), getenv('DB_USERNAME'), getenv('DB_PASSWORD')); exit(0); } catch (Throwable \$e) { exit(1); }" 2>/dev/null; then
     echo "[entrypoint] MySQL reachable."
     break
   fi
