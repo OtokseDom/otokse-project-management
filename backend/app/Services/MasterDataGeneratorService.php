@@ -131,7 +131,6 @@ class MasterDataGeneratorService
             [
                 'organization_id' => $organizationId,
                 'name' => 'Client Scope Change',
-                'code' => 'CLIENT_SCOPE_CHANGE',
                 'category' => 'scope',
                 'impact_level' => 'neutral',
                 'severity' => 3,
@@ -144,7 +143,6 @@ class MasterDataGeneratorService
             [
                 'organization_id' => $organizationId,
                 'name' => 'Blocked by Dependency',
-                'code' => 'DEPENDENCY_BLOCKED',
                 'category' => 'dependency',
                 'impact_level' => 'negative',
                 'severity' => 4,
@@ -157,7 +155,6 @@ class MasterDataGeneratorService
             [
                 'organization_id' => $organizationId,
                 'name' => 'External System Issue',
-                'code' => 'EXTERNAL_SYSTEM_ISSUE',
                 'category' => 'external',
                 'impact_level' => 'neutral',
                 'severity' => 3,
@@ -174,7 +171,6 @@ class MasterDataGeneratorService
             [
                 'organization_id' => $organizationId,
                 'name' => 'Poor Estimation',
-                'code' => 'POOR_ESTIMATION',
                 'category' => 'planning',
                 'impact_level' => 'negative',
                 'severity' => 4,
@@ -187,7 +183,6 @@ class MasterDataGeneratorService
             [
                 'organization_id' => $organizationId,
                 'name' => 'Unclear Requirements',
-                'code' => 'UNCLEAR_REQUIREMENTS',
                 'category' => 'planning',
                 'impact_level' => 'negative',
                 'severity' => 4,
@@ -204,7 +199,6 @@ class MasterDataGeneratorService
             [
                 'organization_id' => $organizationId,
                 'name' => 'Resource Unavailable',
-                'code' => 'RESOURCE_UNAVAILABLE',
                 'category' => 'resource',
                 'impact_level' => 'negative',
                 'severity' => 3,
@@ -217,7 +211,6 @@ class MasterDataGeneratorService
             [
                 'organization_id' => $organizationId,
                 'name' => 'Skill Gap Identified',
-                'code' => 'SKILL_GAP',
                 'category' => 'resource',
                 'impact_level' => 'negative',
                 'severity' => 3,
@@ -234,7 +227,6 @@ class MasterDataGeneratorService
             [
                 'organization_id' => $organizationId,
                 'name' => 'Rework Required',
-                'code' => 'REWORK_REQUIRED',
                 'category' => 'quality',
                 'impact_level' => 'negative',
                 'severity' => 4,
@@ -251,7 +243,6 @@ class MasterDataGeneratorService
             [
                 'organization_id' => $organizationId,
                 'name' => 'Strategic Delay',
-                'code' => 'STRATEGIC_DELAY',
                 'category' => 'strategy',
                 'impact_level' => 'positive',
                 'severity' => 2,
