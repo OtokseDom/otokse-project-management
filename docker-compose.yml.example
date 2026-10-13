@@ -1,56 +1,84 @@
-version: "3.8"
+# Otokse Project Management — production compose.
+# Deploy path on VPS: /var/www/project/docker-compose.yml
+#
+# Topology: NO host ports published. TLS + routing live in the existing
+# ecommerce-nginx-1 container, which joins project_network (see the ecommerce
+# compose snippet in nginx/project.otokse.com.conf header) and:
+#   /api/* -> fastcgi project_backend:9000
+#   /*     -> static SPA from project_frontend_dist volume
+# MySQL is internal-only. Secrets come from .env (root) + backend/.env (Laravel).
 
 services:
   mysql:
     image: mysql:8.0
-    container_name: otokse_mysql
+    container_name: project_mysql
     restart: unless-stopped
     environment:
-      MYSQL_DATABASE: example_db
-      MYSQL_ROOT_PASSWORD: example_root_password
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-project_db}
+      MYSQL_USER: ${MYSQL_USER:-project_user}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?set MYSQL_PASSWORD in .env}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?set MYSQL_ROOT_PASSWORD in .env}
     volumes:
-      - mysql_data:/var/lib/mysql
+      - project_mysql_data:/var/lib/mysql
     networks:
-      - shared_backend
+      - project_network
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u root -p$$MYSQL_ROOT_PASSWORD"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: otokse_backend
+    image: project-backend
+    container_name: project_backend
     restart: unless-stopped
-    ports:
-      - "8001:80"
-    environment:
-      - APP_ENV=local
-      - APP_DEBUG=true
-      - APP_URL=http://localhost:8001
-      - DB_HOST=otokse_mysql
-      - DB_PORT=3306
-      - DB_DATABASE=example_db
-      - DB_USERNAME=example_user
-      - DB_PASSWORD=example_password
+    env_file:
+      - ./backend/.env
+    volumes:
+      # Task/discussion attachments survive rebuilds.
+      - project_storage:/var/www/html/storage/app/public
     depends_on:
-      - mysql
+      mysql:
+        condition: service_healthy
     networks:
-      - shared_backend
+      - project_network
+    healthcheck:
+      # NOTE: :9000 is FastCGI, not HTTP — curl cannot probe it
+      # (curl -f http://localhost:9000/up would always fail). Process + config
+      # check instead; end-to-end proof is the VPS smoke test via nginx /api.
+      test: ["CMD-SHELL", "php-fpm -t 2>/dev/null && pidof php-fpm"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
 
-  frontend:
+  # One-shot: copies the SPA build (built inside the image via
+  # frontend/.env.production, same-origin /api) into the volume that the
+  # ecommerce-nginx-1 container serves. Re-run on every frontend change:
+  #   docker compose up --force-recreate frontend-build
+  frontend-build:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    container_name: otokse_frontend
-    restart: unless-stopped
-    ports:
-      - "8002:80"
-    depends_on:
-      - backend
+      target: build
+    image: project-frontend-build
+    container_name: project_frontend_build
+    command: sh -c "rm -rf /out/* && cp -r dist/. /out/ && echo '[frontend-build] dist copied:' && ls /out | head"
+    volumes:
+      - project_frontend_dist:/out
     networks:
-      - shared_backend
+      - project_network
+    restart: "no"
 
 volumes:
-  mysql_data:
+  project_mysql_data:
+  project_storage:
+  project_frontend_dist:
 
 networks:
-  shared_backend:
-    external: true
+  project_network:
+    name: project_network

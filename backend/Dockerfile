@@ -1,45 +1,45 @@
+# Backend API — php-fpm only (no bundled nginx).
+# TLS + routing + static SPA are handled by the ecommerce-nginx-1 container
+# (see nginx/project.otokse.com.conf), which fastcgi_passes to project_backend:9000.
+# Matches the ecommerce pattern: app container exposes 9000/tcp internally, no host ports.
 FROM php:8.2-fpm
 
-# Install system dependencies
+# Install system dependencies (curl kept for container health/debugging)
 RUN apt-get update && apt-get install -y \
     git \
     curl \
     libpng-dev \
     libonig-dev \
     libxml2-dev \
+    libzip-dev \
     zip \
     unzip \
-    nginx
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Clear cache
-RUN apt-get clean && rm -rf /var/lib/apt/lists/*
-
-# Install PHP extensions
-RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
+# Install PHP extensions (pdo_mysql, mbstring, exif, pcntl, bcmath, gd + zip)
+RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip
 
 # Get latest Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Set working directory
-WORKDIR /var/www
+# Set working directory (matches SCRIPT_FILENAME /var/www/html/public/index.php
+# used by the nginx server block)
+WORKDIR /var/www/html
 
-# Copy existing application directory
-COPY . /var/www
+# Copy application (exclusions in backend/.dockerignore)
+COPY . /var/www/html
 
-# Install dependencies
-RUN composer install --no-dev --optimize-autoloader
+# Install PHP dependencies (production only)
+RUN composer install --no-dev --optimize-autoloader --no-interaction
 
-# Copy nginx config
-COPY docker/nginx.conf /etc/nginx/sites-available/default
+# Persist writable dirs for www-data
+RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache \
+    && chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 
-# Set permissions
-RUN chown -R www-data:www-data /var/www \
-    && chmod -R 755 /var/www/storage
+EXPOSE 9000
 
-EXPOSE 80
-
-# Start script
-COPY docker/start.sh /usr/local/bin/start.sh
-RUN chmod +x /usr/local/bin/start.sh
-
-CMD ["/usr/local/bin/start.sh"]
+# Entrypoint: wait for MySQL, migrate --force, cache, then exec php-fpm (foreground)
+COPY docker/entrypoint.sh /usr/local/bin/project-entrypoint.sh
+RUN chmod +x /usr/local/bin/project-entrypoint.sh
+ENTRYPOINT ["/usr/local/bin/project-entrypoint.sh"]
+CMD ["php-fpm", "-F"]
