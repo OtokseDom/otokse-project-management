@@ -24,3 +24,5 @@ dist-ssr
 *.sw?
 
 .env
+# Tracked: production build env (no secrets — same-origin API flag).
+!.env.production

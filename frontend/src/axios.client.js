@@ -1,8 +1,13 @@
 import axios from "axios";
 
+const rawBase = import.meta.env.VITE_API_BASE_URL ?? "";
+// Normalize: "" (same-origin) and "/" both resolve to /api; "https://host" and
+// "https://host/" both resolve to https://host/api. Without this, a "/" value
+// would produce a broken "//api" baseURL.
+const normalizedBase = rawBase.replace(/\/+$/, "");
 const axiosClient = axios.create({
-	// where port is running via .env
-	baseURL: `${import.meta.env.VITE_API_BASE_URL}/api`,
+	// where port is running via .env (.env.production is empty = same origin)
+	baseURL: `${normalizedBase}/api`,
 });
 
 // interceptors executed before request is sent or after response is received
