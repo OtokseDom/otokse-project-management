@@ -16,9 +16,8 @@ updated: 2026-10-13T00:00:00+00:00
 
 ## Current position
 
-Step-2 blocker fixes **built locally, uncommitted, undeployed** (2026-10-13). VPS state verified
-via SSH (details below). Target: `project.otokse.com` → `66.253.10.48` (Cloudflare proxied A,
-done by user). No fixes pushed; diff shown for approval this session.
+**DEPLOYED + LIVE at https://project.otokse.com (2026-10-13).** Full smoke green; smoke data
+wiped; DB pristine (0 users/orgs). Ecommerce collateral: none.
 
 **Correction:** there is no active host Nginx — traffic flows through the `ecommerce-nginx-1`
 container (`/var/www/ecommerce/nginx/conf.d/`). The new server block targets that container.
@@ -99,3 +98,20 @@ container (`/var/www/ecommerce/nginx/conf.d/`). The new server block targets tha
 - Ports taken: 22/80/443/3000/3001/5432. Free: 8001/8002/9000 (unused — new project publishes none).
 - Disk 5.5G free / 19G; mem ~2.5G avail. Certbot present; `sudo` needs TTY password (user runs).
 - Decision: new project at `/var/www/project`, nginx joins `project_network` (external pattern).
+
+## Deploy log (2026-10-13 — all verified)
+
+- Clone `otokse-project-management@main` → `/var/www/project`; server `.env` (600) with
+  generated MySQL passwords; `backend/.env` production values; `APP_KEY` generated in-container.
+- `docker compose build + up -d`: backend + mysql healthy; entrypoint migrated 24 tables.
+- Deploy-time fixes: (1) entrypoint MySQL wait rewritten to PDO (`mysqli` not installed —
+  loop spun 30× then continued); (2) explicit `name:` on volumes (compose prefixed
+  `project_project_*`, breaking the external-volume share); (3) **signup 500 root cause:**
+  `MasterDataGeneratorService` still inserted `delay_reasons.code`, dropped by migration
+  `2026-01-22` (dev DB masked it) — removed 9 keys, signup green.
+- Nginx: :80 block → `nginx -t` ok → ecommerce snippet (backup `docker-compose.yml.bak-project`)
+  → `up -d nginx` (both networks) → user Certbot (separate cert, exp 2027-01-11, auto-renew)
+  → full conf → reload. Existing sites re-verified (api 200, others 301).
+- Smoke: signup → login → user-auth → project → task → move → discussion + 5MB upload →
+  `/storage/` 200 with correct bytes → dashboards → logout 204 → token reuse 401.
+- Cleanup: `migrate:fresh` (0 users/orgs), `/tmp/smoke*` removed.
