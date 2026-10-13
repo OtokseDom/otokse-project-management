@@ -75,9 +75,14 @@ services:
     restart: "no"
 
 volumes:
+  # Explicit names so the ecommerce nginx service can mount them as external
+  # volumes (compose would otherwise prefix them: project_project_*).
   project_mysql_data:
+    name: project_mysql_data
   project_storage:
+    name: project_storage
   project_frontend_dist:
+    name: project_frontend_dist
 
 networks:
   project_network:
